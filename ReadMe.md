@@ -1,9 +1,8 @@
----
-title: "extCheck — Accessibility Checker for Office and Markdown Files"
+﻿---
+title: "extCheck - Accessibility Checker for Office and Markdown Files"
 author: "Jamal Mazrui"
-date: "April 2, 2026"
-lang: en-US
-description: "User guide for extCheck.exe, a command-line accessibility checker for .docx, .xlsx, .pptx, and .md files."
+date: "April 3, 2026"
+description: "Produce accessibility reports for popular file formats from the command line."
 ---
 
 # extCheck
@@ -34,12 +33,12 @@ extCheck.exe [-h] [-rules] <filespec> [<filespec> ...]
 
 ### Arguments
 
-- `<filespec>` — Path to one or more files. Wildcards are supported.
+- `<filespec>` - Path to one or more files. Wildcards are supported.
 
 ### Options
 
-- `-h` — Show help and exit.
-- `-rules` — Write `extCheck.csv` to the current directory. This file is the complete rule registry, listing every rule ID, its WCAG criterion, severity, applicable formats, description, and remediation guidance.
+- `-h` - Show help and exit.
+- `-rules` - Write `extCheck.csv` to the current directory. This file is the complete rule registry, listing every rule ID, its WCAG criterion, severity, applicable formats, description, and remediation guidance.
 
 ### Supported Formats
 
@@ -114,13 +113,13 @@ At the end of a multi-file run, a total count is printed.
 
 Running `extCheck.exe -rules` writes `extCheck.csv` with all 73 accessibility rules. Each row includes:
 
-- **RuleID** — Unique identifier
-- **MSOfficeCategory** — The Office Accessibility Checker category this maps to
-- **WCAGCriteria** — The WCAG 2.1 success criterion number
-- **Severity** — `Error` (definite barrier) or `Warning` (likely barrier, context-dependent)
-- **AppliesTo** — Which file formats the rule checks
-- **Description** — What the rule looks for and why it matters
-- **Remediation** — How to fix it
+- **RuleID** - Unique identifier
+- **MSOfficeCategory** - The Office Accessibility Checker category this maps to
+- **WCAGCriteria** - The WCAG 2.1 success criterion number
+- **Severity** - `Error` (definite barrier) or `Warning` (likely barrier, context-dependent)
+- **AppliesTo** - Which file formats the rule checks
+- **Description** - What the rule looks for and why it matters
+- **Remediation** - How to fix it
 
 ## Rule Sources
 
@@ -148,8 +147,3 @@ csc extCheck.cs /platform:x86
 
 The `/platform:x86` flag is required because Office COM automation is 32-bit. The compiler (`csc.exe`) is included with .NET Framework and is typically found in `C:\Windows\Microsoft.NET\Framework\v4.0.30319\`.
 
-## Contact
-
-Jamal Mazrui  
-Chief Accessibility Officer, CurbCutOS  
-Seattle, Washington
