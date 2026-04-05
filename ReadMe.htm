@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jamal Mazrui" />
+  <meta name="dcterms.date" content="2026-04-03" />
+  <meta name="description" content="Produce accessibility reports for popular file formats from the command line." />
+  <title>extCheck - Accessibility Checker for Office and Markdown Files</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">extCheck - Accessibility Checker for Office and
+Markdown Files</h1>
+<p class="author">Jamal Mazrui</p>
+<p class="date">April 3, 2026</p>
+</header>
+<h1 id="extcheck">extCheck</h1>
+<p>A command-line accessibility checker for Microsoft Word (.docx),
+Excel (.xlsx), PowerPoint (.pptx), and Pandoc Markdown (.md) files. It
+evaluates each file against accessibility rules drawn from the Microsoft
+Office Accessibility Checker and the axe-core WCAG 2.1 rule set, then
+writes results to a CSV file and prints a summary to the console.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li>Windows with .NET Framework 4.8.1 (included in Windows 10 and
+11)</li>
+<li>Microsoft Word, Excel, or PowerPoint installed to check the
+corresponding file types</li>
+<li>No Office installation needed to check Markdown files</li>
+</ul>
+<h2 id="quick-start">Quick Start</h2>
+<p>Open a Command Prompt, navigate to the folder containing the files
+you want to check, and run:</p>
+<pre><code>extCheck.exe report.docx</code></pre>
+<p>Results appear in the console and a CSV file named
+<code>report.csv</code> is written to the current directory.</p>
+<h2 id="usage">Usage</h2>
+<pre><code>extCheck.exe [-h] [-rules] &lt;filespec&gt; [&lt;filespec&gt; ...]</code></pre>
+<h3 id="arguments">Arguments</h3>
+<ul>
+<li><code>&lt;filespec&gt;</code> - Path to one or more files. Wildcards
+are supported.</li>
+</ul>
+<h3 id="options">Options</h3>
+<ul>
+<li><code>-h</code> - Show help and exit.</li>
+<li><code>-rules</code> - Write <code>extCheck.csv</code> to the current
+directory. This file is the complete rule registry, listing every rule
+ID, its WCAG criterion, severity, applicable formats, description, and
+remediation guidance.</li>
+</ul>
+<h3 id="supported-formats">Supported Formats</h3>
+<table>
+<thead>
+<tr>
+<th>Extension</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.docx</td>
+<td>Microsoft Word document</td>
+</tr>
+<tr>
+<td>.xlsx</td>
+<td>Microsoft Excel workbook</td>
+</tr>
+<tr>
+<td>.pptx</td>
+<td>Microsoft PowerPoint presentation</td>
+</tr>
+<tr>
+<td>.md</td>
+<td>Pandoc Markdown file</td>
+</tr>
+</tbody>
+</table>
+<h2 id="examples">Examples</h2>
+<p>Check a single Word document:</p>
+<pre><code>extCheck.exe report.docx</code></pre>
+<p>Check all Markdown files in the current directory:</p>
+<pre><code>extCheck.exe *.md</code></pre>
+<p>Check all Excel files in a subdirectory:</p>
+<pre><code>extCheck.exe quarterly\*.xlsx</code></pre>
+<p>Check multiple formats in one run:</p>
+<pre><code>extCheck.exe docs\*.docx slides\*.pptx notes\*.md</code></pre>
+<p>Export the complete rule list:</p>
+<pre><code>extCheck.exe -rules</code></pre>
+<h2 id="output">Output</h2>
+<p>For each file checked, a CSV file named
+<code>&lt;filename&gt;.csv</code> is written to the current working
+directory. If you check a file in another folder, the CSV still lands
+where you ran the command. If two files share the same base name but
+different extensions (for example <code>report.docx</code> and
+<code>report.md</code>), the CSV from the second one will overwrite the
+first, so check them in separate runs if you need both.</p>
+<h3 id="csv-columns">CSV Columns</h3>
+<table>
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 55%" />
+</colgroup>
+<thead>
+<tr>
+<th>Column</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RuleID</td>
+<td>Short identifier for the accessibility rule,
+e.g. <code>MissingAltText</code></td>
+</tr>
+<tr>
+<td>Source</td>
+<td><code>MSAC</code> (Office Accessibility Checker) or <code>AXE</code>
+(axe-core WCAG rules)</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>The MS Office Accessibility Checker category name</td>
+</tr>
+<tr>
+<td>Location</td>
+<td>Where in the file the issue was found (sheet name, slide number,
+line number, or <code>(Document)</code>)</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>The specific object or text where the issue occurs</td>
+</tr>
+<tr>
+<td>Message</td>
+<td>Plain-English description of the problem</td>
+</tr>
+<tr>
+<td>Remediation</td>
+<td>Step-by-step guidance for fixing it</td>
+</tr>
+</tbody>
+</table>
+<h3 id="console-output">Console Output</h3>
+<p>The console shows the same information in a readable format. Each
+issue is printed as:</p>
+<pre><code>[RuleID] (Source) Location | Category | Context
+  Problem:   ...
+  Remediate: ...</code></pre>
+<p>At the end of a multi-file run, a total count is printed.</p>
+<h2 id="the-rule-registry">The Rule Registry</h2>
+<p>Running <code>extCheck.exe -rules</code> writes
+<code>extCheck.csv</code> with all 73 accessibility rules. Each row
+includes:</p>
+<ul>
+<li><strong>RuleID</strong> - Unique identifier</li>
+<li><strong>MSOfficeCategory</strong> - The Office Accessibility Checker
+category this maps to</li>
+<li><strong>WCAGCriteria</strong> - The WCAG 2.1 success criterion
+number</li>
+<li><strong>Severity</strong> - <code>Error</code> (definite barrier) or
+<code>Warning</code> (likely barrier, context-dependent)</li>
+<li><strong>AppliesTo</strong> - Which file formats the rule checks</li>
+<li><strong>Description</strong> - What the rule looks for and why it
+matters</li>
+<li><strong>Remediation</strong> - How to fix it</li>
+</ul>
+<h2 id="rule-sources">Rule Sources</h2>
+<p>Rules come from two complementary sources:</p>
+<p><strong>MSAC</strong> rules mirror the categories used by the
+built-in Microsoft Office Accessibility Checker: Missing alternative
+text, Missing table header, Heading issues, Repeated blank characters,
+Blank cells used for formatting, Merged cells, Complex table, Use of
+color alone, Object has no title or name, Object not inline, List not
+used correctly, and Text.</p>
+<p><strong>AXE</strong> rules are adapted from the axe-core open-source
+accessibility engine maintained by Deque Systems. These cover areas the
+Office checker does not address, including hyperlink distinguishability
+(<code>HyperlinkNotUnderlined</code>), duplicate heading text
+(<code>DuplicateHeadingText</code>), non-descriptive link text
+(<code>NonDescriptiveLinkText</code>), color used as the only indicator
+(<code>ColorUsedAlone</code>), form field labels
+(<code>UnlabeledFormField</code>), slide reading order
+(<code>TitleNotFirstInReadingOrder</code>), animation timing
+(<code>RepeatingAnimation</code>, <code>RapidAutoAnimation</code>,
+<code>FastAutoAdvance</code>), and code block language specifiers for
+Markdown (<code>CodeBlockMissingLanguage</code>).</p>
+<h2 id="notes-on-specific-formats">Notes on Specific Formats</h2>
+<p><strong>PowerPoint</strong> requires a visible application window;
+headless mode is not supported. The window is minimized automatically
+when extCheck launches PowerPoint, and closed when checking is
+complete.</p>
+<p><strong>Markdown</strong> checking requires no Office software. The
+checker reads the file directly and evaluates Pandoc-flavored Markdown
+conventions including YAML front matter, ATX and setext headings, pipe
+tables, fenced code blocks, and raw HTML elements.</p>
+<p><strong>False positives</strong> are possible. The empty alt text
+rule for Markdown flags all empty <code>[]</code> alt attributes, but
+empty alt is correct for purely decorative images. The all-caps rule
+ignores sequences of six characters or fewer to allow common acronyms.
+Review each flagged item in context before remediating.</p>
+<h2 id="compiling-from-source">Compiling from Source</h2>
+<p>The program is distributed as a compiled executable. If you have the
+source file <code>extCheck.cs</code> and want to recompile:</p>
+<pre><code>csc extCheck.cs /platform:x86</code></pre>
+<p>The <code>/platform:x86</code> flag is required because Office COM
+automation is 32-bit. The compiler (<code>csc.exe</code>) is included
+with .NET Framework and is typically found in
+<code>C:\Windows\Microsoft.NET\Framework\v4.0.30319\</code>.</p>
+</body>
+</html>
