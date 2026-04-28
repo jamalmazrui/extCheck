@@ -216,6 +216,7 @@ static class shared {
             new[] { "NoHeadings","Heading issues","2.4.6","Warning","MD","A document of substantial length has no headings. Screen reader users navigate long documents by heading list.","Add ATX-style headings (# H1, ## H2) to mark major sections." },
             new[] { "NoSpeakerNotes","Missing alternative text","1.1.1","Warning","PPTX","No slides have speaker notes. For distributed presentations, notes provide essential context for screen reader users.","Add speaker notes via View > Notes. Describe visual content and anything conveyed only through visuals." },
             new[] { "NoYamlFrontMatter","Missing document properties","2.4.2","Error","MD","The Markdown file has no YAML front matter block. Without front matter, Pandoc cannot set document title, language, or author.","Add a YAML front matter block starting and ending with --- at the very top of the file. Include at minimum: title and lang." },
+            new[] { "YamlFrontMatterUnclosed","Missing document properties","2.4.2","Error","MD","The YAML front matter block starting with --- on line 1 has no closing --- or ... delimiter. Pandoc will not process it as front matter.","Add a closing --- or ... line immediately after the last YAML field, before the document body begins." },
             new[] { "NonDescriptiveHyperlinkText","Hyperlink","2.4.4","Error","DOCX, XLSX","Hyperlink display text is non-descriptive or a raw URL. Screen reader users navigating by link list cannot determine the destination.","Edit the hyperlink display text to describe the destination. The text should make sense when read in isolation." },
             new[] { "NonDescriptiveLinkText","Hyperlink","2.4.4","Error","MD","Markdown link text is non-descriptive (click here, here, read more, etc.).","Replace with text that describes the link destination." },
             new[] { "RapidAutoAnimation","Motion","2.2.2","Warning","PPTX","Multiple animations trigger automatically with very short delays, which can overwhelm screen reader users.","Increase delays to at least 1 second per element, or switch to On Click triggers." },
@@ -1220,6 +1221,7 @@ static class mdModule {
     static string[] aLines;
     static Dictionary<string, string> dMeta;
     static int iYamlEndLine;
+    static bool bYamlOpened;
     static Regex reFence = new Regex(@"^(`{3,}|~{3,})");
 
     public static bool open(string sPath) {
@@ -1246,9 +1248,11 @@ static class mdModule {
     }
 
     static void parseYaml() {
+        bYamlOpened = false;
         if (aLines.Length < 2 || aLines[0].Trim() != "---") {
             return;
         }
+        bYamlOpened = true;
         for (int i = 1; i < aLines.Length; i++) {
             string sT = aLines[i].Trim();
             if (sT == "---" || sT == "...") {
@@ -1270,10 +1274,16 @@ static class mdModule {
     static bool hasMeta(string sKey) { return dMeta.ContainsKey(sKey) && dMeta[sKey] != ""; }
 
     static void metadata(string sFilePath) {
-        if (iYamlEndLine == 0) {
+        if (!bYamlOpened) {
             add("NoYamlFrontMatter", 1, "MSAC", "Missing document properties", sFilePath,
                 "The file has no YAML front matter block. Without front matter, Pandoc cannot set document title, language, or author.",
                 "Add a YAML front matter block at the very top starting and ending with ---. Include at minimum: title and lang.");
+            return;
+        }
+        if (iYamlEndLine == 0) {
+            add("YamlFrontMatterUnclosed", 1, "MSAC", "Missing document properties", sFilePath,
+                "The YAML front matter block starting with --- on line 1 has no closing --- or ... delimiter. Pandoc will not process it as front matter.",
+                "Add a closing --- or ... line immediately after the last YAML field, before the document body begins.");
             return;
         }
         if (!hasMeta("title")) {
