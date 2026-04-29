@@ -1,24 +1,34 @@
 // extCheck.cs  — Unified accessibility checker for .docx .xlsx .pptx .md files
-// Compile: csc extCheck.cs /platform:x86
-// Usage:   extCheck.exe [-h] [-rules] <filespec> [<filespec> ...]
+// Compile: csc extCheck.cs /platform:x64    (see buildExtCheck.cmd)
+// Usage:   extCheck.exe [-h] [-g] [-rules] [-o <dir>] [--view-output]
+//                       [-l] [-u] [-f] <filespec> [<filespec> ...]
 //          <filespec> may include wildcards: *.docx  docs\*.md  C:\work\*.pptx
-// Output:  <filename>.csv in the CURRENT WORKING DIRECTORY for each file checked.
+// Output:  <basename>.csv in the output directory (-o) or the current
+//          working directory if no -o is given.
 // Requires: .NET Framework 4.8.1.
 //           Word / Excel / PowerPoint required for .docx / .xlsx / .pptx files.
 //           No Office required for .md files.
-// /platform:x86 required — Office COM automation is 32-bit.
+//
+// Bitness: extCheck is built 64-bit. Office COM automation requires
+// matching bitness between this process and the installed Office. Modern
+// Office (Microsoft 365 / Office 2019+ / Office 2024) is 64-bit by
+// default. If a user has 32-bit Office, com.createApp will surface a
+// clear error pointing at the bitness mismatch.
 //
 // Architecture: Option D — static format modules + shared static infrastructure.
-//   Shared layer:  issue, results, shared, com (helpers used by all formats)
+//   Shared layer:  issue, results, shared, com, logger, configManager, guiDialog
 //   Format modules: docxModule, xlsxModule, pptxModule, mdModule
 //   Dispatcher:    program.run() — resolves files, calls the right module per extension
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 // ===========================================================================
 // Shared: issue record
@@ -274,7 +284,23 @@ static class com {
     public static dynamic createApp(string sProgId) {
         Type t = Type.GetTypeFromProgID(sProgId);
         if (t == null) {
-            throw new Exception(sProgId + " is not installed on this computer.");
+            // ProgID not registered. Two common causes:
+            //  (1) Office (or the relevant app) is not installed.
+            //  (2) Bitness mismatch: this process is 64-bit and the
+            //      installed Office is 32-bit (or vice versa). Modern
+            //      Office is 64-bit by default but legacy 32-bit
+            //      installations still exist.
+            string sBits = (IntPtr.Size == 8) ? "64-bit" : "32-bit";
+            string sOther = (IntPtr.Size == 8) ? "32-bit" : "64-bit";
+            throw new Exception(
+                sProgId + " is not registered for this process.\r\n" +
+                "  This extCheck.exe is " + sBits + ".\r\n" +
+                "  Possible causes:\r\n" +
+                "    * The required Office application is not installed.\r\n" +
+                "    * The installed Office is " + sOther +
+                " and cannot be automated by a " + sBits + " process.\r\n" +
+                "  Fix: install the matching Office bitness, or use the " +
+                sOther + " build of extCheck.");
         }
         return Activator.CreateInstance(t);
     }
@@ -1838,22 +1864,773 @@ static class mdModule {
 // ===========================================================================
 // Entry point class (required by C# 7.3)
 // ===========================================================================
+// ===========================================================================
+// Entry point. [STAThread] is REQUIRED for two reasons:
+//
+// 1) Office COM automation. Without STA, Word/Excel/PowerPoint COM servers
+//    (in our case, in-process via dynamic) can disconnect mid-operation
+//    with HRESULT 0x80010108 (RPC_E_DISCONNECTED) or 0x80010114
+//    (OLE_E_OBJNOTCONNECTED). PowerPoint shape iteration and Excel
+//    UsedRange.Value2 are particularly sensitive. Setting [STAThread]
+//    initializes the main thread as a single-threaded apartment, which
+//    is the apartment Office COM servers expect.
+//
+// 2) WinForms common dialogs. OpenFileDialog and FolderBrowserDialog
+//    require an STA thread; otherwise ShowDialog throws or hangs.
+//
+// IMPORTANT for 64-bit builds: this exe is built /platform:x64. To
+// automate Microsoft Office via COM, the bitness of this process must
+// match the bitness of the installed Office. Modern Office (Microsoft
+// 365, Office 2019+, Office 2024) is 64-bit by default; if a user has
+// 32-bit Office on their machine, com.createApp will fail with a
+// Type.GetTypeFromProgID == null result and the error message will
+// guide the user to a 32-bit rebuild.
+// ===========================================================================
 class extCheck {
+    [STAThread]
     static int Main(string[] aArgs) { return program.run(aArgs); }
 }
 
 // ===========================================================================
-// main
+// Diagnostic logger. Off by default; enabled with --log / -l or by
+// checking "Log session" in the GUI dialog.
+//
+// When enabled, writes a UTF-8 file named extCheck.log (with BOM) to
+// the output directory if one was specified (-o or the GUI Output
+// directory field), or to the current directory otherwise. Each line
+// is prefixed with an ISO-8601 timestamp and severity level. The log
+// stream is flushed after every write so that if the process crashes,
+// the log captures everything up to the crash point. Each session
+// starts with a fresh file -- any prior extCheck.log in the same
+// location is overwritten, so the file always reflects only the
+// current run.
+//
+// All methods no-op silently when the log is not open, so call sites
+// can log unconditionally without guarding each call.
+// ===========================================================================
+public static class logger
+{
+    private static StreamWriter oWriter = null;
+
+    public static void open(string sDir = "")
+    {
+        if (oWriter != null) return;
+        string sLogDir;
+        try {
+            if (!string.IsNullOrWhiteSpace(sDir) && Directory.Exists(sDir)) {
+                sLogDir = Path.GetFullPath(sDir);
+            } else {
+                sLogDir = Directory.GetCurrentDirectory();
+            }
+        } catch {
+            sLogDir = Directory.GetCurrentDirectory();
+        }
+        string sPath = Path.Combine(sLogDir, "extCheck.log");
+        try {
+            oWriter = new StreamWriter(sPath, append: false, encoding: new UTF8Encoding(true));
+            oWriter.AutoFlush = true;
+        } catch (Exception ex) {
+            Console.Error.WriteLine("[WARN] Could not open log file '" + sPath + "': " +
+                ex.Message + ". Continuing without a log.");
+            oWriter = null;
+        }
+    }
+
+    public static void close()
+    {
+        if (oWriter == null) return;
+        try {
+            oWriter.WriteLine(stamp("INFO") + " Log closed.");
+            oWriter.Flush();
+            oWriter.Close();
+        } catch { }
+        oWriter = null;
+    }
+
+    public static void info(string sMsg)  { write("INFO", sMsg); }
+    public static void warn(string sMsg)  { write("WARN", sMsg); }
+    public static void error(string sMsg) { write("ERROR", sMsg); }
+
+    private static void write(string sLevel, string sMsg)
+    {
+        if (oWriter == null) return;
+        try { oWriter.WriteLine(stamp(sLevel) + " " + sMsg); } catch { }
+    }
+
+    private static string stamp(string sLevel)
+    {
+        return DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fff") + " [" + sLevel + "]";
+    }
+}
+
+// ===========================================================================
+// Configuration manager. Reads and writes a small INI file at
+// %LOCALAPPDATA%\extCheck\extCheck.ini. Opt-in via -u / --use-configuration
+// or the GUI Use configuration checkbox. Without that flag, extCheck
+// leaves no filesystem footprint of its own. The configuration stores
+// the source files string, the output directory, and the option
+// checkboxes (force, view_output, log_session). The Show rules
+// checkbox is intentionally NOT persisted — it's a one-shot operation.
+// ===========================================================================
+public static class configManager
+{
+    public static string getConfigDir()
+    {
+        string sAppData = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData);
+        return Path.Combine(sAppData, "extCheck");
+    }
+
+    public static string getConfigPath()
+    {
+        return Path.Combine(getConfigDir(), "extCheck.ini");
+    }
+
+    public static bool configExists()
+    {
+        try { return File.Exists(getConfigPath()); }
+        catch { return false; }
+    }
+
+    public static void eraseAll()
+    {
+        string sDir = getConfigDir();
+        string sPath = getConfigPath();
+        try {
+            if (File.Exists(sPath)) {
+                File.Delete(sPath);
+                logger.info("Deleted configuration file: " + sPath);
+            }
+        } catch (Exception ex) {
+            logger.info("Could not delete configuration file " +
+                sPath + ": " + ex.Message);
+        }
+        try {
+            if (Directory.Exists(sDir)) {
+                bool bEmpty = Directory.EnumerateFileSystemEntries(sDir)
+                    .GetEnumerator().MoveNext() == false;
+                if (bEmpty) {
+                    Directory.Delete(sDir);
+                    logger.info("Removed empty configuration directory: " +
+                        sDir);
+                }
+            }
+        } catch (Exception ex) {
+            logger.info("Could not remove configuration directory " +
+                sDir + ": " + ex.Message);
+        }
+    }
+
+    public static void loadInto(List<string> lsFileArgs)
+    {
+        string sPath = getConfigPath();
+        if (!File.Exists(sPath)) return;
+
+        Dictionary<string, string> dVals;
+        try {
+            dVals = parseFile(sPath);
+        } catch (Exception ex) {
+            string sMsg = "Could not read configuration from:\r\n" +
+                sPath + "\r\n\r\n" + ex.Message;
+            Console.Error.WriteLine("[WARN] " + sMsg);
+            if (program.bGuiMode) {
+                try {
+                    MessageBox.Show(sMsg,
+                        "extCheck — Configuration not loaded",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                } catch { }
+            }
+            return;
+        }
+
+        if (!program.bSourceFromCli) {
+            string sSaved;
+            if (dVals.TryGetValue("source_files", out sSaved) &&
+                !string.IsNullOrWhiteSpace(sSaved)) {
+                foreach (var sArg in program.splitSourceField(sSaved))
+                    lsFileArgs.Add(sArg);
+            }
+        }
+
+        if (!program.bOutputDirFromCli)
+            program.sOutputDir = getOrEmpty(dVals, "output_directory");
+        if (!program.bForceFromCli)
+            program.bForce = getBool(dVals, "force_replacements");
+        if (!program.bViewOutputFromCli)
+            program.bViewOutput = getBool(dVals, "view_output");
+        if (!program.bLogFromCli)
+            program.bLog = getBool(dVals, "log_session");
+    }
+
+    public static void save(string sSource, string sOutDir,
+        bool bForce, bool bView, bool bLog)
+    {
+        string sDir = getConfigDir();
+        string sPath = getConfigPath();
+        try {
+            if (!Directory.Exists(sDir)) Directory.CreateDirectory(sDir);
+            var sb = new StringBuilder();
+            sb.AppendLine("; extCheck configuration");
+            sb.AppendLine("; auto-written on OK-click when Use configuration was checked.");
+            sb.AppendLine("; Delete this file to reset, or click Default settings in");
+            sb.AppendLine("; the GUI, which also deletes the file and the extCheck folder.");
+            sb.AppendLine("source_files=" + (sSource ?? ""));
+            sb.AppendLine("output_directory=" + (sOutDir ?? ""));
+            sb.AppendLine("force_replacements=" + (bForce ? "1" : "0"));
+            sb.AppendLine("view_output=" + (bView ? "1" : "0"));
+            sb.AppendLine("log_session=" + (bLog ? "1" : "0"));
+            File.WriteAllText(sPath, sb.ToString(), new UTF8Encoding(true));
+            logger.info("Saved configuration to " + sPath);
+        } catch (Exception ex) {
+            string sMsg = "Could not save configuration to:\r\n" +
+                sPath + "\r\n\r\n" + ex.Message;
+            Console.Error.WriteLine("[WARN] " + sMsg);
+            logger.info("Could not save configuration: " + ex.Message);
+            if (program.bGuiMode) {
+                try {
+                    MessageBox.Show(sMsg,
+                        "extCheck — Configuration not saved",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                } catch { }
+            }
+        }
+    }
+
+    private static Dictionary<string, string> parseFile(string sPath)
+    {
+        var d = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var sLineRaw in File.ReadAllLines(sPath)) {
+            string sLine = sLineRaw.Trim();
+            if (sLine.Length == 0) continue;
+            if (sLine.StartsWith(";") || sLine.StartsWith("#")) continue;
+            if (sLine.StartsWith("[") && sLine.EndsWith("]")) continue;
+            int iEq = sLine.IndexOf('=');
+            if (iEq <= 0) continue;
+            string sKey = sLine.Substring(0, iEq).Trim();
+            string sVal = sLine.Substring(iEq + 1).Trim();
+            d[sKey] = sVal;
+        }
+        return d;
+    }
+
+    private static bool getBool(Dictionary<string, string> d, string sKey)
+    {
+        string s;
+        if (!d.TryGetValue(sKey, out s)) return false;
+        s = (s ?? "").Trim();
+        return s == "1" || s.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+            s.Equals("yes", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string getOrEmpty(Dictionary<string, string> d, string sKey)
+    {
+        string s;
+        if (!d.TryGetValue(sKey, out s)) return "";
+        return s ?? "";
+    }
+}
+
+// ===========================================================================
+// GUI parameter dialog. Modal WinForms dialog that gathers source files,
+// output directory, and option checkboxes (Force, View output,
+// Log session, Use configuration). A separate Help button shows a
+// MessageBox with an option to open the README in the browser; F1
+// triggers the same handler. A Default settings button resets the
+// fields to factory defaults and deletes the saved configuration.
+//
+// Returns true if OK was clicked, false if Cancel was clicked or the
+// user closed the dialog. The ref parameters carry initial values in
+// and the user's choices out.
+// ===========================================================================
+public static class guiDialog
+{
+    public static bool show(ref string sSource, ref string sOutDir,
+        ref bool bForce, ref bool bView, ref bool bLog, ref bool bUseCfg)
+    {
+        var frm = new Form();
+        frm.Text = "extCheck";
+        frm.FormBorderStyle = FormBorderStyle.FixedDialog;
+        frm.StartPosition = FormStartPosition.CenterScreen;
+        frm.MaximizeBox = false;
+        frm.MinimizeBox = false;
+        frm.ShowInTaskbar = false;
+        frm.ClientSize = new System.Drawing.Size(560, 200);
+        frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
+
+        // Route F1 to the Help button action.
+        frm.KeyPreview = true;
+        frm.KeyDown += (s, e) => {
+            if (e.KeyCode == Keys.F1) {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+                showHelpMessage();
+            }
+        };
+
+        // Layout constants.
+        const int iDefaultLeft = 12;
+        const int iDefaultRight = 12;
+        const int iDefaultTop = 12;
+        const int iDefaultGap = 7;
+        const int iDefaultRowGap = 11;
+        const int iDefaultLabelWidth = 110;
+        const int iDefaultButtonWidth = 130;
+        const int iDefaultButtonHeight = 26;
+        const int iDefaultTextHeight = 23;
+
+        int iFormW = frm.ClientSize.Width;
+        int iTextX = iDefaultLeft + iDefaultLabelWidth + iDefaultGap;
+        int iTextW = iFormW - iTextX - iDefaultGap - iDefaultButtonWidth - iDefaultRight;
+        int iBtnX = iFormW - iDefaultRight - iDefaultButtonWidth;
+
+        // --- Row 1: Source files ---
+        int y = iDefaultTop;
+        var lblSource = new Label();
+        lblSource.Text = "&Source files:";
+        lblSource.AutoSize = false;
+        lblSource.Location = new System.Drawing.Point(iDefaultLeft, y + 3);
+        lblSource.Size = new System.Drawing.Size(iDefaultLabelWidth, iDefaultTextHeight);
+        lblSource.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+        frm.Controls.Add(lblSource);
+
+        var txtSource = new TextBox();
+        txtSource.Text = string.IsNullOrWhiteSpace(sSource)
+            ? defaultSourceForGui()
+            : sSource;
+        txtSource.Location = new System.Drawing.Point(iTextX, y);
+        txtSource.Size = new System.Drawing.Size(iTextW, iDefaultTextHeight);
+        txtSource.TabIndex = 0;
+        frm.Controls.Add(txtSource);
+
+        var btnBrowseSource = new Button();
+        btnBrowseSource.Text = "&Browse source...";
+        btnBrowseSource.Location = new System.Drawing.Point(iBtnX, y - 1);
+        btnBrowseSource.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnBrowseSource.TabIndex = 1;
+        btnBrowseSource.UseVisualStyleBackColor = true;
+        frm.Controls.Add(btnBrowseSource);
+
+        // --- Row 2: Output directory ---
+        y += iDefaultTextHeight + iDefaultRowGap;
+        var lblOut = new Label();
+        lblOut.Text = "&Output directory:";
+        lblOut.AutoSize = false;
+        lblOut.Location = new System.Drawing.Point(iDefaultLeft, y + 3);
+        lblOut.Size = new System.Drawing.Size(iDefaultLabelWidth, iDefaultTextHeight);
+        lblOut.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+        frm.Controls.Add(lblOut);
+
+        var txtOut = new TextBox();
+        txtOut.Text = sOutDir ?? "";
+        txtOut.Location = new System.Drawing.Point(iTextX, y);
+        txtOut.Size = new System.Drawing.Size(iTextW, iDefaultTextHeight);
+        txtOut.TabIndex = 2;
+        frm.Controls.Add(txtOut);
+
+        var btnChooseOut = new Button();
+        btnChooseOut.Text = "&Choose output...";
+        btnChooseOut.Location = new System.Drawing.Point(iBtnX, y - 1);
+        btnChooseOut.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnChooseOut.TabIndex = 3;
+        btnChooseOut.UseVisualStyleBackColor = true;
+        frm.Controls.Add(btnChooseOut);
+
+        // Wire up Browse source: opens an OpenFileDialog. The user
+        // can pick a single file; multi-select would be possible but
+        // copying the multi-file result back into a textbox quoted
+        // properly is more complex than necessary, and the common
+        // case is wildcards which the user types directly.
+        btnBrowseSource.Click += (s, e) => {
+            using (var oDlg = new OpenFileDialog()) {
+                oDlg.Title = "Choose a file to check";
+                oDlg.Filter =
+                    "Supported files (*.docx;*.xlsx;*.pptx;*.md)|*.docx;*.xlsx;*.pptx;*.md|" +
+                    "Word documents (*.docx)|*.docx|" +
+                    "Excel workbooks (*.xlsx)|*.xlsx|" +
+                    "PowerPoint presentations (*.pptx)|*.pptx|" +
+                    "Markdown files (*.md)|*.md|" +
+                    "All files (*.*)|*.*";
+                oDlg.FilterIndex = 1;
+                oDlg.CheckFileExists = true;
+                oDlg.RestoreDirectory = true;
+                try {
+                    string sCurrent = txtSource.Text.Trim().Trim('"');
+                    if (!string.IsNullOrEmpty(sCurrent)) {
+                        string sDir = Path.GetDirectoryName(sCurrent);
+                        if (!string.IsNullOrEmpty(sDir) && Directory.Exists(sDir))
+                            oDlg.InitialDirectory = sDir;
+                    }
+                } catch { }
+                if (oDlg.ShowDialog(frm) == DialogResult.OK) {
+                    string sPicked = oDlg.FileName;
+                    if (sPicked.Contains(" "))
+                        sPicked = "\"" + sPicked + "\"";
+                    txtSource.Text = sPicked;
+                    if (string.IsNullOrEmpty(txtOut.Text))
+                        txtOut.Text = Path.GetDirectoryName(oDlg.FileName);
+                }
+            }
+        };
+
+        // Wire up Choose output: FolderBrowserDialog.
+        btnChooseOut.Click += (s, e) => {
+            using (var oDlg = new FolderBrowserDialog()) {
+                oDlg.Description = "Choose the output directory";
+                oDlg.ShowNewFolderButton = true;
+                try {
+                    string sCurrent = txtOut.Text.Trim();
+                    if (!string.IsNullOrEmpty(sCurrent) && Directory.Exists(sCurrent))
+                        oDlg.SelectedPath = sCurrent;
+                } catch { }
+                if (oDlg.ShowDialog(frm) == DialogResult.OK)
+                    txtOut.Text = oDlg.SelectedPath;
+            }
+        };
+
+        // --- Row 3: Force replacements + View output ---
+        y += iDefaultTextHeight + iDefaultRowGap * 2;
+        int iChkW = (iFormW - iDefaultLeft - iDefaultRight) / 2;
+        var chkForce = new CheckBox();
+        chkForce.Text = "&Force replacements";
+        chkForce.Checked = bForce;
+        chkForce.Location = new System.Drawing.Point(iDefaultLeft, y);
+        chkForce.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+        chkForce.TabIndex = 4;
+        frm.Controls.Add(chkForce);
+
+        var chkView = new CheckBox();
+        chkView.Text = "&View output";
+        chkView.Checked = bView;
+        chkView.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
+        chkView.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+        chkView.TabIndex = 5;
+        frm.Controls.Add(chkView);
+
+        // --- Row 4: Log session + Use configuration ---
+        // Both are "meta" options that affect persistence/diagnostics
+        // rather than the conversion itself, so they sit together
+        // below the conversion-control checkboxes.
+        y += iDefaultTextHeight + iDefaultRowGap;
+        var chkLog = new CheckBox();
+        chkLog.Text = "&Log session";
+        chkLog.Checked = bLog;
+        chkLog.Location = new System.Drawing.Point(iDefaultLeft, y);
+        chkLog.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+        chkLog.TabIndex = 6;
+        frm.Controls.Add(chkLog);
+
+        var chkUseCfg = new CheckBox();
+        chkUseCfg.Text = "&Use configuration";
+        chkUseCfg.Checked = bUseCfg;
+        chkUseCfg.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
+        chkUseCfg.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+        chkUseCfg.TabIndex = 7;
+        frm.Controls.Add(chkUseCfg);
+
+        // --- Bottom row: commit buttons. Help and Default settings
+        // on the left (they don't commit/cancel the dialog), OK and
+        // Cancel on the right. Matches Microsoft's UX guidance.
+        y += iDefaultTextHeight + iDefaultRowGap * 2;
+        var btnHelp = new Button();
+        btnHelp.Text = "&Help";
+        btnHelp.Location = new System.Drawing.Point(iDefaultLeft, y);
+        btnHelp.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnHelp.TabIndex = 8;
+        btnHelp.UseVisualStyleBackColor = true;
+        btnHelp.Click += (s, e) => showHelpMessage();
+        frm.Controls.Add(btnHelp);
+
+        var btnDefaults = new Button();
+        btnDefaults.Text = "&Default settings";
+        btnDefaults.Location = new System.Drawing.Point(
+            iDefaultLeft + iDefaultButtonWidth + iDefaultGap, y);
+        btnDefaults.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnDefaults.TabIndex = 9;
+        btnDefaults.UseVisualStyleBackColor = true;
+        btnDefaults.Click += (s, e) => {
+            string sDefault = defaultSourceForGui();
+            txtSource.Text = sDefault;
+            txtOut.Text = "";
+            chkForce.Checked = false;
+            chkView.Checked = false;
+            chkLog.Checked = false;
+            chkUseCfg.Checked = false;
+            configManager.eraseAll();
+        };
+        frm.Controls.Add(btnDefaults);
+
+        var btnOk = new Button();
+        btnOk.Text = "OK";
+        btnOk.DialogResult = DialogResult.OK;
+        btnOk.Location = new System.Drawing.Point(
+            iFormW - iDefaultRight - 2 * iDefaultButtonWidth - iDefaultGap, y);
+        btnOk.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnOk.TabIndex = 10;
+        btnOk.UseVisualStyleBackColor = true;
+        frm.Controls.Add(btnOk);
+
+        var btnCancel = new Button();
+        btnCancel.Text = "Cancel";
+        btnCancel.DialogResult = DialogResult.Cancel;
+        btnCancel.Location = new System.Drawing.Point(iBtnX, y);
+        btnCancel.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnCancel.TabIndex = 11;
+        btnCancel.UseVisualStyleBackColor = true;
+        frm.Controls.Add(btnCancel);
+
+        // Wire Enter = OK and Esc = Cancel.
+        frm.AcceptButton = btnOk;
+        frm.CancelButton = btnCancel;
+
+        // Resize the form to wrap the bottom row tightly.
+        frm.ClientSize = new System.Drawing.Size(iFormW,
+            y + iDefaultButtonHeight + iDefaultTop);
+
+        // Show modally.
+        var oResult = frm.ShowDialog();
+        if (oResult != DialogResult.OK) return false;
+
+        sSource = txtSource.Text.Trim();
+        sOutDir = txtOut.Text.Trim();
+        bForce = chkForce.Checked;
+        bView = chkView.Checked;
+        bLog = chkLog.Checked;
+        bUseCfg = chkUseCfg.Checked;
+        return true;
+    }
+
+    private static string defaultSourceForGui()
+    {
+        try {
+            return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        } catch {
+            return "";
+        }
+    }
+
+    private static void showHelpMessage()
+    {
+        string sMsg =
+            "extCheck checks Word, Excel, PowerPoint, and Markdown files for " +
+            "accessibility problems and writes a CSV report for each file.\r\n\r\n" +
+            "Source files: a single file path, a wildcard pattern, or several " +
+            "of either separated by spaces. Wrap paths containing spaces in " +
+            "double quotes.\r\n\r\n" +
+            "Output directory: where each <basename>.csv is written. Blank " +
+            "means the current working directory.\r\n\r\n" +
+            "Options:\r\n" +
+            "  Force replacements - overwrite an existing CSV instead of " +
+            "skipping the input\r\n" +
+            "  View output - open the output directory in Explorer when done\r\n" +
+            "  Log session - write extCheck.log (replacing any prior log) " +
+            "to the output directory, or to the current directory if no " +
+            "output directory is set\r\n" +
+            "  Use configuration - remember these settings for next time, in " +
+            "%LOCALAPPDATA%\\extCheck\\extCheck.ini\r\n\r\n" +
+            "Press Cancel to exit without checking.\r\n\r\n" +
+            "Open the full README in your browser?";
+        var oResult = MessageBox.Show(sMsg,
+            "extCheck — Help",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Information,
+            MessageBoxDefaultButton.Button2);
+        if (oResult == DialogResult.Yes) launchReadMe();
+    }
+
+    private static void launchReadMe()
+    {
+        string sExeDir = Path.GetDirectoryName(
+            Assembly.GetExecutingAssembly().Location);
+        string sHtm = Path.Combine(sExeDir, "ReadMe.htm");
+        string sMd = Path.Combine(sExeDir, "ReadMe.md");
+        string sTarget = File.Exists(sHtm)
+            ? sHtm
+            : (File.Exists(sMd) ? sMd : null);
+        if (sTarget == null) {
+            MessageBox.Show(
+                "Documentation (ReadMe.htm or ReadMe.md) was not found in " +
+                "the extCheck install folder:\r\n\r\n" + sExeDir + "\r\n\r\n" +
+                "If extCheck was installed via the installer, reinstall it. " +
+                "If you deployed extCheck.exe manually, place ReadMe.htm " +
+                "(or ReadMe.md) in the same folder.",
+                "extCheck — Documentation not found",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return;
+        }
+        try {
+            var oPsi = new ProcessStartInfo(sTarget) { UseShellExecute = true };
+            Process.Start(oPsi);
+        } catch (Exception ex) {
+            MessageBox.Show(
+                "Could not open the documentation:\r\n\r\n" + ex.Message,
+                "extCheck — Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+    }
+}
+
+// ===========================================================================
+// Main program. Parses arguments, optionally shows a GUI dialog, dispatches
+// to the format modules, and writes per-file CSV reports.
 // ===========================================================================
 static class program {
 
-const string sProgName    = "extCheck";
-const string sProgVersion = "1.0";
-static readonly string[] aSupportedExtensions = { ".docx", ".xlsx", ".pptx", ".md" };
+    public const string sProgName = "extCheck";
+    public const string sProgVersion = "2.0";
+    public static readonly string[] aSupportedExtensions = { ".docx", ".xlsx", ".pptx", ".md" };
 
-const string sUsage = @"
+    // Globals set by command-line switches and/or the GUI dialog.
+    public static bool bGuiMode = false;
+    public static bool bShowRules = false;
+    public static bool bForce = false;
+    public static bool bLog = false;
+    public static bool bUseConfig = false;
+    public static bool bViewOutput = false;
+    public static bool bHideConsoleMode = false;
+
+    // Parallel "was this set on the command line" flags. When true,
+    // the saved config file must NOT overwrite the command-line-supplied
+    // value during the pre-GUI load.
+    public static bool bForceFromCli = false;
+    public static bool bLogFromCli = false;
+    public static bool bViewOutputFromCli = false;
+    public static bool bOutputDirFromCli = false;
+    public static bool bSourceFromCli = false;
+
+    // Output directory. Empty means "current working directory".
+    public static string sOutputDir = "";
+
+    // ---- GUI / console detection (Win32 P/Invoke) ----
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern uint GetConsoleProcessList(
+        [Out] uint[] aiProcessIds, uint iCount);
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GetConsoleWindow();
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    private const int iSwHide = 0;
+
+    private static bool isLaunchedFromGui()
+    {
+        try {
+            var aiList = new uint[16];
+            uint iCount = GetConsoleProcessList(aiList, (uint)aiList.Length);
+            return iCount == 1;
+        } catch {
+            return false;
+        }
+    }
+
+    private static void hideOwnConsoleWindow()
+    {
+        try {
+            IntPtr hwnd = GetConsoleWindow();
+            if (hwnd != IntPtr.Zero) ShowWindow(hwnd, iSwHide);
+        } catch { }
+    }
+
+    // ---- Argument splitter for source field ----
+    // Re-parses a space-separated string of file paths, honoring
+    // double-quoted segments. Used by configManager.loadInto and by
+    // the dialog's OK-path.
+    public static List<string> splitSourceField(string sField)
+    {
+        var lsResult = new List<string>();
+        if (string.IsNullOrWhiteSpace(sField)) return lsResult;
+        var sb = new StringBuilder();
+        bool bInQuotes = false;
+        foreach (char c in sField) {
+            if (c == '"') {
+                bInQuotes = !bInQuotes;
+                continue;
+            }
+            if (c == ' ' && !bInQuotes) {
+                if (sb.Length > 0) {
+                    lsResult.Add(sb.ToString());
+                    sb.Clear();
+                }
+                continue;
+            }
+            sb.Append(c);
+        }
+        if (sb.Length > 0) lsResult.Add(sb.ToString());
+        return lsResult;
+    }
+
+    // ---- Resolve filespecs (with wildcards) to a flat file list. ----
+    private static List<string> resolveFiles(List<string> lsSpecs)
+    {
+        var lsFiles = new List<string>();
+        foreach (string sSpec in lsSpecs) {
+            string sRawDir = Path.GetDirectoryName(sSpec);
+            string sDir = (sRawDir == null || sRawDir == "")
+                ? Directory.GetCurrentDirectory()
+                : Path.IsPathRooted(sRawDir) ? sRawDir : Path.Combine(Directory.GetCurrentDirectory(), sRawDir);
+            string sPattern = Path.GetFileName(sSpec);
+
+            bool bStarExt = sPattern.EndsWith(".*");
+            if (bStarExt) {
+                string sBase = sPattern.Substring(0, sPattern.Length - 2);
+                bool bAnyFound = false;
+                foreach (string sExt in aSupportedExtensions) {
+                    string sPat = (sBase == "") ? "*" + sExt : sBase + sExt;
+                    try {
+                        string[] aExt = Directory.GetFiles(sDir, sPat);
+                        lsFiles.AddRange(aExt);
+                        if (aExt.Length > 0) bAnyFound = true;
+                    } catch { }
+                }
+                if (!bAnyFound) Console.WriteLine("No supported files matched: " + sSpec);
+                continue;
+            }
+
+            string[] aFound;
+            try {
+                aFound = Directory.GetFiles(sDir, sPattern);
+            } catch (Exception ex) {
+                Console.WriteLine("ERROR resolving '" + sSpec + "': " + ex.Message);
+                continue;
+            }
+            if (aFound.Length == 0) Console.WriteLine("No files matched: " + sSpec);
+            lsFiles.AddRange(aFound);
+        }
+        return lsFiles;
+    }
+
+    // ---- Open the given directory in File Explorer. Reuses an
+    // already-open Explorer window on the same folder if possible. ----
+    private static void openOutputInExplorer(string sDir)
+    {
+        try {
+            var oPsi = new ProcessStartInfo("explorer.exe", "\"" + sDir + "\"");
+            oPsi.UseShellExecute = true;
+            Process.Start(oPsi);
+        } catch (Exception ex) {
+            Console.Error.WriteLine("[WARN] Could not open output directory: " + ex.Message);
+        }
+    }
+
+    // ---- Show a final MessageBox in GUI mode summarizing the run. ----
+    private static void showFinalMessage(string sBody, string sTitle = "extCheck — Results")
+    {
+        try {
+            MessageBox.Show(string.IsNullOrEmpty(sBody) ? "Done." : sBody,
+                sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        } catch { }
+    }
+
+    // ---- Print CLI help. ----
+    private const string sUsage = @"
 Usage:
-  extCheck.exe [-h] [-rules] <filespec> [<filespec> ...]
+  extCheck.exe [-h] [-g] [-rules] [-o <dir>] [--view-output]
+               [-l] [-u] [-f] <filespec> [<filespec> ...]
 
 Arguments:
   <filespec>   Path to one or more files to evaluate.
@@ -1866,13 +2643,36 @@ Supported file formats:
   .md     Pandoc Markdown file
 
 Options:
-  -h       Show this help screen and exit.
-  -rules   Write extCheck.csv containing the complete rule registry and exit.
-           The file is written to the current working directory.
+  -h, --help            Show this help screen and exit.
+  -g, --gui-mode        Show the parameter dialog. GUI mode is also entered
+                        automatically when extCheck is launched without
+                        arguments from a GUI shell (File Explorer, Start
+                        menu, desktop hotkey).
+  -rules                Write extCheck.csv (the complete rule registry) to
+                        the output directory or current directory and exit.
+  -o, --output-dir <d>  Directory in which the per-file CSV reports are
+                        written. Defaults to the current working directory.
+                        Created if it does not exist.
+  --view-output         After all files are checked, open the output
+                        directory in File Explorer.
+  -f, --force           Overwrite an existing <basename>.csv. Without this
+                        flag, an input file is skipped if its CSV already
+                        exists in the output directory.
+  -l, --log             Write detailed diagnostics to extCheck.log (UTF-8
+                        with BOM) in the output directory if one is set,
+                        else the current working directory. Any prior
+                        extCheck.log is overwritten so the file always
+                        reflects only the current session.
+  -u, --use-configuration
+                        Load saved settings from
+                        %LOCALAPPDATA%\extCheck\extCheck.ini at startup,
+                        and (in GUI mode) write them back on OK. Without
+                        this flag extCheck leaves no filesystem footprint
+                        of its own.
 
 Output:
-  For each file evaluated, a CSV named <filename>.csv is written to the
-  current working directory. The CSV columns are:
+  For each file evaluated, a CSV named <basename>.csv is written to the
+  output directory. The CSV columns are:
     RuleID, Source, Category, Location, Context, Message, Remediation
 
   Source values:
@@ -1882,158 +2682,296 @@ Output:
   Results are also printed to the console.
 
 Notes:
-  Word, Excel, and PowerPoint must be installed to check .docx, .xlsx, .pptx files.
-  PowerPoint requires a visible application window; it is minimized automatically.
-  No Office installation is needed to check .md files.
+  Word, Excel, and PowerPoint must be installed to check .docx, .xlsx,
+  .pptx files. PowerPoint requires a visible application window; it is
+  minimized automatically. No Office installation is needed for .md files.
+  extCheck is a 64-bit program; the installed Office must also be 64-bit.
 
 Examples:
   extCheck.exe report.docx
-  extCheck.exe *.md
-  extCheck.exe docs\*.docx data\*.xlsx slides\*.pptx
-  extCheck.exe -rules
+  extCheck.exe *.md -o reports
+  extCheck.exe docs\*.docx data\*.xlsx slides\*.pptx --view-output
+  extCheck.exe -rules -o C:\references
+  extCheck.exe -g
 ";
 
-public static int run(string[] aArgs) {
-    Console.WriteLine(sProgName + " " + sProgVersion + " — Accessibility Checker for .docx .xlsx .pptx .md");
-    Console.WriteLine();
+    // ---- Main run() ----
+    public static int run(string[] aArgs)
+    {
+        // Phase 1: GUI auto-detection. We need this before parsing
+        // args because a no-argument GUI launch should never print
+        // usage; instead it should fall through to the dialog.
+        bool bOwnConsole = isLaunchedFromGui();
+        var lsFileArgs = new List<string>();
 
-    if (aArgs.Length == 0 || aArgs[0] == "-h" || aArgs[0] == "/h" || aArgs[0] == "--help") {
-        Console.Write(sUsage);
-        return 0;
-    }
-
-    if (aArgs[0] == "-rules" || aArgs[0] == "/rules") {
-        string sRulesPath = Path.Combine(Directory.GetCurrentDirectory(), "extCheck.csv");
-        shared.writeRulesCsv(sRulesPath);
-        return 0;
-    }
-
-    // Expand all file specs into a flat list.
-    // On Windows, the shell does not expand wildcards before passing args to Main(),
-    // so we call Directory.GetFiles() ourselves. temp.* matches all extensions.
-    // For each supported extension, we also try explicit per-extension expansion
-    // when the spec ends with .* so "temp.*" finds temp.docx, temp.xlsx, etc.
-    var lFiles = new List<string>();
-    foreach (string sSpec in aArgs) {
-        string sRawDir  = Path.GetDirectoryName(sSpec);
-        string sDir     = (sRawDir == null || sRawDir == "")
-            ? Directory.GetCurrentDirectory()
-            : Path.IsPathRooted(sRawDir) ? sRawDir : Path.Combine(Directory.GetCurrentDirectory(), sRawDir);
-        string sPattern = Path.GetFileName(sSpec);
-
-        // If pattern ends with .* expand separately per supported extension so
-        // temp.* reliably finds temp.docx, temp.xlsx, temp.pptx, temp.md
-        bool bStarExt = sPattern.EndsWith(".*");
-        if (bStarExt) {
-            string sBase = sPattern.Substring(0, sPattern.Length - 2); // strip .*
-            bool bAnyFound = false;
-            foreach (string sExt in aSupportedExtensions) {
-                string sPat = (sBase == "") ? "*" + sExt : sBase + sExt;
-                try {
-                    string[] aExt = Directory.GetFiles(sDir, sPat);
-                    lFiles.AddRange(aExt);
-                    if (aExt.Length > 0) {
-                        bAnyFound = true;
-                    }
-                } catch {}
+        // Phase 2: parse CLI args. Recognized flags are consumed;
+        // unrecognized tokens are file specs.
+        for (int i = 0; i < aArgs.Length; i++) {
+            string sArg = aArgs[i];
+            if (sArg == "-h" || sArg == "/h" || sArg == "--help") {
+                Console.WriteLine(sProgName + " " + sProgVersion +
+                    " — Accessibility Checker for .docx .xlsx .pptx .md");
+                Console.WriteLine();
+                Console.Write(sUsage);
+                return 0;
             }
-            if (!bAnyFound) {
-                Console.WriteLine("No supported files matched: " + sSpec);
+            if (sArg == "-v" || sArg == "--version") {
+                Console.WriteLine(sProgName + " " + sProgVersion);
+                return 0;
             }
-            continue;
+            if (sArg == "-g" || sArg == "--gui-mode") { bGuiMode = true; continue; }
+            if (sArg == "-rules" || sArg == "/rules") { bShowRules = true; continue; }
+            if (sArg == "-f" || sArg == "--force") {
+                bForce = true; bForceFromCli = true; continue;
+            }
+            if (sArg == "-l" || sArg == "--log") {
+                bLog = true; bLogFromCli = true; continue;
+            }
+            if (sArg == "-u" || sArg == "--use-configuration") {
+                bUseConfig = true; continue;
+            }
+            if (sArg == "--view-output") {
+                bViewOutput = true; bViewOutputFromCli = true; continue;
+            }
+            if (sArg == "-o" || sArg == "--output-dir") {
+                if (i + 1 >= aArgs.Length) {
+                    Console.Error.WriteLine("[ERROR] " + sArg +
+                        " requires a directory argument.");
+                    return 1;
+                }
+                sOutputDir = aArgs[++i];
+                bOutputDirFromCli = true;
+                continue;
+            }
+            // Unrecognized -> file spec.
+            lsFileArgs.Add(sArg);
+        }
+        if (lsFileArgs.Count > 0) bSourceFromCli = true;
+
+        // Phase 3: GUI auto-launch when invoked from a GUI shell with
+        // no arguments. The console window (if any) belongs to us
+        // alone, so we hide it.
+        if (aArgs.Length == 0 && bOwnConsole) {
+            bGuiMode = true;
+            hideOwnConsoleWindow();
+        } else if (bOwnConsole && lsFileArgs.Count > 0) {
+            // CLI-style invocation from Explorer (e.g., right-click
+            // verb) -- console flash would be confusing. Hide.
+            bHideConsoleMode = true;
+            hideOwnConsoleWindow();
         }
 
-        string[] aFound;
+        // Phase 4: load config if requested or if GUI mode and a
+        // config exists (we treat the existence of a config as
+        // implicit opt-in for GUI mode, matching 2htm).
+        if (bGuiMode && !bUseConfig && configManager.configExists()) {
+            bUseConfig = true;
+        }
+        if (bUseConfig) configManager.loadInto(lsFileArgs);
+
+        // Phase 5: in GUI mode, show the parameter dialog. Cancel = exit.
+        if (bGuiMode) {
+            string sSource = string.Join(" ",
+                lsFileArgs.ConvertAll(s => s.Contains(" ") ? "\"" + s + "\"" : s));
+            string sOut = sOutputDir;
+            bool bForceLocal = bForce;
+            bool bView = bViewOutput;
+            bool bLogLocal = bLog;
+            bool bUseCfgLocal = bUseConfig;
+            if (!guiDialog.show(ref sSource, ref sOut, ref bForceLocal,
+                ref bView, ref bLogLocal, ref bUseCfgLocal)) {
+                return 0;
+            }
+            bForce = bForceLocal;
+            bViewOutput = bView;
+            bLog = bLogLocal;
+            bUseConfig = bUseCfgLocal;
+            sOutputDir = sOut;
+            lsFileArgs = splitSourceField(sSource);
+            if (bUseConfig)
+                configManager.save(sSource, sOutputDir, bForce, bViewOutput, bLog);
+        }
+
+        // Phase 6: resolve output directory and open the log if
+        // requested. Output dir defaults to CWD when empty.
+        string sResolvedOutDir;
+        if (string.IsNullOrWhiteSpace(sOutputDir)) {
+            sResolvedOutDir = Directory.GetCurrentDirectory();
+        } else {
+            try {
+                sResolvedOutDir = Path.GetFullPath(sOutputDir);
+                if (!Directory.Exists(sResolvedOutDir))
+                    Directory.CreateDirectory(sResolvedOutDir);
+            } catch (Exception ex) {
+                string sErr = "Output directory '" + sOutputDir +
+                    "' could not be created: " + ex.Message;
+                Console.Error.WriteLine("[ERROR] " + sErr);
+                if (bGuiMode) showFinalMessage(sErr, "extCheck — Error");
+                return 1;
+            }
+        }
+        if (bLog) logger.open(sResolvedOutDir);
+        logger.info(sProgName + " " + sProgVersion + " starting");
+        logger.info("Output directory: " + sResolvedOutDir);
+
+        // Phase 7: capture stdout/stderr in GUI mode for the final
+        // dialog. In hide-console mode, capture stderr only.
+        TextWriter oOriginalOut = Console.Out;
+        TextWriter oOriginalErr = Console.Error;
+        StringWriter oCapture = null;
+        StringWriter oErrCapture = null;
+        if (bGuiMode) {
+            oCapture = new StringWriter();
+            Console.SetOut(oCapture);
+            Console.SetError(oCapture);
+        } else if (bHideConsoleMode) {
+            oErrCapture = new StringWriter();
+            Console.SetError(oErrCapture);
+        }
+
         try {
-            aFound = Directory.GetFiles(sDir, sPattern);
-        } catch (Exception ex) {
-            Console.WriteLine("ERROR resolving '" + sSpec + "': " + ex.Message);
-            continue;
-        }
-        if (aFound.Length == 0) {
-            Console.WriteLine("No files matched: " + sSpec);
-        }
-        lFiles.AddRange(aFound);
-    }
-
-    if (lFiles.Count == 0) {
-        Console.WriteLine("No files to process.");
-        return 1;
-    }
-
-    int iTotalFiles  = 0;
-    int iTotalIssues = 0;
-
-    foreach (string sFilePath in lFiles) {
-        string sExt = Path.GetExtension(sFilePath).ToLower();
-
-        // Validate extension
-        bool bSupported = false;
-        foreach (string e in aSupportedExtensions) {
-            if (sExt == e) {
-                bSupported = true;
-                break;
-            }
-        }
-        if (!bSupported) {
-            Console.WriteLine("Skipping unsupported format: " + sFilePath);
-            Console.WriteLine("  Supported extensions: " + string.Join(", ", aSupportedExtensions));
+            Console.WriteLine(sProgName + " " + sProgVersion +
+                " — Accessibility Checker for .docx .xlsx .pptx .md");
             Console.WriteLine();
-            continue;
+
+            // Phase 8: handle -rules (immediate write of rule registry).
+            if (bShowRules) {
+                string sRulesPath = Path.Combine(sResolvedOutDir, "extCheck.csv");
+                shared.writeRulesCsv(sRulesPath);
+                Console.WriteLine("Wrote rule registry: " + sRulesPath);
+                logger.info("Wrote rule registry: " + sRulesPath);
+                if (lsFileArgs.Count == 0) {
+                    if (bViewOutput) openOutputInExplorer(sResolvedOutDir);
+                    return 0;
+                }
+                // -rules combined with file specs: continue and
+                // process the files too.
+            }
+
+            // Phase 9: file processing.
+            if (lsFileArgs.Count == 0) {
+                if (!bGuiMode && !bShowRules) {
+                    Console.Write(sUsage);
+                    return 0;
+                }
+                Console.WriteLine("No files to process.");
+                return 1;
+            }
+
+            var lsFiles = resolveFiles(lsFileArgs);
+            if (lsFiles.Count == 0) {
+                Console.WriteLine("No files to process.");
+                return 1;
+            }
+
+            int iTotalFiles = 0;
+            int iTotalIssues = 0;
+            int iSkipped = 0;
+
+            foreach (string sFilePath in lsFiles) {
+                string sExt = Path.GetExtension(sFilePath).ToLower();
+
+                bool bSupported = false;
+                foreach (string sE in aSupportedExtensions) {
+                    if (sExt == sE) { bSupported = true; break; }
+                }
+                if (!bSupported) {
+                    Console.WriteLine("Skipping unsupported format: " + sFilePath);
+                    Console.WriteLine("  Supported extensions: " +
+                        string.Join(", ", aSupportedExtensions));
+                    Console.WriteLine();
+                    continue;
+                }
+
+                string sCsvPath = Path.Combine(
+                    sResolvedOutDir,
+                    Path.GetFileNameWithoutExtension(sFilePath) + ".csv");
+
+                // Force / skip-existing handling.
+                if (File.Exists(sCsvPath) && !bForce) {
+                    Console.WriteLine("Skipping (CSV exists, use -f to overwrite): " +
+                        sFilePath);
+                    Console.WriteLine();
+                    iSkipped++;
+                    continue;
+                }
+
+                Console.WriteLine("File: " + sFilePath);
+                Console.WriteLine("Checking...");
+                logger.info("Checking " + sFilePath);
+
+                results.clear();
+                bool bOpened = false;
+
+                if (sExt == ".docx") {
+                    bOpened = docxModule.open(sFilePath);
+                    if (bOpened) {
+                        try { docxModule.checkAll(sFilePath); }
+                        catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
+                        docxModule.quit();
+                    }
+                } else if (sExt == ".xlsx") {
+                    bOpened = xlsxModule.open(sFilePath);
+                    if (bOpened) {
+                        try { xlsxModule.checkAll(sFilePath); }
+                        catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
+                        xlsxModule.quit();
+                    }
+                } else if (sExt == ".pptx") {
+                    bOpened = pptxModule.open(sFilePath);
+                    if (bOpened) {
+                        try { pptxModule.checkAll(sFilePath); }
+                        catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
+                        pptxModule.quit();
+                    }
+                } else if (sExt == ".md") {
+                    bOpened = mdModule.open(sFilePath);
+                    if (bOpened) {
+                        try { mdModule.checkAll(sFilePath); }
+                        catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
+                        mdModule.quit();
+                    }
+                }
+
+                if (!bOpened) {
+                    Console.WriteLine("  Skipped due to error.");
+                    Console.WriteLine();
+                    logger.warn("Skipped (open failed): " + sFilePath);
+                    continue;
+                }
+
+                results.writeCsv(sCsvPath);
+                results.printSummary(sCsvPath);
+                logger.info("Wrote " + sCsvPath + " (" + results.lIssues.Count + " issue(s))");
+                iTotalFiles++;
+                iTotalIssues += results.lIssues.Count;
+            }
+
+            if (iTotalFiles + iSkipped > 1) {
+                Console.WriteLine("=== " + sProgName + ": " + iTotalFiles +
+                    " file(s) checked, " + iTotalIssues + " total issue(s)" +
+                    (iSkipped > 0 ? ", " + iSkipped + " skipped" : "") + " ===");
+            }
+
+            if (bViewOutput && (iTotalFiles > 0 || bShowRules))
+                openOutputInExplorer(sResolvedOutDir);
+
+            return (iTotalFiles > 0 || bShowRules) ? 0 : 1;
         }
-
-        Console.WriteLine("File: " + sFilePath);
-        Console.WriteLine("Checking...");
-
-        string sCsvPath = Path.Combine(
-            Directory.GetCurrentDirectory(),
-            Path.GetFileNameWithoutExtension(sFilePath) + ".csv");
-
-        results.clear();
-        bool bOpened = false;
-
-        if (sExt == ".docx") {
-            bOpened = docxModule.open(sFilePath);
-            if (bOpened) {
-                try { docxModule.checkAll(sFilePath); } catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
-                docxModule.quit();
+        finally {
+            // Restore stdout/stderr and surface captured output.
+            if (bGuiMode && oCapture != null) {
+                Console.SetOut(oOriginalOut);
+                Console.SetError(oOriginalErr);
+                showFinalMessage(oCapture.ToString());
+            } else if (bHideConsoleMode && oErrCapture != null) {
+                Console.SetError(oOriginalErr);
+                string sErr = oErrCapture.ToString();
+                if (!string.IsNullOrWhiteSpace(sErr))
+                    showFinalMessage(sErr, "extCheck — Errors");
             }
-        } else if (sExt == ".xlsx") {
-            bOpened = xlsxModule.open(sFilePath);
-            if (bOpened) {
-                try { xlsxModule.checkAll(sFilePath); } catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
-                xlsxModule.quit();
-            }
-        } else if (sExt == ".pptx") {
-            bOpened = pptxModule.open(sFilePath);
-            if (bOpened) {
-                try { pptxModule.checkAll(sFilePath); } catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
-                pptxModule.quit();
-            }
-        } else if (sExt == ".md") {
-            bOpened = mdModule.open(sFilePath);
-            if (bOpened) {
-                try { mdModule.checkAll(sFilePath); } catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
-                mdModule.quit();
-            }
+            logger.info("Run complete.");
+            logger.close();
         }
-
-        if (!bOpened) {
-            Console.WriteLine("  Skipped due to error.");
-            Console.WriteLine();
-            continue;
-        }
-
-        results.writeCsv(sCsvPath);
-        results.printSummary(sCsvPath);
-        iTotalFiles++;
-        iTotalIssues += results.lIssues.Count;
     }
-
-    if (iTotalFiles > 1) {
-        Console.WriteLine("=== " + sProgName + ": " + iTotalFiles + " file(s) checked, " + iTotalIssues + " total issue(s) ===");
-    }
-
-    return 0;
-}
 }
