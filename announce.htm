@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>announce</title>
+  <title>extCheck Announce</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
     html {
       color: #1a1a1a;
       background-color: #fdfdfd;
@@ -63,10 +60,6 @@
     img {
       max-width: 100%;
     }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
     h1, h2, h3, h4, h5, h6 {
       margin-top: 1.4em;
     }
@@ -91,7 +84,6 @@
       color: #606060;
     }
     code {
-      white-space: pre-wrap;
       font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
@@ -111,8 +103,8 @@
      overflow: visible;
     }
     hr {
+      background-color: #1a1a1a;
       border: none;
-      border-top: 1px solid #1a1a1a;
       height: 1px;
       margin: 1em 0;
     }
@@ -155,6 +147,7 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
+    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
@@ -170,40 +163,129 @@
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
+  <style>
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 50em; margin: 1em auto; padding: 0 1em; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.5em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+  h2 { font-size: 1.25em; margin-top: 1.5em; }
+  h3 { font-size: 1.1em; margin-top: 1.3em; }
+  p { margin: 0.7em 0; }
+  code { font-family: Consolas, "Courier New", monospace; background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
+  pre { background: #f4f4f4; padding: 0.6em 1em; border-radius: 4px; overflow-x: auto; line-height: 1.35; }
+  pre code { background: transparent; padding: 0; }
+  ul, ol { margin: 0.5em 0; padding-left: 1.6em; }
+  li { margin: 0.25em 0; }
+  table { border-collapse: collapse; margin: 1em 0; }
+  th, td { border: 1px solid #bbb; padding: 0.3em 0.7em; text-align: left; }
+  th { background: #efefef; }
+  blockquote { border-left: 4px solid #bbb; margin: 1em 0; padding: 0.2em 1em; color: #555; }
+  a { color: #0645ad; }
+  a:visited { color: #0b0080; }
+  hr { border: 0; border-top: 1px solid #ccc; margin: 2em 0; }
+  </style>
 </head>
 <body>
-<h1
-id="batch-checks-of-accessibility-for-public-web-pages-and-popular-file-formats">Batch
-Checks of Accessibility for Public Web Pages and Popular File
-Formats</h1>
-<p>I am pleased to share two free, open-source accessibility testing
-tools I have just released on GitHub. Each is a single, self-contained
-executable that runs from any folder on a Windows computer — no
-installation required, and no dependencies to manage.</p>
-<h2 id="extcheck-check-office-and-markdown-files">extCheck — Check
-Office and Markdown Files</h2>
-<p>https://github.com/jamalmazrui/extCheck</p>
-<p>extCheck checks Microsoft Word, Excel, PowerPoint, and Pandoc
-Markdown files against 73 accessibility rules drawn from the Microsoft
-Office Accessibility Checker and the axe-core WCAG 2.2 rule set. Results
-appear in the console and in a CSV report, with each issue described
-along with remediation guidance.</p>
-<h2 id="urlcheck-check-web-pages">urlCheck — Check Web Pages</h2>
-<p>https://github.com/jamalmazrui/urlCheck</p>
-<p>urlCheck opens a web page in Microsoft Edge, runs the axe-core
-engine, and saves an HTML report, a CSV file, an Excel workbook, and a
-JSON results file — all in a named folder. It works with public URLs,
-local HTML files, and batch lists of URLs.</p>
-<hr />
-<p>Because each tool is a portable single file, it integrates naturally
-into developer pipelines: call it synchronously, then parse the
-machine-readable CSV or JSON output as part of a larger automated
-workflow.</p>
-<p>Both tools are designed for users comfortable with the Windows
-command line. If you work in accessibility testing, document production,
-or web quality assurance, I hope you find them useful. Feedback and
-contributions are welcome.</p>
-<p>#accessibility #wcag #a11y #assistivetechnology #commandlinetools
-#opensource</p>
+<header id="title-block-header">
+<h1 class="title">extCheck Announce</h1>
+</header>
+<h1 id="extcheck-release-notes">extCheck Release Notes</h1>
+<h2 id="version-2.0">Version 2.0</h2>
+<p>This is the first release of extCheck as a 64-bit GUI/CLI hybrid
+program.</p>
+<h3 id="whats-new">What’s new</h3>
+<ul>
+<li><strong>64-bit build.</strong> extCheck is now built
+<code>/platform:x64</code>. Microsoft Office’s COM automation requires
+bitness matching between the controller and Office; modern Office
+(Microsoft 365, Office 2019+, Office 2024) is 64-bit by default. If a
+user has 32-bit Office, <code>com.createApp</code> surfaces a clear
+bitness-mismatch error.</li>
+<li><strong>STAThread.</strong> <code>Main</code> is decorated with
+<code>[STAThread]</code>. This satisfies Office COM’s single-threaded
+apartment requirement and is also a precondition for WinForms common
+dialogs.</li>
+<li><strong>Parameter dialog.</strong> Launching extCheck without
+arguments from a GUI shell (Explorer double-click, Start menu, desktop
+hotkey) now shows a parameter dialog with controls for source files,
+output directory, and the option checkboxes (force replacements, view
+output, log session, use configuration). The dialog can also be invoked
+explicitly with <code>-g</code>.</li>
+<li><strong>CLI options.</strong> New flags: <code>-g/--gui-mode</code>,
+<code>-o/--output-dir</code>, <code>-f/--force</code>,
+<code>-l/--log</code>, <code>-u/--use-configuration</code>, and
+<code>--view-output</code>. These mirror the dialog controls one-to-one,
+so a workflow prototyped in the GUI is straightforward to translate to a
+batch file.</li>
+<li><strong>Configuration persistence.</strong> With the <code>-u</code>
+flag (or the dialog’s “Use configuration” checkbox), extCheck reads and
+writes its settings at
+<code>%LOCALAPPDATA%\extCheck\extCheck.ini</code>. Without the flag,
+extCheck leaves no settings on disk.</li>
+<li><strong>Diagnostic log.</strong> With <code>-l</code> (or “Log
+session”), extCheck writes a fresh <code>extCheck.log</code> in the
+output directory. The log captures program version, command-line
+arguments, GUI auto-detection, per-file open/check/quit events, and any
+errors. Each session truncates any prior log.</li>
+<li><strong>Desktop hotkey Alt+Ctrl+X.</strong> The installer adds a
+desktop shortcut whose hotkey is Alt+Ctrl+X. Pressing it from anywhere
+in Windows opens the extCheck parameter dialog.</li>
+<li><strong>Camel Type coding standard.</strong> All variable and
+identifier names follow the project’s Camel Type style. The
+<code>o</code> prefix is reserved for COM objects (the Office automation
+bridge).</li>
+<li><strong>Cross-program naming.</strong> Identifier names for shared
+concepts match across the three companion tools (urlCheck, extCheck,
+2htm). The program-name and version constants are
+<code>sProgramName</code> and <code>sProgramVersion</code>; the config
+and log filename constants are <code>sConfigDirName</code>,
+<code>sConfigFileName</code>, <code>sLogFileName</code>; the source and
+output-directory variables are <code>sSource</code> and
+<code>sOutputDir</code>; the GUI layout constants are all
+<code>iLayout*</code>. The COM helper class is <code>comHelper</code>
+(was <code>com</code>). The <code>logger</code> surface is now uniform:
+<code>open</code>, <code>close</code>, <code>info</code>,
+<code>warn</code>, <code>error</code>, <code>debug</code>.</li>
+<li><strong>Picker initial directory.</strong> The Browse source and
+Choose output buttons now open at the directory derived from the
+text-field value when that value points to an existing path (whether the
+user just typed it or it was loaded from a saved configuration), and at
+the user’s Documents folder otherwise.</li>
+</ul>
+<h3 id="removed">Removed</h3>
+<ul>
+<li>The <code>-strip-images</code> and <code>-plain-text</code> options
+from earlier versions are gone. extCheck is exclusively an accessibility
+checker now; it does not transform documents.</li>
+</ul>
+<h3 id="technical-notes">Technical notes</h3>
+<ul>
+<li><code>comHelper.createApp</code> reports both the calling process’s
+bitness and the likely Office bitness in its error message, so a
+mismatch surfaces with an actionable diagnosis.</li>
+<li>The icon is embedded in <code>extCheck.exe</code> at build time via
+<code>/win32icon</code>. Shortcuts inherit the icon; the .ico file does
+not need to ship with the installed program.</li>
+<li>The build script (<code>buildExtCheck.cmd</code>) writes
+<code>extCheck.exe</code> to the current working directory rather than a
+<code>dist\</code> subfolder, and it no longer copies
+<code>extCheck.csv</code> or <code>extCheck.ico</code> aside (those
+files already live in the working directory next to
+<code>extCheck.iss</code>). The script is straightforward enough that no
+forward <code>call :label</code> is used; it ships with CRLF line
+endings as defense-in-depth.</li>
+</ul>
+<h3 id="installer-extcheck_setup.exe">Installer
+(<code>extCheck_setup.exe</code>)</h3>
+<ul>
+<li>64-bit only.</li>
+<li>Prompts for the installation directory (default:
+<code>C:\Program Files\extCheck</code>).</li>
+<li>Includes a brief MIT-license summary on the welcome page.</li>
+<li>Installs only HTML versions of the documentation
+(<code>ReadMe.htm</code>, <code>Announce.htm</code>,
+<code>License.htm</code>); the Markdown counterparts and
+source/build/installer scripts live in the GitHub repository.</li>
+<li>The “Launch extCheck now” checkbox on the final page reminds the
+user that the desktop hotkey is Alt+Ctrl+X.</li>
+</ul>
 </body>
 </html>

@@ -12,7 +12,7 @@
 // Bitness: extCheck is built 64-bit. Office COM automation requires
 // matching bitness between this process and the installed Office. Modern
 // Office (Microsoft 365 / Office 2019+ / Office 2024) is 64-bit by
-// default. If a user has 32-bit Office, com.createApp will surface a
+// default. If a user has 32-bit Office, comHelper.createApp will surface a
 // clear error pointing at the bitness mismatch.
 //
 // Architecture: Option D — static format modules + shared static infrastructure.
@@ -280,7 +280,7 @@ static class shared {
 // ===========================================================================
 // Shared: COM lifecycle helpers
 // ===========================================================================
-static class com {
+static class comHelper {
     public static dynamic createApp(string sProgId) {
         Type t = Type.GetTypeFromProgID(sProgId);
         if (t == null) {
@@ -323,7 +323,7 @@ static class docxModule {
 
     public static bool open(string sPath) {
         try {
-            oWord = com.createApp("Word.Application");
+            oWord = comHelper.createApp("Word.Application");
             oWord.Visible      = false;
             oWord.DisplayAlerts = 0;
             oDoc  = oWord.Documents.Open(sPath, false, true);
@@ -603,7 +603,7 @@ static class xlsxModule {
 
     public static bool open(string sPath) {
         try {
-            oExcel = com.createApp("Excel.Application");
+            oExcel = comHelper.createApp("Excel.Application");
             oExcel.Visible       = false;
             oExcel.DisplayAlerts = false;
             oWb    = oExcel.Workbooks.Open(sPath, false, true);
@@ -928,7 +928,7 @@ static class pptxModule {
 
     public static bool open(string sPath) {
         try {
-            oPpt             = com.createApp("PowerPoint.Application");
+            oPpt             = comHelper.createApp("PowerPoint.Application");
             oPpt.Visible     = true; // Required — PowerPoint does not support headless mode
             oPpt.WindowState = 2;    // ppWindowMinimized
             oPresentation    = oPpt.Presentations.Open(sPath, true, false, false);
@@ -1882,7 +1882,7 @@ static class mdModule {
 // automate Microsoft Office via COM, the bitness of this process must
 // match the bitness of the installed Office. Modern Office (Microsoft
 // 365, Office 2019+, Office 2024) is 64-bit by default; if a user has
-// 32-bit Office on their machine, com.createApp will fail with a
+// 32-bit Office on their machine, comHelper.createApp will fail with a
 // Type.GetTypeFromProgID == null result and the error message will
 // guide the user to a 32-bit rebuild.
 // ===========================================================================
@@ -1910,11 +1910,11 @@ class extCheck {
 // ===========================================================================
 public static class logger
 {
-    private static StreamWriter oWriter = null;
+    private static StreamWriter writer = null;
 
     public static void open(string sDir = "")
     {
-        if (oWriter != null) return;
+        if (writer != null) return;
         string sLogDir;
         try {
             if (!string.IsNullOrWhiteSpace(sDir) && Directory.Exists(sDir)) {
@@ -1925,36 +1925,37 @@ public static class logger
         } catch {
             sLogDir = Directory.GetCurrentDirectory();
         }
-        string sPath = Path.Combine(sLogDir, "extCheck.log");
+        string sPath = Path.Combine(sLogDir, program.sLogFileName);
         try {
-            oWriter = new StreamWriter(sPath, append: false, encoding: new UTF8Encoding(true));
-            oWriter.AutoFlush = true;
+            writer = new StreamWriter(sPath, append: false, encoding: new UTF8Encoding(true));
+            writer.AutoFlush = true;
         } catch (Exception ex) {
             Console.Error.WriteLine("[WARN] Could not open log file '" + sPath + "': " +
                 ex.Message + ". Continuing without a log.");
-            oWriter = null;
+            writer = null;
         }
     }
 
     public static void close()
     {
-        if (oWriter == null) return;
+        if (writer == null) return;
         try {
-            oWriter.WriteLine(stamp("INFO") + " Log closed.");
-            oWriter.Flush();
-            oWriter.Close();
+            writer.WriteLine(stamp("INFO") + " Log closed.");
+            writer.Flush();
+            writer.Close();
         } catch { }
-        oWriter = null;
+        writer = null;
     }
 
     public static void info(string sMsg)  { write("INFO", sMsg); }
     public static void warn(string sMsg)  { write("WARN", sMsg); }
     public static void error(string sMsg) { write("ERROR", sMsg); }
+    public static void debug(string sMsg) { write("DEBUG", sMsg); }
 
     private static void write(string sLevel, string sMsg)
     {
-        if (oWriter == null) return;
-        try { oWriter.WriteLine(stamp(sLevel) + " " + sMsg); } catch { }
+        if (writer == null) return;
+        try { writer.WriteLine(stamp(sLevel) + " " + sMsg); } catch { }
     }
 
     private static string stamp(string sLevel)
@@ -1978,12 +1979,12 @@ public static class configManager
     {
         string sAppData = Environment.GetFolderPath(
             Environment.SpecialFolder.LocalApplicationData);
-        return Path.Combine(sAppData, "extCheck");
+        return Path.Combine(sAppData, program.sConfigDirName);
     }
 
     public static string getConfigPath()
     {
-        return Path.Combine(getConfigDir(), "extCheck.ini");
+        return Path.Combine(getConfigDir(), program.sConfigFileName);
     }
 
     public static bool configExists()
@@ -2063,7 +2064,7 @@ public static class configManager
             program.bLog = getBool(dVals, "log_session");
     }
 
-    public static void save(string sSource, string sOutDir,
+    public static void save(string sSource, string sOutputDir,
         bool bForce, bool bView, bool bLog)
     {
         string sDir = getConfigDir();
@@ -2076,7 +2077,7 @@ public static class configManager
             sb.AppendLine("; Delete this file to reset, or click Default settings in");
             sb.AppendLine("; the GUI, which also deletes the file and the extCheck folder.");
             sb.AppendLine("source_files=" + (sSource ?? ""));
-            sb.AppendLine("output_directory=" + (sOutDir ?? ""));
+            sb.AppendLine("output_directory=" + (sOutputDir ?? ""));
             sb.AppendLine("force_replacements=" + (bForce ? "1" : "0"));
             sb.AppendLine("view_output=" + (bView ? "1" : "0"));
             sb.AppendLine("log_session=" + (bLog ? "1" : "0"));
@@ -2146,17 +2147,31 @@ public static class configManager
 // ===========================================================================
 public static class guiDialog
 {
-    public static bool show(ref string sSource, ref string sOutDir,
+    public static bool show(ref string sSource, ref string sOutputDir,
         ref bool bForce, ref bool bView, ref bool bLog, ref bool bUseCfg)
     {
         var frm = new Form();
-        frm.Text = "extCheck";
+        frm.Text = program.sProgramName;
         frm.FormBorderStyle = FormBorderStyle.FixedDialog;
         frm.StartPosition = FormStartPosition.CenterScreen;
         frm.MaximizeBox = false;
         frm.MinimizeBox = false;
         frm.ShowInTaskbar = false;
-        frm.ClientSize = new System.Drawing.Size(560, 200);
+
+        // Layout constants. Declared before any use of iLayoutFormWidth
+        // (ClientSize) so the literal 560 doesn't appear inline.
+        const int iLayoutLeft = 12;
+        const int iLayoutRight = 12;
+        const int iLayoutTop = 12;
+        const int iLayoutGap = 7;
+        const int iLayoutRowGap = 11;
+        const int iLayoutLabelWidth = 110;
+        const int iLayoutButtonWidth = 130;
+        const int iLayoutButtonHeight = 26;
+        const int iLayoutTextHeight = 23;
+        const int iLayoutFormWidth = 560;
+
+        frm.ClientSize = new System.Drawing.Size(iLayoutFormWidth, 200);
         frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
 
         // Route F1 to the Help button action.
@@ -2169,29 +2184,18 @@ public static class guiDialog
             }
         };
 
-        // Layout constants.
-        const int iDefaultLeft = 12;
-        const int iDefaultRight = 12;
-        const int iDefaultTop = 12;
-        const int iDefaultGap = 7;
-        const int iDefaultRowGap = 11;
-        const int iDefaultLabelWidth = 110;
-        const int iDefaultButtonWidth = 130;
-        const int iDefaultButtonHeight = 26;
-        const int iDefaultTextHeight = 23;
-
         int iFormW = frm.ClientSize.Width;
-        int iTextX = iDefaultLeft + iDefaultLabelWidth + iDefaultGap;
-        int iTextW = iFormW - iTextX - iDefaultGap - iDefaultButtonWidth - iDefaultRight;
-        int iBtnX = iFormW - iDefaultRight - iDefaultButtonWidth;
+        int iTextX = iLayoutLeft + iLayoutLabelWidth + iLayoutGap;
+        int iTextW = iFormW - iTextX - iLayoutGap - iLayoutButtonWidth - iLayoutRight;
+        int iBtnX = iFormW - iLayoutRight - iLayoutButtonWidth;
 
         // --- Row 1: Source files ---
-        int y = iDefaultTop;
+        int y = iLayoutTop;
         var lblSource = new Label();
         lblSource.Text = "&Source files:";
         lblSource.AutoSize = false;
-        lblSource.Location = new System.Drawing.Point(iDefaultLeft, y + 3);
-        lblSource.Size = new System.Drawing.Size(iDefaultLabelWidth, iDefaultTextHeight);
+        lblSource.Location = new System.Drawing.Point(iLayoutLeft, y + 3);
+        lblSource.Size = new System.Drawing.Size(iLayoutLabelWidth, iLayoutTextHeight);
         lblSource.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
         frm.Controls.Add(lblSource);
 
@@ -2200,39 +2204,39 @@ public static class guiDialog
             ? defaultSourceForGui()
             : sSource;
         txtSource.Location = new System.Drawing.Point(iTextX, y);
-        txtSource.Size = new System.Drawing.Size(iTextW, iDefaultTextHeight);
+        txtSource.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
         txtSource.TabIndex = 0;
         frm.Controls.Add(txtSource);
 
         var btnBrowseSource = new Button();
         btnBrowseSource.Text = "&Browse source...";
         btnBrowseSource.Location = new System.Drawing.Point(iBtnX, y - 1);
-        btnBrowseSource.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnBrowseSource.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
         btnBrowseSource.TabIndex = 1;
         btnBrowseSource.UseVisualStyleBackColor = true;
         frm.Controls.Add(btnBrowseSource);
 
         // --- Row 2: Output directory ---
-        y += iDefaultTextHeight + iDefaultRowGap;
+        y += iLayoutTextHeight + iLayoutRowGap;
         var lblOut = new Label();
         lblOut.Text = "&Output directory:";
         lblOut.AutoSize = false;
-        lblOut.Location = new System.Drawing.Point(iDefaultLeft, y + 3);
-        lblOut.Size = new System.Drawing.Size(iDefaultLabelWidth, iDefaultTextHeight);
+        lblOut.Location = new System.Drawing.Point(iLayoutLeft, y + 3);
+        lblOut.Size = new System.Drawing.Size(iLayoutLabelWidth, iLayoutTextHeight);
         lblOut.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
         frm.Controls.Add(lblOut);
 
         var txtOut = new TextBox();
-        txtOut.Text = sOutDir ?? "";
+        txtOut.Text = sOutputDir ?? "";
         txtOut.Location = new System.Drawing.Point(iTextX, y);
-        txtOut.Size = new System.Drawing.Size(iTextW, iDefaultTextHeight);
+        txtOut.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
         txtOut.TabIndex = 2;
         frm.Controls.Add(txtOut);
 
         var btnChooseOut = new Button();
         btnChooseOut.Text = "&Choose output...";
         btnChooseOut.Location = new System.Drawing.Point(iBtnX, y - 1);
-        btnChooseOut.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnChooseOut.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
         btnChooseOut.TabIndex = 3;
         btnChooseOut.UseVisualStyleBackColor = true;
         frm.Controls.Add(btnChooseOut);
@@ -2243,68 +2247,61 @@ public static class guiDialog
         // properly is more complex than necessary, and the common
         // case is wildcards which the user types directly.
         btnBrowseSource.Click += (s, e) => {
-            using (var oDlg = new OpenFileDialog()) {
-                oDlg.Title = "Choose a file to check";
-                oDlg.Filter =
+            using (var dialog = new OpenFileDialog()) {
+                dialog.Title = "Choose a file to check";
+                dialog.Filter =
                     "Supported files (*.docx;*.xlsx;*.pptx;*.md)|*.docx;*.xlsx;*.pptx;*.md|" +
                     "Word documents (*.docx)|*.docx|" +
                     "Excel workbooks (*.xlsx)|*.xlsx|" +
                     "PowerPoint presentations (*.pptx)|*.pptx|" +
                     "Markdown files (*.md)|*.md|" +
                     "All files (*.*)|*.*";
-                oDlg.FilterIndex = 1;
-                oDlg.CheckFileExists = true;
-                oDlg.RestoreDirectory = true;
+                dialog.FilterIndex = 1;
+                dialog.CheckFileExists = true;
+                dialog.RestoreDirectory = true;
                 try {
-                    string sCurrent = txtSource.Text.Trim().Trim('"');
-                    if (!string.IsNullOrEmpty(sCurrent)) {
-                        string sDir = Path.GetDirectoryName(sCurrent);
-                        if (!string.IsNullOrEmpty(sDir) && Directory.Exists(sDir))
-                            oDlg.InitialDirectory = sDir;
-                    }
+                    dialog.InitialDirectory = getInitialBrowseDir(txtSource.Text);
                 } catch { }
-                if (oDlg.ShowDialog(frm) == DialogResult.OK) {
-                    string sPicked = oDlg.FileName;
+                if (dialog.ShowDialog(frm) == DialogResult.OK) {
+                    string sPicked = dialog.FileName;
                     if (sPicked.Contains(" "))
                         sPicked = "\"" + sPicked + "\"";
                     txtSource.Text = sPicked;
                     if (string.IsNullOrEmpty(txtOut.Text))
-                        txtOut.Text = Path.GetDirectoryName(oDlg.FileName);
+                        txtOut.Text = Path.GetDirectoryName(dialog.FileName);
                 }
             }
         };
 
         // Wire up Choose output: FolderBrowserDialog.
         btnChooseOut.Click += (s, e) => {
-            using (var oDlg = new FolderBrowserDialog()) {
-                oDlg.Description = "Choose the output directory";
-                oDlg.ShowNewFolderButton = true;
+            using (var dialog = new FolderBrowserDialog()) {
+                dialog.Description = "Choose the output directory";
+                dialog.ShowNewFolderButton = true;
                 try {
-                    string sCurrent = txtOut.Text.Trim();
-                    if (!string.IsNullOrEmpty(sCurrent) && Directory.Exists(sCurrent))
-                        oDlg.SelectedPath = sCurrent;
+                    dialog.SelectedPath = getInitialBrowseDir(txtOut.Text);
                 } catch { }
-                if (oDlg.ShowDialog(frm) == DialogResult.OK)
-                    txtOut.Text = oDlg.SelectedPath;
+                if (dialog.ShowDialog(frm) == DialogResult.OK)
+                    txtOut.Text = dialog.SelectedPath;
             }
         };
 
         // --- Row 3: Force replacements + View output ---
-        y += iDefaultTextHeight + iDefaultRowGap * 2;
-        int iChkW = (iFormW - iDefaultLeft - iDefaultRight) / 2;
+        y += iLayoutTextHeight + iLayoutRowGap * 2;
+        int iChkW = (iFormW - iLayoutLeft - iLayoutRight) / 2;
         var chkForce = new CheckBox();
         chkForce.Text = "&Force replacements";
         chkForce.Checked = bForce;
-        chkForce.Location = new System.Drawing.Point(iDefaultLeft, y);
-        chkForce.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+        chkForce.Location = new System.Drawing.Point(iLayoutLeft, y);
+        chkForce.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
         chkForce.TabIndex = 4;
         frm.Controls.Add(chkForce);
 
         var chkView = new CheckBox();
         chkView.Text = "&View output";
         chkView.Checked = bView;
-        chkView.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
-        chkView.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+        chkView.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
+        chkView.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
         chkView.TabIndex = 5;
         frm.Controls.Add(chkView);
 
@@ -2312,31 +2309,31 @@ public static class guiDialog
         // Both are "meta" options that affect persistence/diagnostics
         // rather than the conversion itself, so they sit together
         // below the conversion-control checkboxes.
-        y += iDefaultTextHeight + iDefaultRowGap;
+        y += iLayoutTextHeight + iLayoutRowGap;
         var chkLog = new CheckBox();
         chkLog.Text = "&Log session";
         chkLog.Checked = bLog;
-        chkLog.Location = new System.Drawing.Point(iDefaultLeft, y);
-        chkLog.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+        chkLog.Location = new System.Drawing.Point(iLayoutLeft, y);
+        chkLog.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
         chkLog.TabIndex = 6;
         frm.Controls.Add(chkLog);
 
         var chkUseCfg = new CheckBox();
         chkUseCfg.Text = "&Use configuration";
         chkUseCfg.Checked = bUseCfg;
-        chkUseCfg.Location = new System.Drawing.Point(iDefaultLeft + iChkW, y);
-        chkUseCfg.Size = new System.Drawing.Size(iChkW, iDefaultTextHeight);
+        chkUseCfg.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
+        chkUseCfg.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
         chkUseCfg.TabIndex = 7;
         frm.Controls.Add(chkUseCfg);
 
         // --- Bottom row: commit buttons. Help and Default settings
         // on the left (they don't commit/cancel the dialog), OK and
         // Cancel on the right. Matches Microsoft's UX guidance.
-        y += iDefaultTextHeight + iDefaultRowGap * 2;
+        y += iLayoutTextHeight + iLayoutRowGap * 2;
         var btnHelp = new Button();
         btnHelp.Text = "&Help";
-        btnHelp.Location = new System.Drawing.Point(iDefaultLeft, y);
-        btnHelp.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnHelp.Location = new System.Drawing.Point(iLayoutLeft, y);
+        btnHelp.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
         btnHelp.TabIndex = 8;
         btnHelp.UseVisualStyleBackColor = true;
         btnHelp.Click += (s, e) => showHelpMessage();
@@ -2345,8 +2342,8 @@ public static class guiDialog
         var btnDefaults = new Button();
         btnDefaults.Text = "&Default settings";
         btnDefaults.Location = new System.Drawing.Point(
-            iDefaultLeft + iDefaultButtonWidth + iDefaultGap, y);
-        btnDefaults.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+            iLayoutLeft + iLayoutButtonWidth + iLayoutGap, y);
+        btnDefaults.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
         btnDefaults.TabIndex = 9;
         btnDefaults.UseVisualStyleBackColor = true;
         btnDefaults.Click += (s, e) => {
@@ -2365,8 +2362,8 @@ public static class guiDialog
         btnOk.Text = "OK";
         btnOk.DialogResult = DialogResult.OK;
         btnOk.Location = new System.Drawing.Point(
-            iFormW - iDefaultRight - 2 * iDefaultButtonWidth - iDefaultGap, y);
-        btnOk.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+            iFormW - iLayoutRight - 2 * iLayoutButtonWidth - iLayoutGap, y);
+        btnOk.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
         btnOk.TabIndex = 10;
         btnOk.UseVisualStyleBackColor = true;
         frm.Controls.Add(btnOk);
@@ -2375,7 +2372,7 @@ public static class guiDialog
         btnCancel.Text = "Cancel";
         btnCancel.DialogResult = DialogResult.Cancel;
         btnCancel.Location = new System.Drawing.Point(iBtnX, y);
-        btnCancel.Size = new System.Drawing.Size(iDefaultButtonWidth, iDefaultButtonHeight);
+        btnCancel.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
         btnCancel.TabIndex = 11;
         btnCancel.UseVisualStyleBackColor = true;
         frm.Controls.Add(btnCancel);
@@ -2386,14 +2383,14 @@ public static class guiDialog
 
         // Resize the form to wrap the bottom row tightly.
         frm.ClientSize = new System.Drawing.Size(iFormW,
-            y + iDefaultButtonHeight + iDefaultTop);
+            y + iLayoutButtonHeight + iLayoutTop);
 
         // Show modally.
-        var oResult = frm.ShowDialog();
-        if (oResult != DialogResult.OK) return false;
+        var dialogResult = frm.ShowDialog();
+        if (dialogResult != DialogResult.OK) return false;
 
         sSource = txtSource.Text.Trim();
-        sOutDir = txtOut.Text.Trim();
+        sOutputDir = txtOut.Text.Trim();
         bForce = chkForce.Checked;
         bView = chkView.Checked;
         bLog = chkLog.Checked;
@@ -2408,6 +2405,50 @@ public static class guiDialog
         } catch {
             return "";
         }
+    }
+
+    /// <summary>
+    /// Choose the initial directory for a file or folder picker.
+    /// Returns the directory derived from the user's current text-field
+    /// content (in-session choice or value loaded from saved config) when
+    /// it points to an existing path; falls back to the user's Documents
+    /// folder otherwise. This follows Microsoft's guidance that pickers
+    /// start where the user has shown intent, with Documents as a
+    /// sensible no-context default.
+    /// </summary>
+    /// <param name="sFieldText">The current text of the source-input or
+    /// output-directory field. May be empty, may contain wildcards or
+    /// quoted paths, may contain space-separated tokens (only the first
+    /// is inspected).</param>
+    /// <returns>An existing directory path. Always non-empty.</returns>
+    private static string getInitialBrowseDir(string sFieldText)
+    {
+        string sCandidate = "";
+        string sFirstToken = "";
+        string sParent = "";
+
+        sFieldText = (sFieldText ?? "").Trim();
+        if (string.IsNullOrEmpty(sFieldText)) return defaultSourceForGui();
+        // Inspect first space-separated token only.
+        int iSpace = sFieldText.IndexOf(' ');
+        sFirstToken = (iSpace < 0) ? sFieldText : sFieldText.Substring(0, iSpace);
+        sFirstToken = sFirstToken.Trim('"');
+        if (string.IsNullOrEmpty(sFirstToken)) return defaultSourceForGui();
+        sCandidate = sFirstToken;
+        try {
+            // Wildcards: strip the basename and inspect the parent directory.
+            if (sCandidate.IndexOfAny(new[] { '*', '?' }) >= 0) {
+                sCandidate = Path.GetDirectoryName(sCandidate) ?? "";
+            }
+            if (!string.IsNullOrEmpty(sCandidate) && Directory.Exists(sCandidate))
+                return Path.GetFullPath(sCandidate);
+            if (!string.IsNullOrEmpty(sCandidate) && File.Exists(sCandidate))
+                return Path.GetDirectoryName(Path.GetFullPath(sCandidate));
+            sParent = string.IsNullOrEmpty(sCandidate) ? "" : (Path.GetDirectoryName(sCandidate) ?? "");
+            if (!string.IsNullOrEmpty(sParent) && Directory.Exists(sParent))
+                return Path.GetFullPath(sParent);
+        } catch { }
+        return defaultSourceForGui();
     }
 
     private static void showHelpMessage()
@@ -2431,12 +2472,12 @@ public static class guiDialog
             "%LOCALAPPDATA%\\extCheck\\extCheck.ini\r\n\r\n" +
             "Press Cancel to exit without checking.\r\n\r\n" +
             "Open the full README in your browser?";
-        var oResult = MessageBox.Show(sMsg,
+        var dialogResult = MessageBox.Show(sMsg,
             "extCheck — Help",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Information,
             MessageBoxDefaultButton.Button2);
-        if (oResult == DialogResult.Yes) launchReadMe();
+        if (dialogResult == DialogResult.Yes) launchReadMe();
     }
 
     private static void launchReadMe()
@@ -2461,8 +2502,8 @@ public static class guiDialog
             return;
         }
         try {
-            var oPsi = new ProcessStartInfo(sTarget) { UseShellExecute = true };
-            Process.Start(oPsi);
+            var processStartInfo = new ProcessStartInfo(sTarget) { UseShellExecute = true };
+            Process.Start(processStartInfo);
         } catch (Exception ex) {
             MessageBox.Show(
                 "Could not open the documentation:\r\n\r\n" + ex.Message,
@@ -2479,8 +2520,11 @@ public static class guiDialog
 // ===========================================================================
 static class program {
 
-    public const string sProgName = "extCheck";
-    public const string sProgVersion = "2.0";
+    public const string sProgramName = "extCheck";
+    public const string sProgramVersion = "2.0";
+    public const string sConfigDirName = "extCheck";
+    public const string sConfigFileName = "extCheck.ini";
+    public const string sLogFileName = "extCheck.log";
     public static readonly string[] aSupportedExtensions = { ".docx", ".xlsx", ".pptx", ".md" };
 
     // Globals set by command-line switches and/or the GUI dialog.
@@ -2609,9 +2653,9 @@ static class program {
     private static void openOutputInExplorer(string sDir)
     {
         try {
-            var oPsi = new ProcessStartInfo("explorer.exe", "\"" + sDir + "\"");
-            oPsi.UseShellExecute = true;
-            Process.Start(oPsi);
+            var processStartInfo = new ProcessStartInfo("explorer.exe", "\"" + sDir + "\"");
+            processStartInfo.UseShellExecute = true;
+            Process.Start(processStartInfo);
         } catch (Exception ex) {
             Console.Error.WriteLine("[WARN] Could not open output directory: " + ex.Message);
         }
@@ -2709,14 +2753,14 @@ Examples:
         for (int i = 0; i < aArgs.Length; i++) {
             string sArg = aArgs[i];
             if (sArg == "-h" || sArg == "/h" || sArg == "--help") {
-                Console.WriteLine(sProgName + " " + sProgVersion +
+                Console.WriteLine(sProgramName + " " + sProgramVersion +
                     " — Accessibility Checker for .docx .xlsx .pptx .md");
                 Console.WriteLine();
                 Console.Write(sUsage);
                 return 0;
             }
             if (sArg == "-v" || sArg == "--version") {
-                Console.WriteLine(sProgName + " " + sProgVersion);
+                Console.WriteLine(sProgramName + " " + sProgramVersion);
                 return 0;
             }
             if (sArg == "-g" || sArg == "--gui-mode") { bGuiMode = true; continue; }
@@ -2811,26 +2855,26 @@ Examples:
             }
         }
         if (bLog) logger.open(sResolvedOutDir);
-        logger.info(sProgName + " " + sProgVersion + " starting");
+        logger.info(sProgramName + " " + sProgramVersion + " starting");
         logger.info("Output directory: " + sResolvedOutDir);
 
         // Phase 7: capture stdout/stderr in GUI mode for the final
         // dialog. In hide-console mode, capture stderr only.
-        TextWriter oOriginalOut = Console.Out;
-        TextWriter oOriginalErr = Console.Error;
-        StringWriter oCapture = null;
-        StringWriter oErrCapture = null;
+        TextWriter writerOriginalOut = Console.Out;
+        TextWriter writerOriginalErr = Console.Error;
+        StringWriter stringWriterOut = null;
+        StringWriter stringWriterErr = null;
         if (bGuiMode) {
-            oCapture = new StringWriter();
-            Console.SetOut(oCapture);
-            Console.SetError(oCapture);
+            stringWriterOut = new StringWriter();
+            Console.SetOut(stringWriterOut);
+            Console.SetError(stringWriterOut);
         } else if (bHideConsoleMode) {
-            oErrCapture = new StringWriter();
-            Console.SetError(oErrCapture);
+            stringWriterErr = new StringWriter();
+            Console.SetError(stringWriterErr);
         }
 
         try {
-            Console.WriteLine(sProgName + " " + sProgVersion +
+            Console.WriteLine(sProgramName + " " + sProgramVersion +
                 " — Accessibility Checker for .docx .xlsx .pptx .md");
             Console.WriteLine();
 
@@ -2948,7 +2992,7 @@ Examples:
             }
 
             if (iTotalFiles + iSkipped > 1) {
-                Console.WriteLine("=== " + sProgName + ": " + iTotalFiles +
+                Console.WriteLine("=== " + sProgramName + ": " + iTotalFiles +
                     " file(s) checked, " + iTotalIssues + " total issue(s)" +
                     (iSkipped > 0 ? ", " + iSkipped + " skipped" : "") + " ===");
             }
@@ -2960,13 +3004,13 @@ Examples:
         }
         finally {
             // Restore stdout/stderr and surface captured output.
-            if (bGuiMode && oCapture != null) {
-                Console.SetOut(oOriginalOut);
-                Console.SetError(oOriginalErr);
-                showFinalMessage(oCapture.ToString());
-            } else if (bHideConsoleMode && oErrCapture != null) {
-                Console.SetError(oOriginalErr);
-                string sErr = oErrCapture.ToString();
+            if (bGuiMode && stringWriterOut != null) {
+                Console.SetOut(writerOriginalOut);
+                Console.SetError(writerOriginalErr);
+                showFinalMessage(stringWriterOut.ToString());
+            } else if (bHideConsoleMode && stringWriterErr != null) {
+                Console.SetError(writerOriginalErr);
+                string sErr = stringWriterErr.ToString();
                 if (!string.IsNullOrWhiteSpace(sErr))
                     showFinalMessage(sErr, "extCheck — Errors");
             }

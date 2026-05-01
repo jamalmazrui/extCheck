@@ -1,26 +1,30 @@
 ; ============================================================================
 ; extCheck.iss  --  Inno Setup script for extCheck
 ;
-; Builds extCheck_setup.exe, a 64-bit Windows installer for extCheck.
-;
-; Compile with Inno Setup 6.x (https://jrsoftware.org/isinfo.php). The
-; .iss file expects to be opened from the dist\ folder produced by
-; buildExtCheck.cmd; that folder must contain extCheck.exe, extCheck.csv,
-; extCheck.ico, the documentation, and the source.
-;
-; The installer:
-;   * Targets 64-bit Windows 10 (and later) only.
-;   * Installs to C:\Program Files\extCheck by default.
-;   * Adds a Start Menu group with shortcuts to extCheck, the README,
+; Compile with the Inno Setup IDE (ISCC.exe) to produce extCheck_setup.exe.
+; The resulting installer:
+;   - Targets 64-bit Windows 10 (and later) only.
+;   - Requires administrator privileges.
+;   - Prompts the user for the installation directory; default is
+;     C:\Program Files\extCheck.
+;   - Shows a brief MIT license summary on the welcome page (no extra
+;     wizard screen). The full license text is installed alongside
+;     the program as License.htm.
+;   - Adds a Start Menu group with shortcuts to extCheck, the README,
 ;     and the uninstaller.
-;   * Adds a desktop shortcut whose hotkey is Alt+Ctrl+X. The shortcut
+;   - Adds a desktop shortcut whose hotkey is Alt+Ctrl+X. The shortcut
 ;     launches extCheck in GUI mode (-g) with saved-configuration
 ;     loading (-u). WorkingDir is the user's Documents folder so any
 ;     output folders or log files land somewhere writable.
-;   * Adds no right-click Explorer verbs and no file associations.
-;   * On uninstall, removes the program files but leaves
+;   - Adds no right-click Explorer verbs and no file associations.
+;   - On uninstall, removes the program files but leaves
 ;     %LOCALAPPDATA%\extCheck\extCheck.ini intact (the user's saved
 ;     settings -- their filesystem, their call).
+;
+; This installer ships only the runtime distribution (the .exe, the
+; runtime CSV rule registry, the documentation in HTML form, and the
+; license). The Markdown sources, the C# source, the build script,
+; and this .iss script live in the GitHub repository.
 ; ============================================================================
 
 #define sAppName       "extCheck"
@@ -29,6 +33,7 @@
 #define sAppUrl        "https://github.com/JamalMazrui/extCheck"
 #define sAppExeName    "extCheck.exe"
 #define sAppCopyright  "Copyright (c) 2026 Jamal Mazrui. MIT License."
+#define sHotKey        "Alt+Ctrl+X"
 
 [Setup]
 AppId={{E8C3D0A2-5B1F-4D8E-9A4C-2C3F4D7E8B9A}
@@ -38,25 +43,34 @@ AppVerName={#sAppName} {#sAppVersion}
 AppPublisher={#sAppPublisher}
 AppPublisherURL={#sAppUrl}
 AppSupportURL={#sAppUrl}
-AppUpdatesURL={#sAppUrl}
+AppUpdatesURL={#sAppUrl}/releases
 AppCopyright={#sAppCopyright}
+VersionInfoVersion={#sAppVersion}
 
+; Install under Program Files. {autopf} resolves to "Program Files"
+; on 64-bit Windows when the installer runs in 64-bit mode (see
+; ArchitecturesInstallIn64BitMode below). The user can override this
+; default on the wizard's directory page.
 DefaultDirName={autopf}\{#sAppName}
 DefaultGroupName={#sAppName}
 DisableProgramGroupPage=yes
-DisableDirPage=auto
-DisableReadyPage=no
+UsePreviousAppDir=yes
+UsePreviousGroup=yes
 
 OutputDir=.
 OutputBaseFilename={#sAppName}_setup
 Compression=lzma2
 SolidCompression=yes
+SetupIconFile={#sAppName}.ico
+WizardStyle=modern
 
+; Installer requires admin to write to Program Files.
+PrivilegesRequired=admin
+PrivilegesRequiredOverridesAllowed=
+
+; 64-bit Windows only.
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-
-WizardStyle=modern
-SetupIconFile=extCheck.ico
 
 Uninstallable=yes
 UninstallDisplayIcon={app}\{#sAppExeName}
@@ -67,24 +81,24 @@ MinVersion=10.0
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+[Messages]
+; Replace the default welcome-page body text with one that includes a
+; brief MIT license notice. This satisfies the requirement that the
+; license summary appear on an existing wizard screen rather than on
+; an additional dedicated page (which is what LicenseFile= would
+; produce). The full license text is installed alongside the program.
+WelcomeLabel2=This will install [name/ver] on your computer.%n%n[name] is licensed under the MIT License: free to use, copy, modify, and distribute; provided "as is" with no warranty. The full license text will be installed as License.htm in the program folder.%n%nIt is recommended that you close all other applications before continuing.
+
 [Files]
-; Note: extCheck.ico is NOT copied to {app} because the icon is embedded
-; in extCheck.exe at build time (via /win32icon=extCheck.ico in the csc
-; invocation). Shortcut icons in [Icons] inherit from the exe's embedded
-; icon by default. The .ico file IS still needed at COMPILE time for the
-; SetupIconFile= directive above, which gives extCheck_setup.exe itself
-; an icon -- but that's a compile-time dependency only and does not need
-; to ship with the installed program.
-Source: "extCheck.exe";       DestDir: "{app}"; Flags: ignoreversion
-Source: "extCheck.csv";       DestDir: "{app}"; Flags: ignoreversion
+; The runtime distribution: the executable, the rule-registry CSV
+; (used by extCheck -rules), the HTML docs, and the license. The icon
+; is embedded in extCheck.exe at build time (csc /win32icon flag),
+; so the .ico does not need to ship in the install directory.
+Source: "{#sAppName}.exe";    DestDir: "{app}"; Flags: ignoreversion
+Source: "{#sAppName}.csv";    DestDir: "{app}"; Flags: ignoreversion
 Source: "ReadMe.htm";         DestDir: "{app}"; Flags: ignoreversion
-Source: "ReadMe.md";          DestDir: "{app}"; Flags: ignoreversion
-Source: "license.htm";        DestDir: "{app}"; Flags: ignoreversion
-Source: "announce.md";        DestDir: "{app}"; Flags: ignoreversion
-Source: "announce.htm";       DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
-Source: "extCheck.cs";        DestDir: "{app}"; Flags: ignoreversion
-Source: "extCheck.iss";       DestDir: "{app}"; Flags: ignoreversion
-Source: "buildExtCheck.cmd";  DestDir: "{app}"; Flags: ignoreversion
+Source: "Announce.htm";       DestDir: "{app}"; Flags: ignoreversion
+Source: "License.htm";        DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 ; Start Menu group. WorkingDir is the user's Documents folder so output
@@ -96,7 +110,7 @@ Name: "{group}\{#sAppName}"; \
   WorkingDir: "{userdocs}"; \
   Comment: "Check Office and Markdown files for accessibility problems"
 
-Name: "{group}\{#sAppName} README"; \
+Name: "{group}\{#sAppName} ReadMe"; \
   Filename: "{app}\ReadMe.htm"; \
   WorkingDir: "{app}"; \
   Comment: "Documentation for {#sAppName}"
@@ -115,22 +129,21 @@ Name: "{userdesktop}\{#sAppName}"; \
   Filename: "{app}\{#sAppExeName}"; \
   WorkingDir: "{userdocs}"; \
   Parameters: "-g -u"; \
-  HotKey: Alt+Ctrl+X; \
-  Comment: "Check accessibility (Alt+Ctrl+X)"
+  HotKey: {#sHotKey}; \
+  Comment: "Check accessibility ({#sHotKey})"
 
 [Run]
 ; Post-install checkboxes shown on the final wizard page. Both default
-; to checked; the user can uncheck either to skip.
+; to checked; the user can uncheck either to skip. The launch checkbox
+; label includes a reminder of the desktop hotkey so the user notices
+; and remembers it.
 
-; Launch extCheck (GUI mode). WorkingDir is the user's Documents folder
-; so any output files or log file land somewhere writable.
 FileName: "{app}\{#sAppExeName}"; \
   Parameters: "-g"; \
   WorkingDir: "{userdocs}"; \
-  Description: "Launch {#sAppName} now"; \
+  Description: "Launch {#sAppName} now (desktop hotkey: {#sHotKey})"; \
   Flags: nowait postinstall skipifsilent
 
-; Open the HTML documentation.
 FileName: "{app}\ReadMe.htm"; \
   Description: "Read documentation for {#sAppName}"; \
   Flags: nowait postinstall skipifsilent shellexec
