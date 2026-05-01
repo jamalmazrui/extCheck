@@ -42,6 +42,7 @@ Download `extCheck_setup.exe` from the [GitHub repository](https://github.com/Ja
 - Prompts you for the installation directory (default: `C:\Program Files\extCheck`).
 - Includes a brief MIT license summary on the welcome page; the full license text is installed alongside the program as `License.htm`.
 - Adds a Start-menu shortcut and a desktop shortcut whose hotkey is **Alt+Ctrl+X**. Pressing **Alt+Ctrl+X** from anywhere in Windows opens the `extCheck` dialog.
+- The installer also adds a **Report via extCheck** entry to the File Explorer right-click menu for all file types. Right-clicking any file (or pressing **Shift+F10**) and choosing this entry checks that file and writes the CSV report next to it. extCheck's supported formats are `.docx`, `.xlsx`, `.pptx`, and `.md`; the user is trusted to invoke the verb only on those file types. The accelerator letter is **x** (matching the **Alt+Ctrl+X** desktop hotkey), so the keyboard shortcut from a focused file in File Explorer is **Shift+F10**, then **x**.
 
 The final wizard page offers two checkboxes (both checked by default): launch `extCheck` (with a hotkey reminder) and read the HTML documentation.
 
@@ -60,7 +61,7 @@ Launch `extCheck` from any of these:
 
 The parameter dialog has these controls. Each label has an underlined letter that you can press with **Alt** to jump straight to that control:
 
-- **Source files** [S] — a single file path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. Wrap paths containing spaces in double quotes.
+- **Source files** [S] — a single file path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. A single path containing spaces does not need quotes — extCheck recognizes the entire trimmed field as one path when it points to an existing file. Quotes are only needed when supplying multiple specs and at least one contains a space.
 - **Browse source...** [B] — pick a single source from a file picker
 - **Output directory** [O] — where the output is written. Blank means the current working directory.
 - **Choose output...** [C] — pick the output directory from a folder picker
@@ -73,6 +74,8 @@ The parameter dialog has these controls. Each label has an underlined letter tha
 - **OK** / **Cancel** — start the run, or cancel without running. Enter is OK; Esc is Cancel.
 
 The Browse source and Choose output pickers open at the directory derived from the corresponding text field's current value when that value points to an existing path; otherwise they open at your Documents folder. With **Use configuration** checked, those text fields are pre-populated from your last session, so the pickers naturally pick up where you left off.
+
+If you press OK with an output directory that does not yet exist, extCheck prompts to create it (default Yes). Choosing No keeps the dialog open with focus on the output field so you can correct it.
 
 When all files have been processed, a final results dialog summarizes what was done.
 

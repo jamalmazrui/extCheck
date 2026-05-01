@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -80,26 +81,6 @@ static class results {
                 esc(o.sRemediation));
         }
         File.WriteAllText(sPath, sb.ToString(), Encoding.UTF8);
-    }
-
-    public static void printSummary(string sCsvPath) {
-        Console.WriteLine("Issues: " + lIssues.Count);
-        Console.WriteLine("CSV:    " + sCsvPath);
-        Console.WriteLine();
-        if (lIssues.Count == 0) {
-            Console.WriteLine("No accessibility issues detected.");
-            Console.WriteLine();
-            return;
-        }
-        Console.WriteLine("--- Issue Summary ---");
-        foreach (issue o in lIssues) {
-            Console.WriteLine(
-                "[" + o.sRuleId + "] (" + o.sSource + ") " +
-                o.sLocation + " | " + o.sCategory + " | " + o.sContext);
-            Console.WriteLine("  Problem:   " + o.sMessage);
-            Console.WriteLine("  Remediate: " + o.sRemediation);
-            Console.WriteLine();
-        }
     }
 
     static string esc(string s) {
@@ -302,7 +283,47 @@ static class comHelper {
                 "  Fix: install the matching Office bitness, or use the " +
                 sOther + " build of extCheck.");
         }
-        return Activator.CreateInstance(t);
+        dynamic oApp = Activator.CreateInstance(t);
+        silenceAlerts(sProgId, oApp);
+        return oApp;
+    }
+
+    /// <summary>
+    /// Silence interactive alerts on a freshly-created Office
+    /// Application object so unattended automation does not stall on a
+    /// dialog. Mirrors the equivalent helper in 2htm. Each setter is
+    /// wrapped in its own try/catch because not all versions of Office
+    /// expose every property and some throw harmlessly.
+    /// </summary>
+    private static void silenceAlerts(string sProgId, dynamic oApp) {
+        const int iMsoAutomationSecurityForceDisable = 3;
+        const int iWdAlertsNone = 0;
+        const int iPpAlertsNone = 1;
+        string sLowered = (sProgId ?? "").ToLowerInvariant();
+        try { oApp.AutomationSecurity = iMsoAutomationSecurityForceDisable; } catch { }
+        if (sLowered.StartsWith("word.")) {
+            try { oApp.DisplayAlerts = iWdAlertsNone; } catch { }
+            try { oApp.Visible = false; } catch { }
+            try { oApp.Options.ConfirmConversions = false; } catch { }
+            try { oApp.Options.DoNotPromptForConvert = true; } catch { }
+            try { oApp.Options.SaveNormalPrompt = false; } catch { }
+            try { oApp.Options.WarnBeforeSavingPrintingSendingMarkup = false; } catch { }
+            try { oApp.Options.UpdateLinksAtOpen = false; } catch { }
+            try { oApp.Options.CheckGrammarAsYouType = false; } catch { }
+            try { oApp.Options.CheckSpellingAsYouType = false; } catch { }
+        }
+        else if (sLowered.StartsWith("excel.")) {
+            try { oApp.DisplayAlerts = false; } catch { }
+            try { oApp.Visible = false; } catch { }
+            try { oApp.AskToUpdateLinks = false; } catch { }
+            try { oApp.AlertBeforeOverwriting = false; } catch { }
+            try { oApp.ScreenUpdating = false; } catch { }
+            try { oApp.EnableEvents = false; } catch { }
+        }
+        else if (sLowered.StartsWith("powerpoint.")) {
+            try { oApp.DisplayAlerts = iPpAlertsNone; } catch { }
+            // PowerPoint cannot run with Visible = false.
+        }
     }
 
     public static void safeClose(dynamic o) { try { o.Close(false); } catch {} }
@@ -1952,6 +1973,38 @@ public static class logger
     public static void error(string sMsg) { write("ERROR", sMsg); }
     public static void debug(string sMsg) { write("DEBUG", sMsg); }
 
+    // Write the run header to the top of the log: program name and
+    // version, the friendly run-start timestamp, and the resolved
+    // parameter list. Emits raw lines (no per-line timestamp/level
+    // prefix) so the header reads as a clean banner. The processing
+    // notifications that follow use the standard format via
+    // info/warn/error/debug.
+    public static void header(string sName, string sVersion,
+        List<KeyValuePair<string, string>> dParams)
+    {
+        if (writer == null) return;
+        try {
+            writer.WriteLine("=== " + sName + " " + sVersion + " ===");
+            writer.WriteLine("Run on " + friendlyTime(DateTime.Now));
+            if (dParams != null && dParams.Count > 0) {
+                writer.WriteLine("Parameters:");
+                int iPad = 0;
+                foreach (var oKv in dParams)
+                    if (oKv.Key.Length > iPad) iPad = oKv.Key.Length;
+                foreach (var oKv in dParams)
+                    writer.WriteLine("  " + oKv.Key.PadRight(iPad) + " : " + oKv.Value);
+            }
+            writer.WriteLine("===");
+        } catch { }
+    }
+
+    public static string friendlyTime(DateTime dt)
+    {
+        return dt.ToString("MMMM d, yyyy", CultureInfo.InvariantCulture) +
+            " at " +
+            dt.ToString("h:mm tt", CultureInfo.InvariantCulture);
+    }
+
     private static void write(string sLevel, string sMsg)
     {
         if (writer == null) return;
@@ -2366,6 +2419,41 @@ public static class guiDialog
         btnOk.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
         btnOk.TabIndex = 10;
         btnOk.UseVisualStyleBackColor = true;
+        // Validate output directory before allowing the dialog to close.
+        // If the user has typed a non-existent directory, prompt to
+        // create it (default Yes). On No (or creation failure), set
+        // DialogResult = None so the dialog stays open and the user can
+        // edit the field. WinForms invokes Click handlers BEFORE the
+        // automatic close, so this hook runs first.
+        btnOk.Click += (s, e) => {
+            string sOutCandidate = (txtOut.Text ?? "").Trim();
+            if (sOutCandidate.Length >= 2 && sOutCandidate[0] == '"' && sOutCandidate[sOutCandidate.Length - 1] == '"')
+                sOutCandidate = sOutCandidate.Substring(1, sOutCandidate.Length - 2).Trim();
+            if (string.IsNullOrEmpty(sOutCandidate)) return;
+            try {
+                if (Directory.Exists(sOutCandidate)) return;
+            } catch { return; }
+            DialogResult dr = MessageBox.Show(frm,
+                "Create " + sOutCandidate + "?",
+                program.sProgramName,
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
+            if (dr != DialogResult.Yes) {
+                frm.DialogResult = DialogResult.None;
+                txtOut.Focus();
+                return;
+            }
+            try {
+                Directory.CreateDirectory(sOutCandidate);
+            } catch (Exception ex) {
+                MessageBox.Show(frm,
+                    "Could not create directory:\r\n" + sOutCandidate + "\r\n\r\n" + ex.Message,
+                    program.sProgramName,
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                frm.DialogResult = DialogResult.None;
+                txtOut.Focus();
+            }
+        };
         frm.Controls.Add(btnOk);
 
         var btnCancel = new Button();
@@ -2515,6 +2603,80 @@ public static class guiDialog
 }
 
 // ===========================================================================
+// guiProgress: a small modeless status form shown during the file-checking
+// loop in GUI mode. Mirrors 2htm's guiProgress so users get visible
+// progress feedback during long runs (e.g. multi-megabyte .docx files
+// that take Word several seconds each to open and analyze).
+//
+// The displayed count reflects files ALREADY COMPLETED, not the file
+// being started. When starting file 1 of 5, we show
+// "report.docx -- 0 of 5, 0%". The percent and count advance only
+// after the file finishes. This avoids the confusion of seeing "100%"
+// while the (only) file is still being processed.
+// ===========================================================================
+public static class guiProgress
+{
+    private static Form frm;
+    private static Label lblStatus;
+
+    public static void open(int iTotal)
+    {
+        frm = new Form();
+        frm.Text = "extCheck — Checking";
+        frm.FormBorderStyle = FormBorderStyle.FixedDialog;
+        frm.StartPosition = FormStartPosition.CenterScreen;
+        frm.MaximizeBox = false;
+        frm.MinimizeBox = false;
+        frm.ControlBox = false;
+        frm.ShowInTaskbar = true;
+        frm.ClientSize = new System.Drawing.Size(480, 92);
+        frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
+
+        var lblIntro = new Label();
+        lblIntro.Text = "Checking files. Please wait...";
+        lblIntro.AutoSize = false;
+        lblIntro.Location = new System.Drawing.Point(14, 14);
+        lblIntro.Size = new System.Drawing.Size(452, 22);
+        lblIntro.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+        frm.Controls.Add(lblIntro);
+
+        lblStatus = new Label();
+        lblStatus.Text = "Starting...";
+        lblStatus.AutoSize = false;
+        lblStatus.Location = new System.Drawing.Point(14, 42);
+        lblStatus.Size = new System.Drawing.Size(452, 22);
+        lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+        lblStatus.AccessibleName = "Check status";
+        lblStatus.AccessibleRole = AccessibleRole.StatusBar;
+        frm.Controls.Add(lblStatus);
+
+        frm.Show();
+        Application.DoEvents();
+    }
+
+    public static void update(string sBase, int iIndex, int iTotal)
+    {
+        if (frm == null || lblStatus == null) return;
+        // iIndex is 1-based; we show "iIndex - 1" as the completed count
+        // so the percentage and count reflect work DONE, not work in
+        // progress.
+        int iCompleted = iIndex - 1;
+        int iPercent = iTotal > 0 ? (iCompleted * 100 / iTotal) : 0;
+        lblStatus.Text = sBase + " \u2014 " + iCompleted + " of " + iTotal +
+            ", " + iPercent + "%";
+        Application.DoEvents();
+    }
+
+    public static void close()
+    {
+        if (frm == null) return;
+        try { frm.Close(); frm.Dispose(); } catch { }
+        frm = null;
+        lblStatus = null;
+    }
+}
+
+// ===========================================================================
 // Main program. Parses arguments, optionally shows a GUI dialog, dispatches
 // to the format modules, and writes per-file CSV reports.
 // ===========================================================================
@@ -2526,6 +2688,30 @@ static class program {
     public const string sConfigFileName = "extCheck.ini";
     public const string sLogFileName = "extCheck.log";
     public static readonly string[] aSupportedExtensions = { ".docx", ".xlsx", ".pptx", ".md" };
+
+    // Trim and shorten a message for inline display next to a
+    // basename. COM exceptions can produce multi-paragraph text;
+    // we want a single short line. Returns "" if the input is
+    // null or empty.
+    public static string firstLine(string s) {
+        const int iMaxLen = 120;
+        if (string.IsNullOrEmpty(s)) return "";
+        int i = s.IndexOfAny(new[] { '\r', '\n' });
+        if (i >= 0) s = s.Substring(0, i);
+        s = s.Trim();
+        if (s.Length > iMaxLen) s = s.Substring(0, iMaxLen - 3) + "...";
+        return s;
+    }
+
+    // A single failure record: basename and a short reason. Used
+    // in the structured results summary to render
+    // "basename: reason" on one line. The full exception (if any)
+    // is in the log when -l is on.
+    public class failure {
+        public string sBase;
+        public string sReason;
+        public failure(string sB, string sR) { sBase = sB; sReason = sR; }
+    }
 
     // Globals set by command-line switches and/or the GUI dialog.
     public static bool bGuiMode = false;
@@ -2586,11 +2772,37 @@ static class program {
     // the dialog's OK-path.
     public static List<string> splitSourceField(string sField)
     {
+        // Friendlier parsing rules:
+        //   1. Trim the input.
+        //   2. Strip a single layer of surrounding double quotes.
+        //   3. Test the entire (unquoted) trimmed field as a single spec
+        //      (existing file, existing directory, or wildcard pattern
+        //      that matches at least one file). If usable, return it
+        //      as one token.
+        //   4. Otherwise fall back to space-tokenization, honoring
+        //      "..." segments so the user can mix paths-with-spaces
+        //      and ones without.
+        // The user only needs to use quotes when supplying multiple
+        // specs and at least one contains a space. For a single path,
+        // no quotes are needed -- the entire trimmed input is tested
+        // as one spec.
         var lsResult = new List<string>();
         if (string.IsNullOrWhiteSpace(sField)) return lsResult;
+        string sTrimmed = sField.Trim();
+        string sUnquoted = sTrimmed;
+        if (sUnquoted.Length >= 2 && sUnquoted[0] == '"' && sUnquoted[sUnquoted.Length - 1] == '"')
+            sUnquoted = sUnquoted.Substring(1, sUnquoted.Length - 2).Trim();
+
+        // Test the full unquoted field as a single spec first.
+        if (isUsableSingleSpec(sUnquoted)) {
+            lsResult.Add(sUnquoted);
+            return lsResult;
+        }
+
+        // Fall back: tokenize on whitespace, honoring quoted segments.
         var sb = new StringBuilder();
         bool bInQuotes = false;
-        foreach (char c in sField) {
+        foreach (char c in sTrimmed) {
             if (c == '"') {
                 bInQuotes = !bInQuotes;
                 continue;
@@ -2606,6 +2818,35 @@ static class program {
         }
         if (sb.Length > 0) lsResult.Add(sb.ToString());
         return lsResult;
+    }
+
+    /// <summary>
+    /// Return true if sSpec, taken whole, is a usable file specification
+    /// (existing file, existing directory, or wildcard pattern that
+    /// matches at least one file). Used by splitSourceField to decide
+    /// whether the entire trimmed field is one path that happens to
+    /// contain spaces, vs multiple space-separated paths.
+    /// </summary>
+    private static bool isUsableSingleSpec(string sSpec)
+    {
+        if (string.IsNullOrEmpty(sSpec)) return false;
+        try {
+            if (File.Exists(sSpec)) return true;
+            if (Directory.Exists(sSpec)) return true;
+            // Wildcard? Try to enumerate.
+            if (sSpec.IndexOfAny(new[] { '*', '?' }) >= 0) {
+                string sDir = Path.GetDirectoryName(sSpec);
+                if (string.IsNullOrEmpty(sDir)) sDir = Directory.GetCurrentDirectory();
+                string sPattern = Path.GetFileName(sSpec);
+                if (Directory.Exists(sDir) && !string.IsNullOrEmpty(sPattern)) {
+                    try {
+                        string[] aMatched = Directory.GetFiles(sDir, sPattern);
+                        if (aMatched != null && aMatched.Length > 0) return true;
+                    } catch { }
+                }
+            }
+        } catch { }
+        return false;
     }
 
     // ---- Resolve filespecs (with wildcards) to a flat file list. ----
@@ -2723,7 +2964,10 @@ Output:
     MSAC  Rule derived from MS Office Accessibility Checker categories
     AXE   Rule derived from axe-core WCAG 2.1 equivalents
 
-  Results are also printed to the console.
+  A brief progress line is printed for each file (basename, plus
+  ""skipped"" or ""ERROR"" if applicable). The detailed issue list is in
+  the CSV; full paths and stack traces (when relevant) are in the
+  log when -l is given.
 
 Notes:
   Word, Excel, and PowerPoint must be installed to check .docx, .xlsx,
@@ -2855,8 +3099,26 @@ Examples:
             }
         }
         if (bLog) logger.open(sResolvedOutDir);
-        logger.info(sProgramName + " " + sProgramVersion + " starting");
-        logger.info("Output directory: " + sResolvedOutDir);
+
+        // Write the run header to the log: program version, friendly
+        // start time, and the resolved parameter list (showing both
+        // explicit and defaulted values). Mirrors the GUI dialog
+        // controls so the user can map a logged run to the dialog.
+        var lsParams = new List<KeyValuePair<string, string>>();
+        lsParams.Add(new KeyValuePair<string, string>("Source",
+            lsFileArgs.Count == 0
+                ? "(none)"
+                : string.Join(" ", lsFileArgs.ConvertAll(s => s.Contains(" ") ? "\"" + s + "\"" : s))));
+        lsParams.Add(new KeyValuePair<string, string>("Output directory", sResolvedOutDir));
+        lsParams.Add(new KeyValuePair<string, string>("Force replacements", bForce.ToString().ToLowerInvariant()));
+        lsParams.Add(new KeyValuePair<string, string>("View output",        bViewOutput.ToString().ToLowerInvariant()));
+        lsParams.Add(new KeyValuePair<string, string>("Use configuration",  bUseConfig.ToString().ToLowerInvariant()));
+        lsParams.Add(new KeyValuePair<string, string>("Log session",        bLog.ToString().ToLowerInvariant()));
+        lsParams.Add(new KeyValuePair<string, string>("Show rules",         bShowRules.ToString().ToLowerInvariant()));
+        lsParams.Add(new KeyValuePair<string, string>("GUI mode",           bGuiMode.ToString().ToLowerInvariant()));
+        lsParams.Add(new KeyValuePair<string, string>("Working directory",  Directory.GetCurrentDirectory()));
+        lsParams.Add(new KeyValuePair<string, string>("Command line",       string.Join(" ", aArgs)));
+        logger.header(sProgramName, sProgramVersion, lsParams);
 
         // Phase 7: capture stdout/stderr in GUI mode for the final
         // dialog. In hide-console mode, capture stderr only.
@@ -2908,99 +3170,198 @@ Examples:
                 return 1;
             }
 
-            int iTotalFiles = 0;
-            int iTotalIssues = 0;
-            int iSkipped = 0;
-
+            // ---- Pre-pruning ----
+            //
+            // Two pruning passes happen BEFORE the conversion/check
+            // loop and BEFORE the progress UI opens, so the progress
+            // counter's denominator reflects only files that will
+            // actually be processed:
+            //
+            //   1. Drop files whose extension extCheck cannot check.
+            //      These are silently dropped; they do not appear in
+            //      any of the three result sections (Checked / Failed /
+            //      Skipped) since the user cannot do anything about
+            //      "Force replacements" to make them processable. The
+            //      log records the unsupported skip when -l is given.
+            //
+            //   2. If --force is NOT set, drop files whose target CSV
+            //      already exists. These ARE counted as "skipped" and
+            //      surface in the final results MessageBox with a hint
+            //      about Force replacements.
+            //
+            // The lists below feed three sections in the final
+            // MessageBox: lsToCheck (the survivors of pruning) feed
+            // the loop and end up split into lsChecked + lsFailed; a
+            // separate lsSkippedExisting tracks files dropped in
+            // pass (2).
+            var lsToCheck = new List<string>();
+            var lsSkippedExisting = new List<string>();
             foreach (string sFilePath in lsFiles) {
                 string sExt = Path.GetExtension(sFilePath).ToLower();
-
                 bool bSupported = false;
                 foreach (string sE in aSupportedExtensions) {
                     if (sExt == sE) { bSupported = true; break; }
                 }
                 if (!bSupported) {
-                    Console.WriteLine("Skipping unsupported format: " + sFilePath);
-                    Console.WriteLine("  Supported extensions: " +
-                        string.Join(", ", aSupportedExtensions));
-                    Console.WriteLine();
+                    logger.info("Skipped (unsupported format " + sExt + "): " + sFilePath);
                     continue;
                 }
-
-                string sCsvPath = Path.Combine(
-                    sResolvedOutDir,
+                string sCsvPath = Path.Combine(sResolvedOutDir,
                     Path.GetFileNameWithoutExtension(sFilePath) + ".csv");
-
-                // Force / skip-existing handling.
                 if (File.Exists(sCsvPath) && !bForce) {
-                    Console.WriteLine("Skipping (CSV exists, use -f to overwrite): " +
-                        sFilePath);
-                    Console.WriteLine();
-                    iSkipped++;
+                    lsSkippedExisting.Add(sFilePath);
+                    logger.info("Skipped (CSV exists; use --force to overwrite): " + sFilePath);
                     continue;
                 }
+                lsToCheck.Add(sFilePath);
+            }
 
-                Console.WriteLine("File: " + sFilePath);
-                Console.WriteLine("Checking...");
+            int iTotalIssues = 0;
+            int iFileIndex = 0;
+            var lsChecked = new List<string>();
+            var lsFailed = new List<failure>();
+            bool bGuiOrHidden = bGuiMode || bHideConsoleMode;
+
+            // In GUI/hidden modes, open a small modeless status form
+            // so the user gets visible progress feedback during long
+            // runs. In pure CLI mode (real console attached), no
+            // form -- the inline basenames printed below ARE the
+            // progress indicator. The counter denominator is
+            // lsToCheck.Count (post-pruning) so percentages reflect
+            // actual work.
+            if (bGuiOrHidden) guiProgress.open(lsToCheck.Count);
+
+            try {
+            foreach (string sFilePath in lsToCheck) {
+                iFileIndex++;
+                if (bGuiOrHidden)
+                    guiProgress.update(Path.GetFileName(sFilePath), iFileIndex, lsToCheck.Count);
+
+                string sExt = Path.GetExtension(sFilePath).ToLower();
+                string sCsvPath = Path.Combine(sResolvedOutDir,
+                    Path.GetFileNameWithoutExtension(sFilePath) + ".csv");
+                string sBase = Path.GetFileName(sFilePath);
+
                 logger.info("Checking " + sFilePath);
+
+                // CLI mode: print the basename immediately; no
+                // newline yet. On success, terminate with "\n"; on
+                // failure, append ": <reason>\n". GUI/hidden mode:
+                // no inline write -- the captured stdout becomes
+                // the final MessageBox, and we want only the
+                // structured summary there.
+                if (!bGuiOrHidden) Console.Write(sBase);
 
                 results.clear();
                 bool bOpened = false;
+                string sCheckError = null;
 
                 if (sExt == ".docx") {
                     bOpened = docxModule.open(sFilePath);
                     if (bOpened) {
                         try { docxModule.checkAll(sFilePath); }
-                        catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
+                        catch (Exception ex) { sCheckError = ex.Message; }
                         docxModule.quit();
                     }
                 } else if (sExt == ".xlsx") {
                     bOpened = xlsxModule.open(sFilePath);
                     if (bOpened) {
                         try { xlsxModule.checkAll(sFilePath); }
-                        catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
+                        catch (Exception ex) { sCheckError = ex.Message; }
                         xlsxModule.quit();
                     }
                 } else if (sExt == ".pptx") {
                     bOpened = pptxModule.open(sFilePath);
                     if (bOpened) {
                         try { pptxModule.checkAll(sFilePath); }
-                        catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
+                        catch (Exception ex) { sCheckError = ex.Message; }
                         pptxModule.quit();
                     }
                 } else if (sExt == ".md") {
                     bOpened = mdModule.open(sFilePath);
                     if (bOpened) {
                         try { mdModule.checkAll(sFilePath); }
-                        catch (Exception ex) { Console.WriteLine("  WARNING: " + ex.Message); }
+                        catch (Exception ex) { sCheckError = ex.Message; }
                         mdModule.quit();
                     }
                 }
 
                 if (!bOpened) {
-                    Console.WriteLine("  Skipped due to error.");
-                    Console.WriteLine();
-                    logger.warn("Skipped (open failed): " + sFilePath);
+                    string sReason = "could not open";
+                    logger.warn("Could not open " + sFilePath);
+                    lsFailed.Add(new failure(sBase, sReason));
+                    if (!bGuiOrHidden) Console.WriteLine(": " + sReason);
+                    continue;
+                }
+                if (sCheckError != null) {
+                    string sReason = firstLine(sCheckError);
+                    logger.error("Check failed for " + sFilePath + ": " + sCheckError);
+                    lsFailed.Add(new failure(sBase, sReason));
+                    if (!bGuiOrHidden) Console.WriteLine(": " + sReason);
                     continue;
                 }
 
                 results.writeCsv(sCsvPath);
-                results.printSummary(sCsvPath);
                 logger.info("Wrote " + sCsvPath + " (" + results.lIssues.Count + " issue(s))");
-                iTotalFiles++;
+                lsChecked.Add(sBase);
+                if (!bGuiOrHidden) Console.WriteLine();
                 iTotalIssues += results.lIssues.Count;
             }
-
-            if (iTotalFiles + iSkipped > 1) {
-                Console.WriteLine("=== " + sProgramName + ": " + iTotalFiles +
-                    " file(s) checked, " + iTotalIssues + " total issue(s)" +
-                    (iSkipped > 0 ? ", " + iSkipped + " skipped" : "") + " ===");
+            } finally {
+                if (bGuiOrHidden) guiProgress.close();
             }
 
-            if (bViewOutput && (iTotalFiles > 0 || bShowRules))
+            // ---- Final results summary ----
+            //
+            // Three sections, each printed only when its count is
+            // non-zero. Singular "file" when count == 1; plural
+            // "files" otherwise. In CLI mode the basenames have
+            // already scrolled by inline; the section headers are
+            // still printed but the per-name lists are suppressed
+            // (since they would just repeat). In GUI/hidden mode
+            // the captured stdout is the final MessageBox, so we
+            // include the per-name lists there.
+            int iChecked = lsChecked.Count;
+            int iFailed = lsFailed.Count;
+            int iSkippedExisting = lsSkippedExisting.Count;
+
+            if (iChecked > 0) {
+                Console.WriteLine();
+                Console.WriteLine("Checked " + iChecked + " " +
+                    (iChecked == 1 ? "file" : "files") + ":");
+                if (bGuiOrHidden) {
+                    foreach (string sName in lsChecked)
+                        Console.WriteLine(sName);
+                }
+            }
+            if (iFailed > 0) {
+                Console.WriteLine();
+                Console.WriteLine("Failed to check " + iFailed + " " +
+                    (iFailed == 1 ? "file" : "files") + ":");
+                if (bGuiOrHidden) {
+                    foreach (var oFail in lsFailed) {
+                        if (string.IsNullOrEmpty(oFail.sReason))
+                            Console.WriteLine(oFail.sBase);
+                        else
+                            Console.WriteLine(oFail.sBase + ": " + oFail.sReason);
+                    }
+                }
+            }
+            if (iSkippedExisting > 0) {
+                Console.WriteLine();
+                Console.WriteLine("Skipped " + iSkippedExisting + " " +
+                    (iSkippedExisting == 1 ? "file" : "files") +
+                    ". Check \"Force replacements\" to overwrite.");
+            }
+            if (iChecked == 0 && iFailed == 0 && iSkippedExisting == 0) {
+                Console.WriteLine();
+                Console.WriteLine("No supported files to check.");
+            }
+
+            if (bViewOutput && (iChecked > 0 || bShowRules))
                 openOutputInExplorer(sResolvedOutDir);
 
-            return (iTotalFiles > 0 || bShowRules) ? 0 : 1;
+            return (iChecked > 0 || bShowRules) ? 0 : 1;
         }
         finally {
             // Restore stdout/stderr and surface captured output.

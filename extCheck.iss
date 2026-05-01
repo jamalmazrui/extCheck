@@ -55,6 +55,16 @@ DefaultDirName={autopf}\{#sAppName}
 DefaultGroupName={#sAppName}
 DisableProgramGroupPage=yes
 UsePreviousAppDir=yes
+
+; Force the "Select Destination Location" page to always be shown,
+; even on reinstall. Without this, DisableDirPage defaults to "auto",
+; which means: hide the directory page if a prior install of the same
+; AppId is detected. We want the page shown every time so the user
+; can review the install location, and so it is obviously editable.
+; UsePreviousAppDir=yes pre-fills the field with the previous
+; directory, so the user just presses Next on a reinstall to keep the
+; same path -- but they can also change it.
+DisableDirPage=no
 UsePreviousGroup=yes
 
 OutputDir=.
@@ -131,6 +141,45 @@ Name: "{userdesktop}\{#sAppName}"; \
   Parameters: "-g -u"; \
   HotKey: {#sHotKey}; \
   Comment: "Check accessibility ({#sHotKey})"
+
+[Registry]
+; File Explorer "Report via extCheck" right-click menu entry.
+; Registered under HKLM\Software\Classes\*\shell\extCheck so the
+; verb appears for all file types. The user is trusted to invoke it
+; only on supported files (.docx, .xlsx, .pptx, .md); if invoked on
+; an unsupported extension, extCheck reports that and exits.
+;
+; Registering once on "*" rather than four times under
+; SystemFileAssociations\<ext> keeps the registry footprint small,
+; matches the approach 2htm uses, and gives the user a single,
+; consistent entry to find regardless of file type.
+;
+; The verb passes "%1" (the full absolute path of the right-clicked
+; file) to extCheck.exe with -f to force overwriting any existing
+; CSV report so repeated right-clicks refresh rather than skip.
+;
+; The Shift+F10 keyboard shortcut in File Explorer opens the same
+; context menu, so this entry is reachable both by mouse and by
+; keyboard. The "e&xtCheck" ampersand makes "x" the accelerator
+; letter, matching the desktop hotkey Alt+Ctrl+X.
+;
+; Selecting multiple files and invoking the verb runs extCheck.exe
+; once per selected file (the standard shell behavior for verb
+; commands that include "%1"). Each invocation processes one file
+; and writes its CSV next to the source.
+;
+; The uninsdeletekey flag on the parent verb key causes Inno Setup
+; to remove the entire subtree (including the command subkey)
+; automatically on uninstall.
+
+Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\extCheck"; \
+  ValueType: string; ValueName: ""; ValueData: "Report via e&xtCheck"; \
+  Flags: uninsdeletekey
+Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\extCheck"; \
+  ValueType: string; ValueName: "Icon"; ValueData: """{app}\{#sAppExeName}"",0"
+Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\extCheck\command"; \
+  ValueType: string; ValueName: ""; \
+  ValueData: """{app}\{#sAppExeName}"" -f ""%1"""
 
 [Run]
 ; Post-install checkboxes shown on the final wizard page. Both default

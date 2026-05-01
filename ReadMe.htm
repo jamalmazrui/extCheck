@@ -315,6 +315,16 @@ license text is installed alongside the program as
 <li>Adds a Start-menu shortcut and a desktop shortcut whose hotkey is
 <strong>Alt+Ctrl+X</strong>. Pressing <strong>Alt+Ctrl+X</strong> from
 anywhere in Windows opens the <code>extCheck</code> dialog.</li>
+<li>The installer also adds a <strong>Report via extCheck</strong> entry
+to the File Explorer right-click menu for all file types. Right-clicking
+any file (or pressing <strong>Shift+F10</strong>) and choosing this
+entry checks that file and writes the CSV report next to it. extCheck’s
+supported formats are <code>.docx</code>, <code>.xlsx</code>,
+<code>.pptx</code>, and <code>.md</code>; the user is trusted to invoke
+the verb only on those file types. The accelerator letter is
+<strong>x</strong> (matching the <strong>Alt+Ctrl+X</strong> desktop
+hotkey), so the keyboard shortcut from a focused file in File Explorer
+is <strong>Shift+F10</strong>, then <strong>x</strong>.</li>
 </ul>
 <p>The final wizard page offers two checkboxes (both checked by
 default): launch <code>extCheck</code> (with a hotkey reminder) and read
@@ -336,7 +346,10 @@ that control:</p>
 <ul>
 <li><strong>Source files</strong> [S] — a single file path, a wildcard
 pattern (e.g., <code>*.docx</code>), or several of either separated by
-spaces. Wrap paths containing spaces in double quotes.</li>
+spaces. A single path containing spaces does not need quotes — extCheck
+recognizes the entire trimmed field as one path when it points to an
+existing file. Quotes are only needed when supplying multiple specs and
+at least one contains a space.</li>
 <li><strong>Browse source…</strong> [B] — pick a single source from a
 file picker</li>
 <li><strong>Output directory</strong> [O] — where the output is written.
@@ -368,6 +381,9 @@ value points to an existing path; otherwise they open at your Documents
 folder. With <strong>Use configuration</strong> checked, those text
 fields are pre-populated from your last session, so the pickers
 naturally pick up where you left off.</p>
+<p>If you press OK with an output directory that does not yet exist,
+extCheck prompts to create it (default Yes). Choosing No keeps the
+dialog open with focus on the output field so you can correct it.</p>
 <p>When all files have been processed, a final results dialog summarizes
 what was done.</p>
 <h3 id="from-the-command-line">From the command line</h3>

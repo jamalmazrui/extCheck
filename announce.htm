@@ -249,6 +249,69 @@ Choose output buttons now open at the directory derived from the
 text-field value when that value points to an existing path (whether the
 user just typed it or it was loaded from a saved configuration), and at
 the user’s Documents folder otherwise.</li>
+<li><strong>Friendlier source-field parsing.</strong> When you supply a
+single path, you no longer need to put quotes around it just because the
+path contains spaces. extCheck tests the entire trimmed source field as
+a single spec first; only when it is not a usable single spec does it
+fall back to space-tokenization. Quotes are only required when supplying
+multiple specs and at least one contains a space.</li>
+<li><strong>Output-directory create prompt.</strong> If you press OK
+with an output directory that does not yet exist, extCheck asks “Create
+[path]?” with default Yes. Choosing No keeps the dialog open with focus
+on the output field.</li>
+<li><strong>Office automation alerts disabled.</strong> Word, Excel, and
+PowerPoint application objects created by extCheck now have their
+<code>DisplayAlerts</code> property set to none, plus other
+prompt-suppression options including
+<code>Word.Application.Options.DoNotPromptForConvert = true</code>
+(suppresses the PDF-conversion dialog) and
+<code>AutomationSecurity = msoAutomationSecurityForceDisable</code>
+(blocks macros silently).</li>
+<li><strong>GUI progress display.</strong> When extCheck runs in GUI
+mode, a small “Checking” status form now shows the current file’s
+basename and the count of files <strong>already completed</strong>. When
+checking a single file, you see “report.docx — 0 of 1, 0%” while it is
+being processed (rather than no feedback while Word opens a
+multi-megabyte file).</li>
+<li><strong>Pre-pruning + structured results summary.</strong> Before
+the check loop runs and before the progress UI opens, the file list is
+pruned in two passes: (1) unsupported extensions are silently dropped
+(logged when <code>-l</code> is on); (2) files whose CSV target already
+exists are dropped unless <strong>Force replacements</strong> is checked
+— these are counted as “skipped.” The progress counter denominator is
+the post-pruning count, so percentages reflect actual work. The final
+summary is structured as up to three sections —
+<code>Checked N file(s):</code>,
+<code>Failed to check N file(s):</code>, and
+<code>Skipped N file(s). Check "Force replacements" to overwrite.</code>
+— each shown only when its count is non-zero, with singular “file” /
+plural “files” inflection. Failed entries include a short reason after
+the basename when one is available
+(<code>report.docx: could not open</code>); the full exception and stack
+trace go to the log when <code>-l</code> is on. The per-issue detail
+list is in the <code>&lt;basename&gt;.csv</code> file.</li>
+<li><strong>CLI vs GUI output styles.</strong> In CLI mode (real console
+attached) basenames print inline as the loop runs — natural progress
+feedback for the console user. In GUI mode (and right-click invocations)
+the loop is silent on stdout; the progress status form shows the current
+file, and the structured summary is the final MessageBox. The structured
+summary is printed in both modes, but the per-name lists are suppressed
+in CLI mode (they would just repeat what already scrolled by).</li>
+<li><strong>Log header.</strong> When <code>-l</code> (Log session) is
+enabled, the log file now begins with a clean header before the
+timestamped processing notifications: program name and version, a
+friendly run timestamp (<code>Run on May 1, 2026 at 2:30 PM</code>), and
+a <code>Parameters:</code> block listing each setting with both explicit
+and defaulted values resolved (Source, Output directory, Force
+replacements, View output, Use configuration, Log session, Show rules,
+GUI mode, Working directory, Command line). The header is followed by
+the normal timestamped log entries.</li>
+<li><strong>File Explorer right-click menu.</strong> The installer now
+adds a “Check accessibility with extCheck” entry to the right-click menu
+(also reachable via Shift+F10) for <code>.docx</code>,
+<code>.xlsx</code>, <code>.pptx</code>, and <code>.md</code> files.
+Selecting a supported file and choosing this entry checks that one file
+and writes the CSV next to the source.</li>
 </ul>
 <h3 id="removed">Removed</h3>
 <ul>
@@ -277,8 +340,13 @@ endings as defense-in-depth.</li>
 (<code>extCheck_setup.exe</code>)</h3>
 <ul>
 <li>64-bit only.</li>
-<li>Prompts for the installation directory (default:
-<code>C:\Program Files\extCheck</code>).</li>
+<li>Prompts for the installation directory on every run (default:
+<code>C:\Program Files\extCheck</code>). The directory page is now
+explicitly enabled (<code>DisableDirPage=no</code> in the .iss);
+previously it was at the Inno Setup default of <code>auto</code>, which
+silently skipped the page on reinstalls of the same <code>AppId</code>.
+The previous directory is pre-filled, so on a reinstall the user just
+presses Next to keep the same path.</li>
 <li>Includes a brief MIT-license summary on the welcome page.</li>
 <li>Installs only HTML versions of the documentation
 (<code>ReadMe.htm</code>, <code>Announce.htm</code>,
@@ -286,6 +354,16 @@ endings as defense-in-depth.</li>
 source/build/installer scripts live in the GitHub repository.</li>
 <li>The “Launch extCheck now” checkbox on the final page reminds the
 user that the desktop hotkey is Alt+Ctrl+X.</li>
+<li>Adds a “Report via e<strong>x</strong>tCheck” entry to the File
+Explorer right-click menu for all file types (registered under
+<code>HKLM\SOFTWARE\Classes\*\shell\extCheck</code>). The user is
+trusted to invoke the verb only on supported file types
+(<code>.docx</code>, <code>.xlsx</code>, <code>.pptx</code>,
+<code>.md</code>); on an unsupported file, extCheck reports that and
+exits. Registering once on <code>*</code> keeps the registry footprint
+small and matches the approach 2htm uses. The accelerator letter
+<code>x</code> matches the desktop hotkey accelerator. Uninstall removes
+the registry entries.</li>
 </ul>
 </body>
 </html>
