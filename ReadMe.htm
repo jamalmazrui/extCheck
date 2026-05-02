@@ -344,12 +344,15 @@ hotkey)</li>
 letter that you can press with <strong>Alt</strong> to jump straight to
 that control:</p>
 <ul>
-<li><strong>Source files</strong> [S] — a single file path, a wildcard
-pattern (e.g., <code>*.docx</code>), or several of either separated by
-spaces. A single path containing spaces does not need quotes — extCheck
-recognizes the entire trimmed field as one path when it points to an
-existing file. Quotes are only needed when supplying multiple specs and
-at least one contains a space.</li>
+<li><strong>Source files</strong> [S] — a single file path, a directory
+path, a wildcard pattern (e.g., <code>*.docx</code>), or several of
+either separated by spaces. A bare directory expands automatically to
+all supported files in it — equivalent to <code>&lt;dir&gt;\*.*</code> —
+so the trailing wildcard is not required. A single path containing
+spaces does not need quotes — extCheck recognizes the entire trimmed
+field as one path when it points to an existing file or directory.
+Quotes are only needed when supplying multiple specs and at least one
+contains a space.</li>
 <li><strong>Browse source…</strong> [B] — pick a single source from a
 file picker</li>
 <li><strong>Output directory</strong> [O] — where the output is written.

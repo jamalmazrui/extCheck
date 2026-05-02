@@ -61,7 +61,7 @@ Launch `extCheck` from any of these:
 
 The parameter dialog has these controls. Each label has an underlined letter that you can press with **Alt** to jump straight to that control:
 
-- **Source files** [S] — a single file path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. A single path containing spaces does not need quotes — extCheck recognizes the entire trimmed field as one path when it points to an existing file. Quotes are only needed when supplying multiple specs and at least one contains a space.
+- **Source files** [S] — a single file path, a directory path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. A bare directory expands automatically to all supported files in it — equivalent to `<dir>\*.*` — so the trailing wildcard is not required. A single path containing spaces does not need quotes — extCheck recognizes the entire trimmed field as one path when it points to an existing file or directory. Quotes are only needed when supplying multiple specs and at least one contains a space.
 - **Browse source...** [B] — pick a single source from a file picker
 - **Output directory** [O] — where the output is written. Blank means the current working directory.
 - **Choose output...** [C] — pick the output directory from a folder picker

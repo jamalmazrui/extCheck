@@ -1951,7 +1951,7 @@ public static class logger
             writer = new StreamWriter(sPath, append: false, encoding: new UTF8Encoding(true));
             writer.AutoFlush = true;
         } catch (Exception ex) {
-            Console.Error.WriteLine("[WARN] Could not open log file '" + sPath + "': " +
+            Console.Error.WriteLine("Could not open log file '" + sPath + "': " +
                 ex.Message + ". Continuing without a log.");
             writer = null;
         }
@@ -2086,7 +2086,7 @@ public static class configManager
         } catch (Exception ex) {
             string sMsg = "Could not read configuration from:\r\n" +
                 sPath + "\r\n\r\n" + ex.Message;
-            Console.Error.WriteLine("[WARN] " + sMsg);
+            Console.Error.WriteLine(sMsg);
             if (program.bGuiMode) {
                 try {
                     MessageBox.Show(sMsg,
@@ -2139,7 +2139,7 @@ public static class configManager
         } catch (Exception ex) {
             string sMsg = "Could not save configuration to:\r\n" +
                 sPath + "\r\n\r\n" + ex.Message;
-            Console.Error.WriteLine("[WARN] " + sMsg);
+            Console.Error.WriteLine(sMsg);
             logger.info("Could not save configuration: " + ex.Message);
             if (program.bGuiMode) {
                 try {
@@ -2259,6 +2259,9 @@ public static class guiDialog
         txtSource.Location = new System.Drawing.Point(iTextX, y);
         txtSource.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
         txtSource.TabIndex = 0;
+        // Explicit AccessibleName so JAWS/NVDA announce the field by
+        // its label even when the visual layout doesn't auto-associate.
+        txtSource.AccessibleName = "Source files";
         frm.Controls.Add(txtSource);
 
         var btnBrowseSource = new Button();
@@ -2284,6 +2287,7 @@ public static class guiDialog
         txtOut.Location = new System.Drawing.Point(iTextX, y);
         txtOut.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
         txtOut.TabIndex = 2;
+        txtOut.AccessibleName = "Output directory";
         frm.Controls.Add(txtOut);
 
         var btnChooseOut = new Button();
@@ -2850,16 +2854,61 @@ static class program {
     }
 
     // ---- Resolve filespecs (with wildcards) to a flat file list. ----
+    //
+    // Three input forms accepted per spec:
+    //   1. A bare directory path (no wildcard, points to an existing
+    //      directory) -> expand to all supported extensions in that
+    //      directory. So "C:\Documents" becomes
+    //      "C:\Documents\*.docx", "*.xlsx", "*.pptx", "*.md".
+    //   2. A wildcard ending in .* -> "*.*" expands to one wildcard
+    //      pattern per supported extension.
+    //   3. A specific filename or wildcard pattern -> passed straight
+    //      to Directory.GetFiles. The caller (pre-pruning) drops any
+    //      matched files whose extension extCheck cannot check.
+    //
+    // The bare-directory form (1) is what makes
+    //   extCheck "C:\Documents"
+    //   extCheck -g  (with "C:\Documents" typed into the GUI)
+    // behave identically to
+    //   extCheck "C:\Documents\*.*"
+    // without the user having to remember the trailing wildcard.
     private static List<string> resolveFiles(List<string> lsSpecs)
     {
         var lsFiles = new List<string>();
-        foreach (string sSpec in lsSpecs) {
+        foreach (string sSpecRaw in lsSpecs) {
+            string sSpec = sSpecRaw;
+
+            // Form 1: bare directory -> expand to "<dir>\*<ext>" once
+            // per supported extension, accumulating matches.
+            bool bIsBareDir = false;
+            try {
+                if (sSpec.IndexOfAny(new[] { '*', '?' }) < 0 &&
+                    Directory.Exists(sSpec))
+                    bIsBareDir = true;
+            } catch { }
+            if (bIsBareDir) {
+                bool bAnyFound = false;
+                foreach (string sExt in aSupportedExtensions) {
+                    string sPat = "*" + sExt;
+                    try {
+                        string[] aExt = Directory.GetFiles(sSpec, sPat);
+                        lsFiles.AddRange(aExt);
+                        if (aExt.Length > 0) bAnyFound = true;
+                    } catch { }
+                }
+                if (!bAnyFound)
+                    Console.WriteLine("No supported files found in: " + sSpec);
+                continue;
+            }
+
             string sRawDir = Path.GetDirectoryName(sSpec);
             string sDir = (sRawDir == null || sRawDir == "")
                 ? Directory.GetCurrentDirectory()
                 : Path.IsPathRooted(sRawDir) ? sRawDir : Path.Combine(Directory.GetCurrentDirectory(), sRawDir);
             string sPattern = Path.GetFileName(sSpec);
 
+            // Form 2: "*.*" or "<base>.*" -> expand once per supported
+            // extension.
             bool bStarExt = sPattern.EndsWith(".*");
             if (bStarExt) {
                 string sBase = sPattern.Substring(0, sPattern.Length - 2);
@@ -2876,6 +2925,7 @@ static class program {
                 continue;
             }
 
+            // Form 3: explicit filename or wildcard -> pass through.
             string[] aFound;
             try {
                 aFound = Directory.GetFiles(sDir, sPattern);
@@ -2898,7 +2948,7 @@ static class program {
             processStartInfo.UseShellExecute = true;
             Process.Start(processStartInfo);
         } catch (Exception ex) {
-            Console.Error.WriteLine("[WARN] Could not open output directory: " + ex.Message);
+            Console.Error.WriteLine("Could not open output directory: " + ex.Message);
         }
     }
 
@@ -2997,8 +3047,7 @@ Examples:
         for (int i = 0; i < aArgs.Length; i++) {
             string sArg = aArgs[i];
             if (sArg == "-h" || sArg == "/h" || sArg == "--help") {
-                Console.WriteLine(sProgramName + " " + sProgramVersion +
-                    " — Accessibility Checker for .docx .xlsx .pptx .md");
+                Console.WriteLine(sProgramName + " " + sProgramVersion);
                 Console.WriteLine();
                 Console.Write(sUsage);
                 return 0;
@@ -3023,7 +3072,7 @@ Examples:
             }
             if (sArg == "-o" || sArg == "--output-dir") {
                 if (i + 1 >= aArgs.Length) {
-                    Console.Error.WriteLine("[ERROR] " + sArg +
+                    Console.Error.WriteLine(sArg +
                         " requires a directory argument.");
                     return 1;
                 }
@@ -3093,7 +3142,7 @@ Examples:
             } catch (Exception ex) {
                 string sErr = "Output directory '" + sOutputDir +
                     "' could not be created: " + ex.Message;
-                Console.Error.WriteLine("[ERROR] " + sErr);
+                Console.Error.WriteLine(sErr);
                 if (bGuiMode) showFinalMessage(sErr, "extCheck — Error");
                 return 1;
             }
