@@ -7,19 +7,13 @@ description: "Accessibility Checker for Office and Markdown Files"
 # extCheck
 
 **Author:** Jamal Mazrui
-**License:** MIT
-
-`extCheck` is one of three companion accessibility tools by Jamal Mazrui:
-
-- **2htm** — convert documents (Word, Excel, PowerPoint, PDF, Markdown) to accessible HTML
-- **extCheck** — check Office and Markdown files for accessibility problems
-- **urlCheck** — check web pages for accessibility problems
-
-The three tools share a common command-line and GUI layout, so learning one makes the others easy to pick up.
+**Copyright:** © 2026 Jamal Mazrui
+**License:** [MIT](https://opensource.org/license/mit/)
+**Project home:** <https://github.com/JamalMazrui/extCheck>
 
 `extCheck` is a Windows tool that checks Microsoft Word, Excel, PowerPoint, and Pandoc Markdown files for accessibility problems. For each file you give it, extCheck writes a CSV report listing issues with rule IDs, locations, problem descriptions, and remediation guidance.
 
-Like its companion tools, `extCheck` runs in two modes: a **GUI mode** (a small parameter dialog launched by double-clicking the program, pressing its desktop hotkey, or running with `-g`) and a **command-line mode** (any other invocation, suitable for batch files and pipelines). Both modes accept the same options.
+Like its companion tools `urlCheck` and `2htm` (see the Announce file for a description of the family), `extCheck` runs in two modes: a **GUI mode** (a small parameter dialog launched by double-clicking the program, pressing its desktop hotkey, or running with `-g`) and a **command-line mode** (any other invocation, suitable for batch files and pipelines). Both modes accept the same options.
 
 ---
 

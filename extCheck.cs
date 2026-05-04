@@ -1,4 +1,5 @@
 ﻿// extCheck.cs  — Unified accessibility checker for .docx .xlsx .pptx .md files
+// Copyright (c) 2026 Jamal Mazrui — MIT License — https://github.com/JamalMazrui/extCheck
 // Compile: csc extCheck.cs /platform:x64    (see buildExtCheck.cmd)
 // Usage:   extCheck.exe [-h] [-g] [-rules] [-o <dir>] [--view-output]
 //                       [-l] [-u] [-f] <filespec> [<filespec> ...]
