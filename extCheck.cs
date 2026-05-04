@@ -1,4 +1,4 @@
-// extCheck.cs  — Unified accessibility checker for .docx .xlsx .pptx .md files
+﻿// extCheck.cs  — Unified accessibility checker for .docx .xlsx .pptx .md files
 // Compile: csc extCheck.cs /platform:x64    (see buildExtCheck.cmd)
 // Usage:   extCheck.exe [-h] [-g] [-rules] [-o <dir>] [--view-output]
 //                       [-l] [-u] [-f] <filespec> [<filespec> ...]
@@ -3185,9 +3185,13 @@ Examples:
         }
 
         try {
-            Console.WriteLine(sProgramName + " " + sProgramVersion +
-                " — Accessibility Checker for .docx .xlsx .pptx .md");
-            Console.WriteLine();
+            // No startup banner in regular runs. The banner is shown
+            // only when the user explicitly asks for it via --help or
+            // --version (handled earlier in the argument-parse loop).
+            // For normal CLI runs the inline per-file output is the
+            // user's progress feedback; for GUI runs the captured
+            // stdout becomes the final MessageBox, where a banner
+            // would just be noise.
 
             // Phase 8: handle -rules (immediate write of rule registry).
             if (bShowRules) {

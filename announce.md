@@ -1,4 +1,4 @@
-# extCheck Release Notes
+﻿# extCheck Release Notes
 
 ## Version 2.0
 

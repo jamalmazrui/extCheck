@@ -1,4 +1,4 @@
-; ============================================================================
+﻿; ============================================================================
 ; extCheck.iss  --  Inno Setup script for extCheck
 ;
 ; Compile with the Inno Setup IDE (ISCC.exe) to produce extCheck_setup.exe.

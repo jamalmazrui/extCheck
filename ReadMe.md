@@ -1,4 +1,4 @@
----
+﻿---
 title: "extCheck — Accessibility Checker for Office and Markdown Files"
 author: "Jamal Mazrui"
 description: "Accessibility Checker for Office and Markdown Files"
