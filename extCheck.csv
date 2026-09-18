@@ -1,4 +1,4 @@
-﻿RuleID,MSOfficeCategory,WCAGCriteria,Severity,AppliesTo,Description,Remediation
+RuleID,MSOfficeCategory,WCAGCriteria,Severity,AppliesTo,Description,Remediation
 AllCapsText,Text,1.4.8,Warning,"DOCX, PPTX, MD",Text is typed entirely in capital letters. TTS engines may read each letter individually or stress words unnaturally.,Use mixed-case text. Apply a character style or CSS rule with text-transform:uppercase rather than typing in capitals.
 AltTextIsFilename,Missing alternative text,1.1.1,Error,MD,Alt text appears to be a filename rather than a meaningful description.,Replace the filename with a description of what the image shows and why it matters in context.
 AltTextRedundantPrefix,Missing alternative text,1.1.1,Warning,MD,"Alt text begins with 'image of', 'picture of', or 'photo of'. Screen readers already announce the element is an image.",Remove the redundant prefix and begin the alt text with the actual description.
