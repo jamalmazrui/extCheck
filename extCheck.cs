@@ -31,6 +31,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Homer;
 
 // ===========================================================================
 // Shared: issue record
@@ -1910,7 +1911,31 @@ static class mdModule {
 // ===========================================================================
 class extCheck {
     [STAThread]
-    static int Main(string[] aArgs) { return program.run(aArgs); }
+    static int Main(string[] aArgs)
+    {
+        // ONE SESSION LOG, ALWAYS: %LOCALAPPDATA%\extCheck\logs\
+        // extCheck-yyyyMMdd-HHmmss.log, from Homer's Log, with the environment
+        // already in its header. -l still writes extCheck.log beside the
+        // reports as well.
+        Log.start(program.sProgramName);
+        // F11 and the Help box ask GitHub through this whether a newer
+        // extCheck exists.
+        Elevate.configure(program.c_sGitHubOwner, program.sProgramName, program.sProgramVersion);
+        int iExit = 1;
+        try {
+            iExit = program.run(aArgs);
+        } catch (Exception ex) {
+            // Whatever run() did not catch is recorded with its stack, and
+            // the console names the log rather than showing a trace.
+            Log.exception(ex);
+            Console.Error.WriteLine("extCheck stopped: " + ex.Message);
+            Console.Error.WriteLine("The session log has the details: " + Log.path);
+            iExit = 1;
+        }
+        Log.info("Exit code " + iExit);
+        Log.close();
+        return iExit;
+    }
 }
 
 // ===========================================================================
@@ -1969,10 +1994,14 @@ public static class logger
         writer = null;
     }
 
-    public static void info(string sMsg)  { write("INFO", sMsg); }
-    public static void warn(string sMsg)  { write("WARN", sMsg); }
-    public static void error(string sMsg) { write("ERROR", sMsg); }
-    public static void debug(string sMsg) { write("DEBUG", sMsg); }
+    // EVERY LINE ALSO GOES TO THE SESSION LOG that Homer's Log keeps in
+    // %LOCALAPPDATA%\extCheck\logs, whatever the options, so a failure
+    // always leaves a record. extCheck.log (-l) stays what it was: an extra
+    // copy beside the reports.
+    public static void info(string sMsg)  { Log.info(sMsg); write("INFO", sMsg); }
+    public static void warn(string sMsg)  { Log.warn(sMsg); write("WARN", sMsg); }
+    public static void error(string sMsg) { Log.error(sMsg); write("ERROR", sMsg); }
+    public static void debug(string sMsg) { Log.line("DEBUG  " + sMsg); write("DEBUG", sMsg); }
 
     // Write the run header to the top of the log: program name and
     // version, the friendly run-start timestamp, and the resolved
@@ -1983,6 +2012,8 @@ public static class logger
     public static void header(string sName, string sVersion,
         List<KeyValuePair<string, string>> dParams)
     {
+        Log.section("Settings");
+        if (dParams != null) foreach (var oKv in dParams) Log.keyValue(oKv.Key, oKv.Value);
         if (writer == null) return;
         try {
             writer.WriteLine("=== " + sName + " " + sVersion + " ===");
@@ -2019,21 +2050,26 @@ public static class logger
 }
 
 // ===========================================================================
-// Configuration manager. Reads and writes a small INI file at
-// %LOCALAPPDATA%\extCheck\extCheck.ini. Opt-in via -u / --use-configuration
-// or the GUI Use configuration checkbox. Without that flag, extCheck
-// leaves no filesystem footprint of its own. The configuration stores
-// the source files string, the output directory, and the option
-// checkboxes (force, view_output, log_session). The Show rules
-// checkbox is intentionally NOT persisted — it's a one-shot operation.
+// Configuration manager. Reads and writes the [Settings] section of
+// %LOCALAPPDATA%\extCheck\configs\extCheck.inix (Homer's Paths.configs(),
+// written through Homer's InixCodec, which keeps any comment a person adds).
+// Opt-in via -u / --use-configuration or the GUI Use configuration checkbox.
+// The configuration stores the source files string, the output directory,
+// and the option checkboxes (force, view output, log session). The Show
+// rules checkbox is intentionally NOT persisted -- it's a one-shot operation.
+//
+// The extCheck.ini of versions before 2.1, directly under
+// %LOCALAPPDATA%\extCheck, is read while no .inix exists, and removed the
+// first time the new file is saved. Its snake_case names are read as the
+// new ones.
 // ===========================================================================
 public static class configManager
 {
+    const string c_sSettingsSection = "Settings";
+
     public static string getConfigDir()
     {
-        string sAppData = Environment.GetFolderPath(
-            Environment.SpecialFolder.LocalApplicationData);
-        return Path.Combine(sAppData, program.sConfigDirName);
+        return Paths.configs();
     }
 
     public static string getConfigPath()
@@ -2041,45 +2077,42 @@ public static class configManager
         return Path.Combine(getConfigDir(), program.sConfigFileName);
     }
 
+    public static string getLegacyPath()
+    {
+        string sAppData = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData);
+        return Path.Combine(Path.Combine(sAppData, program.sConfigDirName), program.c_sLegacyConfigFileName);
+    }
+
     public static bool configExists()
     {
-        try { return File.Exists(getConfigPath()); }
+        try { return File.Exists(getConfigPath()) || File.Exists(getLegacyPath()); }
         catch { return false; }
     }
 
+    // Both the settings file and one left by a version before 2.1. The
+    // folders stay: %LOCALAPPDATA%\extCheck also holds the session logs.
     public static void eraseAll()
     {
-        string sDir = getConfigDir();
-        string sPath = getConfigPath();
-        try {
-            if (File.Exists(sPath)) {
-                File.Delete(sPath);
-                logger.info("Deleted configuration file: " + sPath);
-            }
-        } catch (Exception ex) {
-            logger.info("Could not delete configuration file " +
-                sPath + ": " + ex.Message);
-        }
-        try {
-            if (Directory.Exists(sDir)) {
-                bool bEmpty = Directory.EnumerateFileSystemEntries(sDir)
-                    .GetEnumerator().MoveNext() == false;
-                if (bEmpty) {
-                    Directory.Delete(sDir);
-                    logger.info("Removed empty configuration directory: " +
-                        sDir);
+        foreach (string sPath in new string[] { getConfigPath(), getLegacyPath() }) {
+            try {
+                if (File.Exists(sPath)) {
+                    File.Delete(sPath);
+                    logger.info("Deleted configuration file: " + sPath);
                 }
+            } catch (Exception ex) {
+                logger.info("Could not delete configuration file " +
+                    sPath + ": " + ex.Message);
             }
-        } catch (Exception ex) {
-            logger.info("Could not remove configuration directory " +
-                sDir + ": " + ex.Message);
         }
     }
 
     public static void loadInto(List<string> lsFileArgs)
     {
         string sPath = getConfigPath();
+        if (!File.Exists(sPath)) sPath = getLegacyPath();
         if (!File.Exists(sPath)) return;
+        logger.info("Reading configuration from " + sPath);
 
         Dictionary<string, string> dVals;
         try {
@@ -2101,7 +2134,7 @@ public static class configManager
 
         if (!program.bSourceFromCli) {
             string sSaved;
-            if (dVals.TryGetValue("source_files", out sSaved) &&
+            if (dVals.TryGetValue("SourceFiles", out sSaved) &&
                 !string.IsNullOrWhiteSpace(sSaved)) {
                 foreach (var sArg in program.splitSourceField(sSaved))
                     lsFileArgs.Add(sArg);
@@ -2109,13 +2142,13 @@ public static class configManager
         }
 
         if (!program.bOutputDirFromCli)
-            program.sOutputDir = getOrEmpty(dVals, "output_directory");
+            program.sOutputDir = getOrEmpty(dVals, "OutputDirectory");
         if (!program.bForceFromCli)
-            program.bForce = getBool(dVals, "force_replacements");
+            program.bForce = getBool(dVals, "ForceReplacements");
         if (!program.bViewOutputFromCli)
-            program.bViewOutput = getBool(dVals, "view_output");
+            program.bViewOutput = getBool(dVals, "ViewOutput");
         if (!program.bLogFromCli)
-            program.bLog = getBool(dVals, "log_session");
+            program.bLog = getBool(dVals, "LogSession");
     }
 
     public static void save(string sSource, string sOutputDir,
@@ -2125,18 +2158,25 @@ public static class configManager
         string sPath = getConfigPath();
         try {
             if (!Directory.Exists(sDir)) Directory.CreateDirectory(sDir);
-            var sb = new StringBuilder();
-            sb.AppendLine("; extCheck configuration");
-            sb.AppendLine("; auto-written on OK-click when Use configuration was checked.");
-            sb.AppendLine("; Delete this file to reset, or click Default settings in");
-            sb.AppendLine("; the GUI, which also deletes the file and the extCheck folder.");
-            sb.AppendLine("source_files=" + (sSource ?? ""));
-            sb.AppendLine("output_directory=" + (sOutputDir ?? ""));
-            sb.AppendLine("force_replacements=" + (bForce ? "1" : "0"));
-            sb.AppendLine("view_output=" + (bView ? "1" : "0"));
-            sb.AppendLine("log_session=" + (bLog ? "1" : "0"));
-            File.WriteAllText(sPath, sb.ToString(), new UTF8Encoding(true));
+            if (!File.Exists(sPath)) {
+                var sb = new StringBuilder();
+                sb.AppendLine("; extCheck settings, written when Use configuration is checked at OK.");
+                sb.AppendLine("; Delete this file to reset, or press Default settings in the dialog.");
+                sb.AppendLine("[" + c_sSettingsSection + "]");
+                File.WriteAllText(sPath, sb.ToString(), new UTF8Encoding(true));
+            }
+            // InixCodec.writeValue changes one value in place, leaving every
+            // comment and every other key where it was.
+            InixCodec.writeValue(sPath, c_sSettingsSection, "SourceFiles", sSource ?? "");
+            InixCodec.writeValue(sPath, c_sSettingsSection, "OutputDirectory", sOutputDir ?? "");
+            InixCodec.writeValue(sPath, c_sSettingsSection, "ForceReplacements", bForce ? "yes" : "no");
+            InixCodec.writeValue(sPath, c_sSettingsSection, "ViewOutput", bView ? "yes" : "no");
+            InixCodec.writeValue(sPath, c_sSettingsSection, "LogSession", bLog ? "yes" : "no");
             logger.info("Saved configuration to " + sPath);
+            if (File.Exists(getLegacyPath())) {
+                File.Delete(getLegacyPath());
+                logger.info("Removed the old " + getLegacyPath() + "; the settings are now in " + sPath);
+            }
         } catch (Exception ex) {
             string sMsg = "Could not save configuration to:\r\n" +
                 sPath + "\r\n\r\n" + ex.Message;
@@ -2153,6 +2193,11 @@ public static class configManager
         }
     }
 
+    static readonly Dictionary<string, string> dLegacyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+        { "force_replacements", "ForceReplacements" }, { "log_session", "LogSession" },
+        { "output_directory", "OutputDirectory" }, { "source_files", "SourceFiles" },
+        { "view_output", "ViewOutput" } };
+
     private static Dictionary<string, string> parseFile(string sPath)
     {
         var d = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -2165,6 +2210,9 @@ public static class configManager
             if (iEq <= 0) continue;
             string sKey = sLine.Substring(0, iEq).Trim();
             string sVal = sLine.Substring(iEq + 1).Trim();
+            // The names of versions before 2.1, read as today's.
+            string sNew;
+            if (dLegacyNames.TryGetValue(sKey, out sNew)) sKey = sNew;
             d[sKey] = sVal;
         }
         return d;
@@ -2201,294 +2249,149 @@ public static class configManager
 // ===========================================================================
 public static class guiDialog
 {
+    // THE DIALOG IS BUILT FROM Homer's Lbc (since 2.1.0), like every Homer
+    // dialog: one control per row in tab order, each field's label just before
+    // it so the label names it, a band where a field and the button that fills
+    // it share a row. Lbc supplies, with no code here, Control+Enter for OK from
+    // any control, Shift+F1 for a field's tip, F7 for a list of the dialog's
+    // controls, the editing keys of every text field, and the Help button (F1),
+    // which lists each field with its tip and ends with the version check.
+    // F11 is claimed below. The Guide button opens the full guide and returns
+    // to the dialog with everything as it was, as Default settings does.
     public static bool show(ref string sSource, ref string sOutputDir,
         ref bool bForce, ref bool bView, ref bool bLog, ref bool bUseCfg)
     {
-        var frm = new Form();
-        frm.Text = program.sProgramName;
-        frm.FormBorderStyle = FormBorderStyle.FixedDialog;
-        frm.StartPosition = FormStartPosition.CenterScreen;
-        frm.MaximizeBox = false;
-        frm.MinimizeBox = false;
-        frm.ShowInTaskbar = false;
+        while (true) {
+            string sButton;
+            using (var dlg = new LbcDialog(program.sProgramName, null)) {
+                dlg.addBand();
+                TextBox tbSource = dlg.addInputBox("&Source files:",
+                    string.IsNullOrWhiteSpace(sSource) ? defaultSourceForGui() : sSource,
+                    "One or more files, folders or wildcard patterns such as *.docx, " +
+                    "separated by spaces. A folder means every supported file in it.");
+                Button btnBrowse = dlg.addButton("&Browse source...",
+                    "Choose one file to check.");
+                dlg.addBand();
+                TextBox tbOut = dlg.addInputBox("&Output directory:", sOutputDir ?? "",
+                    "Where each report is written, named after its file. Blank means the current folder.");
+                Button btnChoose = dlg.addButton("&Choose output...",
+                    "Choose the folder the reports go to.");
+                dlg.endBand();
 
-        // Layout constants. Declared before any use of iLayoutFormWidth
-        // (ClientSize) so the literal 560 doesn't appear inline.
-        const int iLayoutLeft = 12;
-        const int iLayoutRight = 12;
-        const int iLayoutTop = 12;
-        const int iLayoutGap = 7;
-        const int iLayoutRowGap = 11;
-        const int iLayoutLabelWidth = 110;
-        const int iLayoutButtonWidth = 130;
-        const int iLayoutButtonHeight = 26;
-        const int iLayoutTextHeight = 23;
-        const int iLayoutFormWidth = 560;
+                btnBrowse.Click += (o, e) => {
+                    using (var dialog = new OpenFileDialog()) {
+                        dialog.Title = "Choose a file to check";
+                        dialog.Filter =
+                            "Supported files (*.docx;*.xlsx;*.pptx;*.md)|*.docx;*.xlsx;*.pptx;*.md|" +
+                            "Word documents (*.docx)|*.docx|" +
+                            "Excel workbooks (*.xlsx)|*.xlsx|" +
+                            "PowerPoint presentations (*.pptx)|*.pptx|" +
+                            "Markdown files (*.md)|*.md|" +
+                            "All files (*.*)|*.*";
+                        dialog.FilterIndex = 1;
+                        dialog.CheckFileExists = true;
+                        dialog.RestoreDirectory = true;
+                        try { dialog.InitialDirectory = getInitialBrowseDir(tbSource.Text); } catch { }
+                        if (dialog.ShowDialog(dlg.form) == DialogResult.OK) {
+                            string sPicked = dialog.FileName;
+                            if (sPicked.Contains(" ")) sPicked = "\"" + sPicked + "\"";
+                            tbSource.Text = sPicked;
+                            if (string.IsNullOrEmpty(tbOut.Text))
+                                tbOut.Text = Path.GetDirectoryName(dialog.FileName);
+                            tbSource.Focus();
+                        }
+                    }
+                };
+                btnChoose.Click += (o, e) => {
+                    using (var dialog = new FolderBrowserDialog()) {
+                        dialog.Description = "Choose the output directory";
+                        dialog.ShowNewFolderButton = true;
+                        try { dialog.SelectedPath = getInitialBrowseDir(tbOut.Text); } catch { }
+                        if (dialog.ShowDialog(dlg.form) == DialogResult.OK) {
+                            tbOut.Text = dialog.SelectedPath;
+                            tbOut.Focus();
+                        }
+                    }
+                };
 
-        frm.ClientSize = new System.Drawing.Size(iLayoutFormWidth, 200);
-        frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
+                dlg.addSeparator();
+                CheckBox cbForce = dlg.addCheckBox("&Force replacements", bForce,
+                    "Overwrite an existing report instead of skipping the file.");
+                CheckBox cbView = dlg.addCheckBox("&View output", bView,
+                    "Open the output folder in File Explorer when the run is done.");
+                CheckBox cbLog = dlg.addCheckBox("&Log session", bLog,
+                    "Also write " + program.sLogFileName + " in the output folder. A session log is always kept in %LOCALAPPDATA%\\extCheck\\logs.");
+                CheckBox cbUseCfg = dlg.addCheckBox("&Use configuration", bUseCfg,
+                    "Load these settings next time, and save them when you press OK, in configs\\" + program.sConfigFileName + ".");
 
-        // Route F1 to the Help button action.
-        frm.KeyPreview = true;
-        frm.KeyDown += (s, e) => {
-            if (e.KeyCode == Keys.F1) {
-                e.Handled = true;
-                e.SuppressKeyPress = true;
-                showHelpMessage();
+                // F11: is there a newer extCheck on the web? (Elevate sounds
+                // like eleven.) Claimed before any control sees the key.
+                dlg.commandKey = k => {
+                    if (k != Keys.F11) return false;
+                    logger.info("F11: checking the web for a newer version");
+                    if (Elevate.offer(dlg.form)) {
+                        logger.info("F11: the setup program was started; closing the dialog");
+                        dlg.form.DialogResult = DialogResult.Cancel;
+                        dlg.form.Close();
+                    }
+                    return true;
+                };
+
+                sButton = dlg.runWithButtons(new string[] {
+                    "OK", "Guide", "Default settings", "Cancel" });
+
+                // Harvest every field before the dialog is disposed, so a
+                // return to the dialog keeps whatever else was typed.
+                sSource = (tbSource.Text ?? "").Trim();
+                sOutputDir = (tbOut.Text ?? "").Trim();
+                bForce = cbForce.Checked;
+                bView = cbView.Checked;
+                bLog = cbLog.Checked;
+                bUseCfg = cbUseCfg.Checked;
             }
-        };
 
-        int iFormW = frm.ClientSize.Width;
-        int iTextX = iLayoutLeft + iLayoutLabelWidth + iLayoutGap;
-        int iTextW = iFormW - iTextX - iLayoutGap - iLayoutButtonWidth - iLayoutRight;
-        int iBtnX = iFormW - iLayoutRight - iLayoutButtonWidth;
-
-        // --- Row 1: Source files ---
-        int y = iLayoutTop;
-        var lblSource = new Label();
-        lblSource.Text = "&Source files:";
-        lblSource.AutoSize = false;
-        lblSource.Location = new System.Drawing.Point(iLayoutLeft, y + 3);
-        lblSource.Size = new System.Drawing.Size(iLayoutLabelWidth, iLayoutTextHeight);
-        lblSource.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-        frm.Controls.Add(lblSource);
-
-        var txtSource = new TextBox();
-        txtSource.Text = string.IsNullOrWhiteSpace(sSource)
-            ? defaultSourceForGui()
-            : sSource;
-        txtSource.Location = new System.Drawing.Point(iTextX, y);
-        txtSource.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
-        txtSource.TabIndex = 0;
-        // Explicit AccessibleName so JAWS/NVDA announce the field by
-        // its label even when the visual layout doesn't auto-associate.
-        txtSource.AccessibleName = "Source files";
-        frm.Controls.Add(txtSource);
-
-        var btnBrowseSource = new Button();
-        btnBrowseSource.Text = "&Browse source...";
-        btnBrowseSource.Location = new System.Drawing.Point(iBtnX, y - 1);
-        btnBrowseSource.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-        btnBrowseSource.TabIndex = 1;
-        btnBrowseSource.UseVisualStyleBackColor = true;
-        frm.Controls.Add(btnBrowseSource);
-
-        // --- Row 2: Output directory ---
-        y += iLayoutTextHeight + iLayoutRowGap;
-        var lblOut = new Label();
-        lblOut.Text = "&Output directory:";
-        lblOut.AutoSize = false;
-        lblOut.Location = new System.Drawing.Point(iLayoutLeft, y + 3);
-        lblOut.Size = new System.Drawing.Size(iLayoutLabelWidth, iLayoutTextHeight);
-        lblOut.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-        frm.Controls.Add(lblOut);
-
-        var txtOut = new TextBox();
-        txtOut.Text = sOutputDir ?? "";
-        txtOut.Location = new System.Drawing.Point(iTextX, y);
-        txtOut.Size = new System.Drawing.Size(iTextW, iLayoutTextHeight);
-        txtOut.TabIndex = 2;
-        txtOut.AccessibleName = "Output directory";
-        frm.Controls.Add(txtOut);
-
-        var btnChooseOut = new Button();
-        btnChooseOut.Text = "&Choose output...";
-        btnChooseOut.Location = new System.Drawing.Point(iBtnX, y - 1);
-        btnChooseOut.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-        btnChooseOut.TabIndex = 3;
-        btnChooseOut.UseVisualStyleBackColor = true;
-        frm.Controls.Add(btnChooseOut);
-
-        // Wire up Browse source: opens an OpenFileDialog. The user
-        // can pick a single file; multi-select would be possible but
-        // copying the multi-file result back into a textbox quoted
-        // properly is more complex than necessary, and the common
-        // case is wildcards which the user types directly.
-        btnBrowseSource.Click += (s, e) => {
-            using (var dialog = new OpenFileDialog()) {
-                dialog.Title = "Choose a file to check";
-                dialog.Filter =
-                    "Supported files (*.docx;*.xlsx;*.pptx;*.md)|*.docx;*.xlsx;*.pptx;*.md|" +
-                    "Word documents (*.docx)|*.docx|" +
-                    "Excel workbooks (*.xlsx)|*.xlsx|" +
-                    "PowerPoint presentations (*.pptx)|*.pptx|" +
-                    "Markdown files (*.md)|*.md|" +
-                    "All files (*.*)|*.*";
-                dialog.FilterIndex = 1;
-                dialog.CheckFileExists = true;
-                dialog.RestoreDirectory = true;
-                try {
-                    dialog.InitialDirectory = getInitialBrowseDir(txtSource.Text);
-                } catch { }
-                if (dialog.ShowDialog(frm) == DialogResult.OK) {
-                    string sPicked = dialog.FileName;
-                    if (sPicked.Contains(" "))
-                        sPicked = "\"" + sPicked + "\"";
-                    txtSource.Text = sPicked;
-                    if (string.IsNullOrEmpty(txtOut.Text))
-                        txtOut.Text = Path.GetDirectoryName(dialog.FileName);
-                }
+            if (string.IsNullOrEmpty(sButton) ||
+                    string.Equals(sButton, "Cancel", StringComparison.OrdinalIgnoreCase))
+                return false;
+            if (string.Equals(sButton, "Guide", StringComparison.OrdinalIgnoreCase)) {
+                launchReadMe();
+                continue;
             }
-        };
-
-        // Wire up Choose output: FolderBrowserDialog.
-        btnChooseOut.Click += (s, e) => {
-            using (var dialog = new FolderBrowserDialog()) {
-                dialog.Description = "Choose the output directory";
-                dialog.ShowNewFolderButton = true;
-                try {
-                    dialog.SelectedPath = getInitialBrowseDir(txtOut.Text);
-                } catch { }
-                if (dialog.ShowDialog(frm) == DialogResult.OK)
-                    txtOut.Text = dialog.SelectedPath;
+            if (string.Equals(sButton, "Default settings", StringComparison.OrdinalIgnoreCase)) {
+                sSource = defaultSourceForGui();
+                sOutputDir = "";
+                bForce = false; bView = false; bLog = false; bUseCfg = false;
+                configManager.eraseAll();
+                logger.info("Default settings restored");
+                continue;
             }
-        };
+            // OK: offer to create an output directory that does not exist yet.
+            if (!confirmOutputDir(sOutputDir)) continue;
+            return true;
+        }
+    }
 
-        // --- Row 3: Force replacements + View output ---
-        y += iLayoutTextHeight + iLayoutRowGap * 2;
-        int iChkW = (iFormW - iLayoutLeft - iLayoutRight) / 2;
-        var chkForce = new CheckBox();
-        chkForce.Text = "&Force replacements";
-        chkForce.Checked = bForce;
-        chkForce.Location = new System.Drawing.Point(iLayoutLeft, y);
-        chkForce.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-        chkForce.TabIndex = 4;
-        frm.Controls.Add(chkForce);
-
-        var chkView = new CheckBox();
-        chkView.Text = "&View output";
-        chkView.Checked = bView;
-        chkView.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
-        chkView.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-        chkView.TabIndex = 5;
-        frm.Controls.Add(chkView);
-
-        // --- Row 4: Log session + Use configuration ---
-        // Both are "meta" options that affect persistence/diagnostics
-        // rather than the conversion itself, so they sit together
-        // below the conversion-control checkboxes.
-        y += iLayoutTextHeight + iLayoutRowGap;
-        var chkLog = new CheckBox();
-        chkLog.Text = "&Log session";
-        chkLog.Checked = bLog;
-        chkLog.Location = new System.Drawing.Point(iLayoutLeft, y);
-        chkLog.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-        chkLog.TabIndex = 6;
-        frm.Controls.Add(chkLog);
-
-        var chkUseCfg = new CheckBox();
-        chkUseCfg.Text = "&Use configuration";
-        chkUseCfg.Checked = bUseCfg;
-        chkUseCfg.Location = new System.Drawing.Point(iLayoutLeft + iChkW, y);
-        chkUseCfg.Size = new System.Drawing.Size(iChkW, iLayoutTextHeight);
-        chkUseCfg.TabIndex = 7;
-        frm.Controls.Add(chkUseCfg);
-
-        // --- Bottom row: commit buttons. Help and Default settings
-        // on the left (they don't commit/cancel the dialog), OK and
-        // Cancel on the right. Matches Microsoft's UX guidance.
-        y += iLayoutTextHeight + iLayoutRowGap * 2;
-        var btnHelp = new Button();
-        btnHelp.Text = "&Help";
-        btnHelp.Location = new System.Drawing.Point(iLayoutLeft, y);
-        btnHelp.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-        btnHelp.TabIndex = 8;
-        btnHelp.UseVisualStyleBackColor = true;
-        btnHelp.Click += (s, e) => showHelpMessage();
-        frm.Controls.Add(btnHelp);
-
-        var btnDefaults = new Button();
-        btnDefaults.Text = "&Default settings";
-        btnDefaults.Location = new System.Drawing.Point(
-            iLayoutLeft + iLayoutButtonWidth + iLayoutGap, y);
-        btnDefaults.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-        btnDefaults.TabIndex = 9;
-        btnDefaults.UseVisualStyleBackColor = true;
-        btnDefaults.Click += (s, e) => {
-            string sDefault = defaultSourceForGui();
-            txtSource.Text = sDefault;
-            txtOut.Text = "";
-            chkForce.Checked = false;
-            chkView.Checked = false;
-            chkLog.Checked = false;
-            chkUseCfg.Checked = false;
-            configManager.eraseAll();
-        };
-        frm.Controls.Add(btnDefaults);
-
-        var btnOk = new Button();
-        btnOk.Text = "OK";
-        btnOk.DialogResult = DialogResult.OK;
-        btnOk.Location = new System.Drawing.Point(
-            iFormW - iLayoutRight - 2 * iLayoutButtonWidth - iLayoutGap, y);
-        btnOk.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-        btnOk.TabIndex = 10;
-        btnOk.UseVisualStyleBackColor = true;
-        // Validate output directory before allowing the dialog to close.
-        // If the user has typed a non-existent directory, prompt to
-        // create it (default Yes). On No (or creation failure), set
-        // DialogResult = None so the dialog stays open and the user can
-        // edit the field. WinForms invokes Click handlers BEFORE the
-        // automatic close, so this hook runs first.
-        btnOk.Click += (s, e) => {
-            string sOutCandidate = (txtOut.Text ?? "").Trim();
-            if (sOutCandidate.Length >= 2 && sOutCandidate[0] == '"' && sOutCandidate[sOutCandidate.Length - 1] == '"')
-                sOutCandidate = sOutCandidate.Substring(1, sOutCandidate.Length - 2).Trim();
-            if (string.IsNullOrEmpty(sOutCandidate)) return;
-            try {
-                if (Directory.Exists(sOutCandidate)) return;
-            } catch { return; }
-            DialogResult dr = MessageBox.Show(frm,
-                "Create " + sOutCandidate + "?",
-                program.sProgramName,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-            if (dr != DialogResult.Yes) {
-                frm.DialogResult = DialogResult.None;
-                txtOut.Focus();
-                return;
-            }
-            try {
-                Directory.CreateDirectory(sOutCandidate);
-            } catch (Exception ex) {
-                MessageBox.Show(frm,
-                    "Could not create directory:\r\n" + sOutCandidate + "\r\n\r\n" + ex.Message,
-                    program.sProgramName,
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                frm.DialogResult = DialogResult.None;
-                txtOut.Focus();
-            }
-        };
-        frm.Controls.Add(btnOk);
-
-        var btnCancel = new Button();
-        btnCancel.Text = "Cancel";
-        btnCancel.DialogResult = DialogResult.Cancel;
-        btnCancel.Location = new System.Drawing.Point(iBtnX, y);
-        btnCancel.Size = new System.Drawing.Size(iLayoutButtonWidth, iLayoutButtonHeight);
-        btnCancel.TabIndex = 11;
-        btnCancel.UseVisualStyleBackColor = true;
-        frm.Controls.Add(btnCancel);
-
-        // Wire Enter = OK and Esc = Cancel.
-        frm.AcceptButton = btnOk;
-        frm.CancelButton = btnCancel;
-
-        // Resize the form to wrap the bottom row tightly.
-        frm.ClientSize = new System.Drawing.Size(iFormW,
-            y + iLayoutButtonHeight + iLayoutTop);
-
-        // Show modally.
-        var dialogResult = frm.ShowDialog();
-        if (dialogResult != DialogResult.OK) return false;
-
-        sSource = txtSource.Text.Trim();
-        sOutputDir = txtOut.Text.Trim();
-        bForce = chkForce.Checked;
-        bView = chkView.Checked;
-        bLog = chkLog.Checked;
-        bUseCfg = chkUseCfg.Checked;
-        return true;
+    // Offer to create a non-existent output directory, default Yes. Returns
+    // false to send the user back to the dialog.
+    private static bool confirmOutputDir(string sOutputDir)
+    {
+        string sOutCandidate = (sOutputDir ?? "").Trim();
+        if (sOutCandidate.Length >= 2 && sOutCandidate[0] == '"' && sOutCandidate[sOutCandidate.Length - 1] == '"')
+            sOutCandidate = sOutCandidate.Substring(1, sOutCandidate.Length - 2).Trim();
+        if (string.IsNullOrEmpty(sOutCandidate)) return true;
+        try { if (Directory.Exists(sOutCandidate)) return true; } catch { return true; }
+        DialogResult dr = MessageBox.Show("Create " + sOutCandidate + "?",
+            program.sProgramName, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button1);
+        if (dr != DialogResult.Yes) return false;
+        try {
+            Directory.CreateDirectory(sOutCandidate);
+            return true;
+        } catch (Exception ex) {
+            MessageBox.Show("Could not create directory:\r\n" + sOutCandidate + "\r\n\r\n" + ex.Message,
+                program.sProgramName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return false;
+        }
     }
 
     private static string defaultSourceForGui()
@@ -2544,52 +2447,28 @@ public static class guiDialog
         return defaultSourceForGui();
     }
 
-    private static void showHelpMessage()
-    {
-        string sMsg =
-            "extCheck checks Word, Excel, PowerPoint, and Markdown files for " +
-            "accessibility problems and writes a CSV report for each file.\r\n\r\n" +
-            "Source files: a single file path, a wildcard pattern, or several " +
-            "of either separated by spaces. Wrap paths containing spaces in " +
-            "double quotes.\r\n\r\n" +
-            "Output directory: where each <basename>.csv is written. Blank " +
-            "means the current working directory.\r\n\r\n" +
-            "Options:\r\n" +
-            "  Force replacements - overwrite an existing CSV instead of " +
-            "skipping the input\r\n" +
-            "  View output - open the output directory in Explorer when done\r\n" +
-            "  Log session - write extCheck.log (replacing any prior log) " +
-            "to the output directory, or to the current directory if no " +
-            "output directory is set\r\n" +
-            "  Use configuration - remember these settings for next time, in " +
-            "%LOCALAPPDATA%\\extCheck\\extCheck.ini\r\n\r\n" +
-            "Press Cancel to exit without checking.\r\n\r\n" +
-            "Open the full README in your browser?";
-        var dialogResult = MessageBox.Show(sMsg,
-            "extCheck — Help",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Information,
-            MessageBoxDefaultButton.Button2);
-        if (dialogResult == DialogResult.Yes) launchReadMe();
-    }
-
+    // Opens the full guide. The Homer layout puts it in help\extCheck.htm,
+    // beside exec\ where the program runs, in the installed tree and in the
+    // project alike; Paths.installedFolder finds that folder. ReadMe.htm at
+    // the top is the fallback, then the Markdown forms.
     private static void launchReadMe()
     {
-        string sExeDir = Path.GetDirectoryName(
-            Assembly.GetExecutingAssembly().Location);
-        string sHtm = Path.Combine(sExeDir, "ReadMe.htm");
-        string sMd = Path.Combine(sExeDir, "ReadMe.md");
-        string sTarget = File.Exists(sHtm)
-            ? sHtm
-            : (File.Exists(sMd) ? sMd : null);
+        string sFolder = Paths.installedFolder;
+        string[] aCandidates = {
+            Path.Combine(Path.Combine(sFolder, "help"), "extCheck.htm"),
+            Path.Combine(sFolder, "ReadMe.htm"),
+            Path.Combine(Path.Combine(sFolder, "help"), "extCheck.md"),
+            Path.Combine(sFolder, "ReadMe.md") };
+        string sTarget = null;
+        foreach (string sCandidate in aCandidates)
+            if (sTarget == null && File.Exists(sCandidate)) sTarget = sCandidate;
         if (sTarget == null) {
+            logger.warn("No guide found under " + sFolder);
             MessageBox.Show(
-                "Documentation (ReadMe.htm or ReadMe.md) was not found in " +
-                "the extCheck install folder:\r\n\r\n" + sExeDir + "\r\n\r\n" +
-                "If extCheck was installed via the installer, reinstall it. " +
-                "If you deployed extCheck.exe manually, place ReadMe.htm " +
-                "(or ReadMe.md) in the same folder.",
-                "extCheck — Documentation not found",
+                "The guide was not found in the extCheck folder:\r\n\r\n" +
+                sFolder + "\r\n\r\n" +
+                "Reinstalling extCheck puts it back.",
+                "extCheck — Guide not found",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
             return;
@@ -2599,7 +2478,7 @@ public static class guiDialog
             Process.Start(processStartInfo);
         } catch (Exception ex) {
             MessageBox.Show(
-                "Could not open the documentation:\r\n\r\n" + ex.Message,
+                "Could not open the guide:\r\n\r\n" + ex.Message,
                 "extCheck — Error",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
@@ -2688,9 +2567,15 @@ public static class guiProgress
 static class program {
 
     public const string sProgramName = "extCheck";
-    public const string sProgramVersion = "2.0";
+    // From version.txt, through the Version.cs the build writes on every
+    // build, so -v, the log, F11 and the installer report one number.
+    public const string sProgramVersion = BuildVersion.Version;
     public const string sConfigDirName = "extCheck";
-    public const string sConfigFileName = "extCheck.ini";
+    public const string sConfigFileName = "extCheck.inix";
+    // The GitHub owner whose extCheck releases F11 asks about, and the
+    // settings file of the versions before 2.1.
+    public const string c_sGitHubOwner = "JamalMazrui";
+    public const string c_sLegacyConfigFileName = "extCheck.ini";
     public const string sLogFileName = "extCheck.log";
     public static readonly string[] aSupportedExtensions = { ".docx", ".xlsx", ".pptx", ".md" };
 
@@ -2994,17 +2879,16 @@ Options:
   -f, --force           Overwrite an existing <basename>.csv. Without this
                         flag, an input file is skipped if its CSV already
                         exists in the output directory.
-  -l, --log             Write detailed diagnostics to extCheck.log (UTF-8
-                        with BOM) in the output directory if one is set,
-                        else the current working directory. Any prior
-                        extCheck.log is overwritten so the file always
-                        reflects only the current session.
+  -l, --log             Also write detailed diagnostics to extCheck.log
+                        (UTF-8 with BOM) in the output directory if one is
+                        set, else the current working directory. Any prior
+                        extCheck.log is overwritten. A session log is always
+                        kept in %LOCALAPPDATA%\extCheck\logs.
   -u, --use-configuration
                         Load saved settings from
-                        %LOCALAPPDATA%\extCheck\extCheck.ini at startup,
-                        and (in GUI mode) write them back on OK. Without
-                        this flag extCheck leaves no filesystem footprint
-                        of its own.
+                        %LOCALAPPDATA%\extCheck\configs\extCheck.inix at
+                        startup, and (in GUI mode) write them back on OK.
+                        Without this flag no settings are saved.
 
 Output:
   For each file evaluated, a CSV named <basename>.csv is written to the

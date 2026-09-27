@@ -1,0 +1,39 @@
+﻿; accept.inix -- what "done" means for extCheck, checked by scripts\check.
+; Each [check] runs a command in the project folder; Expect is its exit code
+; and Wants, when given, a string its output must contain.
+
+[check]
+Name   = the help names the configuration file
+Run    = exec\extCheck.exe --help
+Expect = 0
+Wants  = extCheck.inix
+
+[check]
+Name   = the help names the log folder
+Run    = exec\extCheck.exe --help
+Expect = 0
+Wants  = extCheck\logs
+
+[check]
+Name   = the program reports the version the build wrote
+Run    = exec\extCheck.exe --version
+Expect = 0
+Wants  = extCheck
+
+[check]
+Name   = the command-line wrapper finds the program in exec
+Run    = extCheck.cmd --version
+Expect = 0
+Wants  = extCheck
+
+[check]
+Name   = the rule registry was written by the build
+Run    = cmd /c if exist help\extCheck.csv (exit 0) else (exit 1)
+Expect = 0
+
+[check]
+Name   = the Explorer verb points at exec
+; findstr reads a backslash as an escape even in /c: text, so each is doubled;
+; written singly, the search was for "{app}exec{#AppExeName}" and failed.
+Run    = findstr /l /c:"{app}\\exec\\{#AppExeName}" extCheck_setup.iss
+Expect = 0
