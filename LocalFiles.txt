@@ -3,7 +3,7 @@
 # tidy keeps these where they are, and writes each line into .gitignore
 # as never pushed. One path or pattern a line; a trailing slash means a folder.
 
-# The built program and the installer: made by buildExtCheck, never authored.
+# The built program and the installer: made by build, never authored.
 exec/
 extCheck_setup.exe
 work/

@@ -11,7 +11,7 @@ How extCheck is built, released and laid out. Since 2.1.0 it is built on the Hom
 
 `C:\extCheck` mirrors the installed tree:
 
-- At the top: `extCheck.cs` (the program), `buildExtCheck.cmd`, `extCheck_setup.iss`, `extCheck.cmd`, `extCheck.ico`, `accept.inix`, `RepoFiles.txt`, `LocalFiles.txt`, `ReadMe` and `License`.
+- At the top: `extCheck.cs` (the program), `build.cmd`, `extCheck_setup.iss`, `extCheck.cmd`, `extCheck.ico`, `accept.inix`, `RepoFiles.txt`, `LocalFiles.txt`, `ReadMe` and `License`.
 - `exec` — the built `extCheck.exe`. Never in git.
 - `help` — this document and the others: `extCheck` (the guide), `Announce`, `Developer`, `History`, `Hotkeys`, each as `.md` and `.htm`, and `extCheck.csv`, the rule registry, which the build writes by running `exec\extCheck.exe -rules -o help`.
 - `logs` — one log per run of the build or any tool.
@@ -21,7 +21,7 @@ How extCheck is built, released and laid out. Since 2.1.0 it is built on the Hom
 
 ## The four steps
 
-1. `buildExtCheck` — steps the version (`buildExtCheck nobump` keeps it), compiles `exec\extCheck.exe`, writes the rule registry into `help`, writes each `.htm` from its `.md`, puts the project's files in the Homer encoding, checks that the installer ships every file in `help`, and builds `extCheck_setup.exe`. Its log is `logs\extCheck-build-yyyyMMdd-HHmmss.log`.
+1. `build` — steps the version (`build nobump` keeps it), compiles `exec\extCheck.exe`, writes the rule registry into `help`, writes each `.htm` from its `.md`, puts the project's files in the Homer encoding, checks that the installer ships every file in `help`, and builds `extCheck_setup.exe`. Its log is `logs\extCheck-build-yyyyMMdd-HHmmss.log`.
 2. `scripts\push "message"` — rewrites the whitelist `.gitignore` from `RepoFiles.txt`, commits and pushes.
 3. `scripts\tidy` and `scripts\tidy --do-it` — the periodic clean.
 4. `scripts\release` — runs `scripts\check`, then tags the pushed commit with the version stamped in `extCheck_setup.exe` and publishes the installer.

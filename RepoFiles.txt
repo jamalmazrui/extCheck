@@ -10,7 +10,7 @@
 .gitattributes
 .gitignore
 accept.inix
-buildExtCheck.cmd
+build.cmd
 extCheck.cmd
 extCheck.cs
 extCheck.ico
