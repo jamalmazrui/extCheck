@@ -1,0 +1,147 @@
+﻿; Tutorial_6_Check_a_Markdown_File.inix -- check a markdown file
+
+[about]
+Title=6 - Check a Markdown File
+Intro=Checking a Markdown file, such as a project's ReadMe on GitHub: headings, lists, links and pictures, with no Office installed.
+Setup=A Markdown file of your own, such as a ReadMe. Office is not needed.
+Homework=Check a ReadMe of your own, fix one heading or link it names, and check it again.
+
+[step]
+
+Say=One want: a ReadMe for my project on GitHub that reads well by screen reader, since it is the first thing a visitor sees.
+Key=
+
+[step]
+
+Say=Markdown is plain text with simple marks: a number sign for a heading, a dash for a list item, square brackets for a link. extCheck reads it directly, so no Office program is needed.
+Key=
+
+[step]
+
+Say=I open the dialog and put the file's path in Source files.
+Key=Alt+Control+X
+Hear=extCheck dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter, and the check takes a moment, since nothing has to start in the background.
+Key=Enter
+Hear=1 file checked, 5 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Five issues, in ReadMe dot csv. The location here is a line number, so I can go straight to it in my editor.
+Key=
+Hear=Heading Skipped Level, Line 12
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A heading skipped a level, as in a Word document. Two number signs, then four, leaves a gap in the outline a reader moves through.
+Key=
+
+[step]
+
+Say=Next, a link.
+Key=
+Hear=Non Descriptive Link Text, Line 20
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The link text says click here. A screen reader user often lists a page's links on their own, and a list of click here, click here tells them nothing. The text should say where the link goes.
+Key=
+
+[step]
+
+Say=Then a picture.
+Key=
+Hear=Missing Alt Text, Line 31
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=An image whose square brackets are empty has no description. Whatever goes between them is what a screen reader says.
+Key=
+
+[step]
+
+Say=Then a list that is not a list.
+Key=
+Hear=Fake Numbered List, Line 40
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Lines numbered with a number in brackets, or a number and a dash, look like a list but are plain paragraphs to Markdown, so a screen reader does not announce a list or its length. A number followed by a full stop makes a real one.
+Key=
+
+[step]
+
+Say=Others in a typical Markdown file: more than one top heading, bare web addresses read out character by character, and tables with no header row.
+Key=
+
+[step]
+
+Say=Because a Markdown check needs nothing installed, it suits running on every change, before each commit, as a habit.
+Key=
+
+[step]
+
+Say=I fix the file and check again with Force replacements on.
+Key=Alt+F
+Hear=Force replacements check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter, and the report comes back clean.
+Key=Enter
+Hear=1 file checked, 0 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Markdown is also how many sites and documentation tools are written, so these habits travel well beyond GitHub.
+Key=
+[step]
+
+Say=Code blocks are treated with care: text between the fences is left alone, since a command or a sample is meant to look exactly as it does.
+Key=
+Hear=Line 50, code block, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Pandoc's own Markdown extensions are understood too, such as a title block at the top and attributes in curly braces.
+Key=
+[step]
+
+Say=A table in Markdown needs its header row and the line of dashes under it, or Pandoc and GitHub both read it as plain text.
+Key=
+Hear=Missing Table Header, Line 60
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Since the report gives line numbers, an editor's Go to line command takes me straight to each one.
+Key=
+[step]
+
+Say=Pictures in Markdown take their description between the square brackets, just before the address in round brackets.
+Key=
+Hear=Line 31, image, Screenshot of the main dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=And the heading at the very top, one number sign, is the document's title: there should be exactly one.
+Key=
+Hear=Heading level 1, Project Name
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Headings, links, pictures and lists: the Markdown the web reads best. The next walk checks a whole folder at once.
+Key=

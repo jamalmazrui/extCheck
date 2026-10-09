@@ -1,0 +1,158 @@
+﻿; Tutorial_5_Check_an_Excel_Workbook.inix -- check an excel workbook
+
+[about]
+Title=5 - Check an Excel Workbook
+Intro=Checking a shared spreadsheet: headers, merged cells, blank cells used for spacing, and sheet names, the problems that make a workbook hard to navigate by screen reader.
+Setup=An Excel workbook of your own, such as a budget or a schedule, and Microsoft Excel installed.
+Homework=Give each sheet of a workbook a meaningful name, then check it again and see those rows disappear.
+
+[step]
+
+Say=One want: a budget spreadsheet the whole team can work in, including the colleague who uses a screen reader.
+Key=
+
+[step]
+
+Say=I open the dialog and put the workbook's path in Source files.
+Key=Alt+Control+X
+Hear=extCheck dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter. Excel opens the workbook in the background, and extCheck reads every sheet.
+Key=Enter
+Hear=Checking Budget dot xlsx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The results box gives the count.
+Key=
+Hear=1 file checked, 7 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Seven issues, in Budget dot csv. A spreadsheet is read cell by cell, so its problems are about knowing where you are.
+Key=
+
+[step]
+
+Say=The location column names the sheet and, where it matters, the cell, so each finding can be found again in a moment.
+Key=
+Hear=Merged Cells, Sheet1, A1 to D1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Merged cells: one cell spread across several columns, often a title across the top. Moving through it, a screen reader can lose its place in the columns below.
+Key=
+
+[step]
+
+Say=Next, a table with no header row.
+Key=
+Hear=Missing Table Header, Sheet1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A header row names each column, so a screen reader can say Amount, not just a number, as it moves along a row. In Excel, formatting the range as a table with headers fixes this.
+Key=
+
+[step]
+
+Say=Then a sheet name.
+Key=
+Hear=Default Sheet Name, Sheet1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Sheet1 says nothing. A name such as Monthly Budget tells a screen reader user which sheet they are on, the moment they switch to it.
+Key=
+
+[step]
+
+Say=Others in a typical workbook: blank rows and columns used only for spacing, which are heard as empty cells; colour used alone to mean something, such as red for overdue; and hidden sheets someone may need.
+Key=
+
+[step]
+
+Say=Colour alone is a judgment the report flags for me to decide: a word beside the colour, such as Overdue, says the same thing to everyone.
+Key=
+
+[step]
+
+Say=I fix the names and headers first, since every reader relies on them, then the merged and blank cells.
+Key=
+
+[step]
+
+Say=Then I check again with Force replacements on.
+Key=Alt+F
+Hear=Force replacements check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter, and the count comes down.
+Key=Enter
+Hear=1 file checked, 2 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=In Excel, a workbook's structure is heard by moving, not by looking. Control with Page Down moves to the next sheet, and the reader says its name.
+Key=Control+Page Down
+Hear=Monthly Budget
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=A named sheet tells me at once where I am. That is why sheet names matter.
+Key=
+[step]
+
+Say=Frozen panes help as well: a frozen header row stays in view, so its names are always there to be read with a cell.
+Key=
+Hear=Amount, B2
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Formulas are fine to keep. extCheck reads what a cell shows, so a total computed by a formula is checked like any other value.
+Key=
+Hear=Total, 4,250 dollars, formula
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=A workbook shared for others to fill in benefits most from a check, since every person who opens it meets the same structure.
+Key=
+Hear=Budget dot csv
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Before checking, save and close the workbook, so the copy extCheck reads is the latest one.
+Key=
+Hear=Budget dot xlsx, saved
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=After fixing the headers, moving along a row says each column's name before its value, which is what a header row is for.
+Key=Right Arrow
+Hear=Amount, B5, 1,200
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A short description of the workbook on its first sheet, saying what each sheet holds, helps every reader find the right one first.
+Key=Control+Home
+Hear=Monthly Budget, A1, About this workbook
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Headers, names and plain cells: a workbook anyone can navigate. The next walk checks a Markdown file, which needs no Office at all.
+Key=

@@ -1,0 +1,1618 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Tutorials</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Tutorials</h1>
+</header>
+<h1 id="tutorials">Tutorials</h1>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#0-overview">0 - Overview</a></li>
+<li><a href="#1-user-interface">1 - User Interface</a></li>
+<li><a href="#2-install-and-launch">2 - Install and Launch</a></li>
+<li><a href="#3-check-a-word-document">3 - Check a Word
+Document</a></li>
+<li><a href="#4-check-a-powerpoint-presentation">4 - Check a PowerPoint
+Presentation</a></li>
+<li><a href="#5-check-an-excel-workbook">5 - Check an Excel
+Workbook</a></li>
+<li><a href="#6-check-a-markdown-file">6 - Check a Markdown
+File</a></li>
+<li><a href="#7-check-a-whole-folder">7 - Check a Whole Folder</a></li>
+<li><a href="#8-check-from-explorer-and-the-command-line">8 - Check from
+Explorer and the Command Line</a></li>
+<li><a href="#9-conclusion">9 - Conclusion</a></li>
+<li><a href="#1-where-to-go-next">1. Where to Go Next</a></li>
+</ul>
+<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->
+<h2 id="overview">0 - Overview</h2>
+<p>What extCheck is, the two ways to run it, and the ten walks that
+teach it.</p>
+<p><strong>Before you start:</strong> Nothing to set up for this walk;
+it only listens.</p>
+<h3 id="step-1">Step 1</h3>
+<p>Welcome. This is the first of ten short walks through extCheck. I am
+the host, and the other voice you hear is the screen reader, speaking as
+it would on your own computer.</p>
+<h3 id="step-2-insertup-arrow">Step 2: Insert+Up Arrow</h3>
+<p>Two screen reader keys help in every walk. If you miss something the
+reader said, Insert plus Up Arrow says the current line again.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-inserttab">Step 3: Insert+Tab</h3>
+<p>And whenever you are unsure where you are, Insert plus Tab says what
+has the focus: its name, its kind, and its value.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit, blank</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4">Step 4</h3>
+<p>extCheck checks documents for accessibility problems before you share
+them: Word documents, Excel workbooks, PowerPoint presentations, and
+Markdown files. For each one it writes a report, a spreadsheet file
+listing every problem it found, where it is, why it matters, and how to
+fix it.</p>
+<h3 id="step-5">Step 5</h3>
+<p>Word, Excel and PowerPoint files are opened by Microsoft Office in
+the background, so Office must be installed to check them. Markdown
+files need nothing else at all.</p>
+<h3 id="step-6">Step 6</h3>
+<p>There are two ways to run it. The dialog is a small window of fields
+and check boxes, opened from the desktop with one key. The command line
+runs the same checks from a command prompt or a batch file, which suits
+checking many files on a schedule.</p>
+<h3 id="step-7">Step 7</h3>
+<p>A third way sits in between: in File Explorer, the context menu of
+any file holds Report via extCheck, which checks that one file and
+writes its report beside it.</p>
+<h3 id="step-8">Step 8</h3>
+<p>The reports are plain CSV files. Open one in Excel, or in any editor,
+and each row is one problem, with seven columns: the rule, its source,
+the category, the location, the text concerned, the message, and the
+fix.</p>
+<h3 id="step-9">Step 9</h3>
+<p>Each rule comes from one of two families. Some mirror the categories
+of the Accessibility Checker built into Microsoft Office. Others are
+adapted from axe-core, the open-source engine many web checkers use, and
+cover things the Office checker does not.</p>
+<h3 id="step-10">Step 10</h3>
+<p>Here are the ten walks. Walk one: the user interface, the dialog and
+its keys. Walk two: install and launch. Walk three: check a Word
+document. Walk four: check a PowerPoint presentation. Walk five: check
+an Excel workbook.</p>
+<h3 id="step-11">Step 11</h3>
+<p>Walk six: check a Markdown file. Walk seven: check a whole folder and
+keep the reports together. Walk eight: check from File Explorer and the
+command line. Walk nine: the conclusion, a glossary, and where to get
+help.</p>
+<h3 id="step-12">Step 12</h3>
+<p>Each walk is a few minutes long, and each builds on the ones before
+it, so they are best heard in order the first time. Walk one comes
+next.</p>
+<p><strong>Something to try:</strong> Think of one document you share
+with other people. Walk three, four, five or six will check one like
+it.</p>
+<h2 id="user-interface">1 - User Interface</h2>
+<p>The extCheck dialog: its fields, its underlined letters, and the keys
+that work anywhere in it, each shown as the screen reader speaks it.</p>
+<p><strong>Before you start:</strong> extCheck installed, as walk two
+shows; the dialog open with Alt+Control+X.</p>
+<h3 id="step-1-1">Step 1</h3>
+<p>One want: to move around the extCheck dialog quickly, without
+hunting. Everything in it can be reached by a letter.</p>
+<h3 id="step-2-altcontrolx">Step 2: Alt+Control+X</h3>
+<p>I press the desktop key for extCheck. The dialog opens on its first
+field.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3">Step 3</h3>
+<p>Source files is where the documents to check are named: one file, a
+folder, a pattern such as star dot docx, or several of these with spaces
+between. The underlined letter is S.</p>
+<h3 id="step-4-tab">Step 4: Tab</h3>
+<p>Tab moves to the next control, the button that opens a file
+picker.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Browse source button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-alto">Step 5: Alt+O</h3>
+<p>Every label has an underlined letter, and Alt with that letter jumps
+straight to it from anywhere in the dialog. Output directory is O.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Output directory edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-1">Step 6</h3>
+<p>Output directory is where the reports go. Left blank, they go to the
+current folder. Choose output, C, opens a folder picker instead of
+typing.</p>
+<h3 id="step-7-altf">Step 7: Alt+F</h3>
+<p>Next come four check boxes. Force replacements, F, replaces a report
+that already exists; without it, a document whose report is there is
+skipped.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Force replacements check box, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-space">Step 8: Space</h3>
+<p>Space checks it, and Space again clears it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-space">Step 9: Space</h3>
+<p>I clear it again, since most runs do not need it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-1">Step 10</h3>
+<p>View output, V, opens the reports’ folder in File Explorer when the
+run is done. Log session, L, writes a log of the run beside the reports.
+Use configuration, U, remembers these fields for next time.</p>
+<h3 id="step-11-shiftf1">Step 11: Shift+F1</h3>
+<p>Not sure what a field is for? Shift+F1 says the tip for the one you
+are on.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Force replacements: replace an existing report instead of skipping
+its document</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-f1">Step 12: F1</h3>
+<p>F1 shows Help: every field with its tip, and every key.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck Help dialog</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13-escape">Step 13: Escape</h3>
+<p>Escape closes Help and returns to the same field.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Force replacements check box, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-14-f7">Step 14: F7</h3>
+<p>F7 lists every control in the dialog. Arrow to one, press Enter, and
+the focus moves there.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Controls list</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-15-enter">Step 15: Enter</h3>
+<p>I choose Source files from the list.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16-tab">Step 16: Tab</h3>
+<p>Enter starts the check. From any control, even a check box,
+Control+Enter does the same.</p>
+<p>Screen reader:</p>
+<ul>
+<li>OK button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-17-altg">Step 17: Alt+G</h3>
+<p>Two more buttons sit at the end. Guide, G, opens the full guide in
+the browser and then returns here.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Guide button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-18-altd">Step 18: Alt+D</h3>
+<p>Default settings, D, clears every field and box, and forgets anything
+saved. It asks first, since it cannot be undone.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Default settings button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-19-tab">Step 19: Tab</h3>
+<p>Escape, from anywhere in the dialog, closes it without checking
+anything, the same as the Cancel button.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Cancel button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-20">Step 20</h3>
+<p>The dialog never speaks over the screen reader. It says a field’s
+name once, as the reader would, and adds speech only for what the reader
+cannot know, such as a run’s progress.</p>
+<h3 id="step-21-altu">Step 21: Alt+U</h3>
+<p>And the dialog remembers nothing unless asked. With Use configuration
+ticked, OK saves the fields; next time, they are already filled in.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Use configuration check box, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-22">Step 22</h3>
+<p>Every key you have heard is listed in the Hotkeys document in the
+help folder, by key, by command, and by the field it belongs to, so you
+can review them without the dialog open.</p>
+<h3 id="step-23-shifttab">Step 23: Shift+Tab</h3>
+<p>Tab and Shift with Tab move forward and back through every control,
+in the order they appear, so nothing can be missed by moving one step at
+a time.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Use configuration check box, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-24-alts">Step 24: Alt+S</h3>
+<p>An underlined letter works whether or not the screen reader announces
+it, since it is plain Windows: the Alt key with the letter that the
+label shows.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-25">Step 25</h3>
+<p>That is the whole dialog: a field for what to check, a field for
+where reports go, four boxes, and a key for everything. The next walk
+installs extCheck.</p>
+<p><strong>Something to try:</strong> Open the dialog, press F7, and
+choose a control from the list. Then press Shift+F1 there and hear its
+tip.</p>
+<h2 id="install-and-launch">2 - Install and Launch</h2>
+<p>Installing extCheck for everyone on the computer, the desktop key
+that opens it, and the File Explorer entry that checks one file.</p>
+<p><strong>Before you start:</strong> extCheck_setup.exe downloaded from
+the extCheck releases page on GitHub.</p>
+<h3 id="step-1-2">Step 1</h3>
+<p>One want: extCheck on this computer, ready from the desktop and from
+File Explorer, in one sitting.</p>
+<h3 id="step-2-enter">Step 2: Enter</h3>
+<p>I open the downloaded setup program. It installs for everyone on the
+computer, so Windows asks for administrator rights. I say yes.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Setup - extCheck dialog</li>
+<li>Welcome to the extCheck Setup Wizard</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-enter">Step 3: Enter</h3>
+<p>The welcome page shows a short summary of the license. extCheck is
+free and open source, under the MIT license. Enter takes Next.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Select Destination Location</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-enter">Step 4: Enter</h3>
+<p>The first time, it asks for a folder. The default, in Program Files,
+is right. An update later goes to the same folder without asking.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Ready to Install</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-enter">Step 5: Enter</h3>
+<p>Enter again, and it copies the program and its documents.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Installing</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-2">Step 6</h3>
+<p>The last page offers two check boxes. Launch extCheck now is checked;
+open the user guide is not.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Launch extCheck now check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-enter">Step 7: Enter</h3>
+<p>I press Finish. A short box says what was installed and where the
+logs are.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck setup complete</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-enter">Step 8: Enter</h3>
+<p>When I close that box, extCheck starts, its dialog ready on Source
+files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-1">Step 9</h3>
+<p>Setup added three ways to start it. The first is a desktop shortcut
+whose key is Alt+Control+X, which opens the dialog from anywhere in
+Windows.</p>
+<h3 id="step-10-2">Step 10</h3>
+<p>The second is the Start menu, where extCheck has its own group with
+the program, the guide and the uninstaller.</p>
+<h3 id="step-11-escape">Step 11: Escape</h3>
+<p>The third is in File Explorer. I close the dialog and go to a
+document there.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Desktop</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-shiftf10">Step 12: Shift+F10</h3>
+<p>Shift+F10 opens the context menu for the file I am on.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Context menu</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13-x">Step 13: X</h3>
+<p>X is Report via extCheck. It checks this one file at once and writes
+its report in the same folder, with the same name ending in dot csv.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck: 1 file checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-14">Step 14</h3>
+<p>Keeping extCheck current takes one key. In the dialog, F11 asks
+GitHub whether a newer version exists. If one does, Yes is the default,
+and Enter downloads and starts the new setup.</p>
+<h3 id="step-15">Step 15</h3>
+<p>If this copy is already the newest, No is the default, and Enter
+simply returns to the dialog.</p>
+<h3 id="step-16">Step 16</h3>
+<p>Installing for everyone has a reason: the program sits in Program
+Files, out of reach of changes made by mistake, and each person’s
+settings and logs stay in their own folders.</p>
+<p>Screen reader:</p>
+<ul>
+<li>C colon backslash Program Files backslash extCheck</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-17">Step 17</h3>
+<p>Those per-person folders are under your own application data: configs
+for the saved fields, and logs for a record of every session, kept
+whatever the dialog’s Log session box says.</p>
+<p>Screen reader:</p>
+<ul>
+<li>configs folder, logs folder</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-18">Step 18</h3>
+<p>If setup ever stops partway, its own log says why, and running the
+setup again simply finishes the job.</p>
+<h3 id="step-19">Step 19</h3>
+<p>To remove extCheck, use Installed apps in Windows Settings, or the
+uninstaller in its Start-menu group. Your reports are never touched,
+since they are wherever you saved them.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck, Uninstall button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-20-1">Step 20</h3>
+<p>One more thing the installer adds: extCheck dot cmd at the top of the
+installation, which runs extCheck from any command prompt. Walk eight
+uses it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dot cmd</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-21-altcontrolx">Step 21: Alt+Control+X</h3>
+<p>Back in the dialog, the title bar shows the version, so you can
+always tell which extCheck is installed.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck 1.4 dialog</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-22-windows">Step 22: Windows</h3>
+<p>And the Start-menu group holds the guide as well, so help is there
+even before the dialog is opened.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Start</li>
+<li>extCheck folder</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-23">Step 23</h3>
+<p>Installed, launched three ways, and kept current with F11. The next
+walk checks a real document.</p>
+<p><strong>Something to try:</strong> After installing, right-click a
+document in File Explorer and find Report via extCheck.</p>
+<h2 id="check-a-word-document">3 - Check a Word Document</h2>
+<p>Checking a Word handout before it is emailed, and reading its report:
+the most common use of extCheck.</p>
+<p><strong>Before you start:</strong> A Word document of your own, such
+as a handout or a letter, and Microsoft Word installed.</p>
+<h3 id="step-1-3">Step 1</h3>
+<p>One want: a Word handout that everyone can read, checked before I
+email it to a group.</p>
+<h3 id="step-2-altcontrolx-1">Step 2: Alt+Control+X</h3>
+<p>I open the dialog. The focus is on Source files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-altb">Step 3: Alt+B</h3>
+<p>Rather than type the path, Browse source opens a file picker.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Open dialog</li>
+<li>File name edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-enter-1">Step 4: Enter</h3>
+<p>I type the start of the handout’s name and press Enter. The picker
+closes, and its full path is in Source files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files edit</li>
+<li>C colon backslash Users backslash Documents backslash Handout dot
+docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-altv">Step 5: Alt+V</h3>
+<p>I leave Output directory blank, so the report lands in the current
+folder, and I tick View output, so that folder opens when the check is
+done.</p>
+<p>Screen reader:</p>
+<ul>
+<li>View output check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-enter">Step 6: Enter</h3>
+<p>Enter starts the check. Word opens the document invisibly in the
+background, so nothing appears on screen.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Checking Handout dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-1">Step 7</h3>
+<p>A few seconds later the results box says what was done.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file checked, 6 issues</li>
+<li>OK button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-enter-1">Step 8: Enter</h3>
+<p>Six issues. I press Enter, and File Explorer opens on the folder, on
+the new report, Handout dot csv.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Handout dot csv</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-enter">Step 9: Enter</h3>
+<p>I open it in Excel. Each row is one problem, and the columns are
+rule, source, category, location, context, message, and remediation,
+which is the fix.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Handout dot csv - Excel</li>
+<li>Rule ID, A1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-down-arrow">Step 10: Down Arrow</h3>
+<p>Down Arrow moves to the first problem. Control with Right Arrow reads
+along its row.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Missing Alt Text, A2</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11-1">Step 11</h3>
+<p>Missing alt text: a picture with no description, so a screen reader
+can say only that a picture is there. The location says which picture,
+and the remediation says how to add its description in Word.</p>
+<h3 id="step-12-down-arrow">Step 12: Down Arrow</h3>
+<p>The next row is a heading problem.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Heading Skipped Level, A3</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13">Step 13</h3>
+<p>A heading skipped a level, from heading one straight to heading
+three. Readers who move by headings use those levels as an outline, so a
+gap misleads them about the structure.</p>
+<h3 id="step-14-1">Step 14</h3>
+<p>Others in a typical Word report: a table with no header row, a link
+whose text says click here rather than where it goes, and blank
+paragraphs used for spacing, each heard as an empty line.</p>
+<h3 id="step-15-1">Step 15</h3>
+<p>Each finding is a fix I can make in Word, in a minute or two: add the
+description, correct the heading level, mark the first table row as its
+header.</p>
+<h3 id="step-16-altf">Step 16: Alt+F</h3>
+<p>After fixing, I check again. The old report is there, so I tick Force
+replacements, which replaces it rather than skipping the document.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Force replacements check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-17-enter">Step 17: Enter</h3>
+<p>Enter, and the new report has fewer rows. When the count reaches
+zero, the handout is ready to send.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file checked, 0 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-18-altdown-arrow">Step 18: Alt+Down Arrow</h3>
+<p>A report can be long. In Excel, a filter on the Rule ID column shows
+one kind of problem at a time, which makes a long report manageable.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Filter, Rule ID</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-19-1">Step 19</h3>
+<p>Or sort by Location, to fix the document from top to bottom in one
+pass.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Sort A to Z, Location</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-20-2">Step 20</h3>
+<p>The Message column always says why a problem matters, not just what
+it is, so a fix is never a matter of guessing.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Message, A picture has no description, so a screen reader can only
+say that a picture is there</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-21">Step 21</h3>
+<p>Some rules are certain, such as a picture with no description at all.
+Others are judgments, such as a description that may be too short to be
+useful; the message says which kind a finding is.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Alt Text Too Short, Picture 3</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-22-1">Step 22</h3>
+<p>If Word is already open with other documents, extCheck uses its own
+hidden copy, and leaves yours alone.</p>
+<h3 id="step-23-1">Step 23</h3>
+<p>One document, checked, fixed and checked again. The next walk does
+the same for a slide presentation, where reading order matters most.</p>
+<p><strong>Something to try:</strong> Fix one problem the report names,
+check the document again with Force replacements on, and confirm that
+row is gone.</p>
+<h2 id="check-a-powerpoint-presentation">4 - Check a PowerPoint
+Presentation</h2>
+<p>Checking slides before a talk, and the problems presentations have
+that documents do not: slide titles, reading order, and pictures without
+descriptions.</p>
+<p><strong>Before you start:</strong> A PowerPoint presentation of your
+own, and Microsoft PowerPoint installed.</p>
+<h3 id="step-1-4">Step 1</h3>
+<p>One want: slides for a talk that the audience can follow afterwards
+with a screen reader, when I share the file.</p>
+<h3 id="step-2-altcontrolx-2">Step 2: Alt+Control+X</h3>
+<p>I open the dialog, and type the presentation’s path in Source files.
+Typing works as well as browsing.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-enter-1">Step 3: Enter</h3>
+<p>I press Enter. PowerPoint opens the slides in the background, and
+extCheck reads each one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Checking Talk dot pptx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-1">Step 4</h3>
+<p>The results box gives the count.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file checked, 9 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-1">Step 5</h3>
+<p>Nine issues, in Talk dot csv. Presentations have three kinds of
+problem that documents do not.</p>
+<h3 id="step-6-3">Step 6</h3>
+<p>The first is the slide title. A screen reader user moves through a
+presentation by its titles, the way a sighted reader glances at the top
+of each slide. A slide with no title is a slide with no name.</p>
+<h3 id="step-7-2">Step 7</h3>
+<p>In the report, its location names the slide by number, so I know
+exactly where to look.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Slide Missing Title, Slide 4</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-1">Step 8</h3>
+<p>The second is reading order. A screen reader reads the things on a
+slide from back to front, in the order they were added, not top to
+bottom as they look. A title added last is read last.</p>
+<h3 id="step-9-2">Step 9</h3>
+<p>extCheck reports a slide whose title is not first to be read. In
+PowerPoint, the Selection Pane lists a slide’s objects in that order,
+and dragging the title to the bottom of that list makes it read
+first.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Title Not First In Reading Order, Slide 2</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-3">Step 10</h3>
+<p>The third is pictures and charts with no description. A chart that
+shows a trend says nothing unless its description says what the trend
+is.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Missing Alt Text, Slide 6, Chart 1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11-2">Step 11</h3>
+<p>Others in a typical presentation: slides that advance on a timer,
+which may move before a listener has finished, and text too small to
+read when the slides are shown.</p>
+<h3 id="step-12-1">Step 12</h3>
+<p>Some findings are judgments rather than certainties, such as text
+that may be too small. The message says why each matters, and the fix is
+mine to decide.</p>
+<h3 id="step-13-1">Step 13</h3>
+<p>I fix the titles in PowerPoint first, since they are the
+presentation’s outline, then the reading order, then the
+descriptions.</p>
+<h3 id="step-14-altf">Step 14: Alt+F</h3>
+<p>Then I check again with Force replacements on, so the new report
+replaces the old.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Force replacements check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-15-enter-1">Step 15: Enter</h3>
+<p>Enter, and the count comes down. Presentations are the files most
+often shared without a check, and the ones that need it most.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file checked, 1 issue</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16-tab-1">Step 16: Tab</h3>
+<p>A slide’s reading order can be checked by ear, too: in PowerPoint,
+Tab moves through a slide’s objects in exactly the order a screen reader
+reads them.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Title 1, title placeholder</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-17-1">Step 17</h3>
+<p>The first thing heard should be the title. Here it is, so this slide
+is in order.</p>
+<h3 id="step-18-1">Step 18</h3>
+<p>Charts deserve the most care. A good description says what the chart
+shows, such as sales doubling over three years, not that it is a bar
+chart.</p>
+<h3 id="step-19-2">Step 19</h3>
+<p>Pictures used only for decoration should be marked decorative in
+PowerPoint, so a screen reader skips them; extCheck does not report a
+picture marked that way.</p>
+<h3 id="step-20-3">Step 20</h3>
+<p>Speaker notes are a good home for anything said aloud in the talk but
+not on a slide, so a reader of the shared file gets it too.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Notes, Slide 3</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-21-1">Step 21</h3>
+<p>Before checking, close the presentation in PowerPoint, so the copy
+extCheck reads is the one you last saved.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Talk dot pptx, saved</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-22-f5">Step 22: F5</h3>
+<p>After fixing, a quick test by ear helps too: in PowerPoint, start the
+slide show, and listen to each slide’s title as it arrives.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Slide 1, Quarterly Results</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-23-2">Step 23</h3>
+<p>Titles, reading order and descriptions: the three that matter most in
+slides. The next walk checks a workbook.</p>
+<p><strong>Something to try:</strong> Open a presentation’s Selection
+Pane in PowerPoint, and see the order a screen reader follows on one
+slide.</p>
+<h2 id="check-an-excel-workbook">5 - Check an Excel Workbook</h2>
+<p>Checking a shared spreadsheet: headers, merged cells, blank cells
+used for spacing, and sheet names, the problems that make a workbook
+hard to navigate by screen reader.</p>
+<p><strong>Before you start:</strong> An Excel workbook of your own,
+such as a budget or a schedule, and Microsoft Excel installed.</p>
+<h3 id="step-1-5">Step 1</h3>
+<p>One want: a budget spreadsheet the whole team can work in, including
+the colleague who uses a screen reader.</p>
+<h3 id="step-2-altcontrolx-3">Step 2: Alt+Control+X</h3>
+<p>I open the dialog and put the workbook’s path in Source files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-enter-2">Step 3: Enter</h3>
+<p>Enter. Excel opens the workbook in the background, and extCheck reads
+every sheet.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Checking Budget dot xlsx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-2">Step 4</h3>
+<p>The results box gives the count.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file checked, 7 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-2">Step 5</h3>
+<p>Seven issues, in Budget dot csv. A spreadsheet is read cell by cell,
+so its problems are about knowing where you are.</p>
+<h3 id="step-6-4">Step 6</h3>
+<p>The location column names the sheet and, where it matters, the cell,
+so each finding can be found again in a moment.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Merged Cells, Sheet1, A1 to D1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-3">Step 7</h3>
+<p>Merged cells: one cell spread across several columns, often a title
+across the top. Moving through it, a screen reader can lose its place in
+the columns below.</p>
+<h3 id="step-8-2">Step 8</h3>
+<p>Next, a table with no header row.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Missing Table Header, Sheet1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-3">Step 9</h3>
+<p>A header row names each column, so a screen reader can say Amount,
+not just a number, as it moves along a row. In Excel, formatting the
+range as a table with headers fixes this.</p>
+<h3 id="step-10-4">Step 10</h3>
+<p>Then a sheet name.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Default Sheet Name, Sheet1</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11-3">Step 11</h3>
+<p>Sheet1 says nothing. A name such as Monthly Budget tells a screen
+reader user which sheet they are on, the moment they switch to it.</p>
+<h3 id="step-12-2">Step 12</h3>
+<p>Others in a typical workbook: blank rows and columns used only for
+spacing, which are heard as empty cells; colour used alone to mean
+something, such as red for overdue; and hidden sheets someone may
+need.</p>
+<h3 id="step-13-2">Step 13</h3>
+<p>Colour alone is a judgment the report flags for me to decide: a word
+beside the colour, such as Overdue, says the same thing to everyone.</p>
+<h3 id="step-14-2">Step 14</h3>
+<p>I fix the names and headers first, since every reader relies on them,
+then the merged and blank cells.</p>
+<h3 id="step-15-altf">Step 15: Alt+F</h3>
+<p>Then I check again with Force replacements on.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Force replacements check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16-enter">Step 16: Enter</h3>
+<p>Enter, and the count comes down.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file checked, 2 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-17-controlpage-down">Step 17: Control+Page Down</h3>
+<p>In Excel, a workbook’s structure is heard by moving, not by looking.
+Control with Page Down moves to the next sheet, and the reader says its
+name.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Monthly Budget</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-18-2">Step 18</h3>
+<p>A named sheet tells me at once where I am. That is why sheet names
+matter.</p>
+<h3 id="step-19-3">Step 19</h3>
+<p>Frozen panes help as well: a frozen header row stays in view, so its
+names are always there to be read with a cell.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Amount, B2</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-20-4">Step 20</h3>
+<p>Formulas are fine to keep. extCheck reads what a cell shows, so a
+total computed by a formula is checked like any other value.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Total, 4,250 dollars, formula</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-21-2">Step 21</h3>
+<p>A workbook shared for others to fill in benefits most from a check,
+since every person who opens it meets the same structure.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Budget dot csv</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-22-2">Step 22</h3>
+<p>Before checking, save and close the workbook, so the copy extCheck
+reads is the latest one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Budget dot xlsx, saved</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-23-right-arrow">Step 23: Right Arrow</h3>
+<p>After fixing the headers, moving along a row says each column’s name
+before its value, which is what a header row is for.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Amount, B5, 1,200</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-24-controlhome">Step 24: Control+Home</h3>
+<p>A short description of the workbook on its first sheet, saying what
+each sheet holds, helps every reader find the right one first.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Monthly Budget, A1, About this workbook</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-25-1">Step 25</h3>
+<p>Headers, names and plain cells: a workbook anyone can navigate. The
+next walk checks a Markdown file, which needs no Office at all.</p>
+<p><strong>Something to try:</strong> Give each sheet of a workbook a
+meaningful name, then check it again and see those rows disappear.</p>
+<h2 id="check-a-markdown-file">6 - Check a Markdown File</h2>
+<p>Checking a Markdown file, such as a project’s ReadMe on GitHub:
+headings, lists, links and pictures, with no Office installed.</p>
+<p><strong>Before you start:</strong> A Markdown file of your own, such
+as a ReadMe. Office is not needed.</p>
+<h3 id="step-1-6">Step 1</h3>
+<p>One want: a ReadMe for my project on GitHub that reads well by screen
+reader, since it is the first thing a visitor sees.</p>
+<h3 id="step-2">Step 2</h3>
+<p>Markdown is plain text with simple marks: a number sign for a
+heading, a dash for a list item, square brackets for a link. extCheck
+reads it directly, so no Office program is needed.</p>
+<h3 id="step-3-altcontrolx">Step 3: Alt+Control+X</h3>
+<p>I open the dialog and put the file’s path in Source files.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-enter-2">Step 4: Enter</h3>
+<p>Enter, and the check takes a moment, since nothing has to start in
+the background.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file checked, 5 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-3">Step 5</h3>
+<p>Five issues, in ReadMe dot csv. The location here is a line number,
+so I can go straight to it in my editor.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Heading Skipped Level, Line 12</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-5">Step 6</h3>
+<p>A heading skipped a level, as in a Word document. Two number signs,
+then four, leaves a gap in the outline a reader moves through.</p>
+<h3 id="step-7-4">Step 7</h3>
+<p>Next, a link.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Non Descriptive Link Text, Line 20</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-3">Step 8</h3>
+<p>The link text says click here. A screen reader user often lists a
+page’s links on their own, and a list of click here, click here tells
+them nothing. The text should say where the link goes.</p>
+<h3 id="step-9-4">Step 9</h3>
+<p>Then a picture.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Missing Alt Text, Line 31</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-5">Step 10</h3>
+<p>An image whose square brackets are empty has no description. Whatever
+goes between them is what a screen reader says.</p>
+<h3 id="step-11-4">Step 11</h3>
+<p>Then a list that is not a list.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Fake Numbered List, Line 40</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-12-3">Step 12</h3>
+<p>Lines numbered with a number in brackets, or a number and a dash,
+look like a list but are plain paragraphs to Markdown, so a screen
+reader does not announce a list or its length. A number followed by a
+full stop makes a real one.</p>
+<h3 id="step-13-3">Step 13</h3>
+<p>Others in a typical Markdown file: more than one top heading, bare
+web addresses read out character by character, and tables with no header
+row.</p>
+<h3 id="step-14-3">Step 14</h3>
+<p>Because a Markdown check needs nothing installed, it suits running on
+every change, before each commit, as a habit.</p>
+<h3 id="step-15-altf-1">Step 15: Alt+F</h3>
+<p>I fix the file and check again with Force replacements on.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Force replacements check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-16-enter-1">Step 16: Enter</h3>
+<p>Enter, and the report comes back clean.</p>
+<p>Screen reader:</p>
+<ul>
+<li>1 file checked, 0 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-17-2">Step 17</h3>
+<p>Markdown is also how many sites and documentation tools are written,
+so these habits travel well beyond GitHub.</p>
+<h3 id="step-18-3">Step 18</h3>
+<p>Code blocks are treated with care: text between the fences is left
+alone, since a command or a sample is meant to look exactly as it
+does.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Line 50, code block, not checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-19-4">Step 19</h3>
+<p>Pandoc’s own Markdown extensions are understood too, such as a title
+block at the top and attributes in curly braces.</p>
+<h3 id="step-20-5">Step 20</h3>
+<p>A table in Markdown needs its header row and the line of dashes under
+it, or Pandoc and GitHub both read it as plain text.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Missing Table Header, Line 60</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-21-3">Step 21</h3>
+<p>Since the report gives line numbers, an editor’s Go to line command
+takes me straight to each one.</p>
+<h3 id="step-22-3">Step 22</h3>
+<p>Pictures in Markdown take their description between the square
+brackets, just before the address in round brackets.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Line 31, image, Screenshot of the main dialog</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-23-3">Step 23</h3>
+<p>And the heading at the very top, one number sign, is the document’s
+title: there should be exactly one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Heading level 1, Project Name</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-24">Step 24</h3>
+<p>Headings, links, pictures and lists: the Markdown the web reads best.
+The next walk checks a whole folder at once.</p>
+<p><strong>Something to try:</strong> Check a ReadMe of your own, fix
+one heading or link it names, and check it again.</p>
+<h2 id="check-a-whole-folder">7 - Check a Whole Folder</h2>
+<p>Checking every document in a folder at once, keeping the reports
+together in their own folder, and keeping a log of the run.</p>
+<p><strong>Before you start:</strong> A folder holding several documents
+of different kinds, such as course materials.</p>
+<h3 id="step-1-7">Step 1</h3>
+<p>One want: every handout, slide deck and spreadsheet for a course
+checked before term starts, with the reports kept together.</p>
+<h3 id="step-2-altcontrolx-4">Step 2: Alt+Control+X</h3>
+<p>I open the dialog. In Source files, a folder’s path is enough:
+extCheck checks every Word, Excel, PowerPoint and Markdown file in
+it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dialog</li>
+<li>Source files edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-1">Step 3</h3>
+<p>I type the folder’s path.</p>
+<p>Screen reader:</p>
+<ul>
+<li>C colon backslash Courses backslash Fall</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-3">Step 4</h3>
+<p>Several sources work too, separated by spaces, and a pattern such as
+star dot pptx checks only the presentations.</p>
+<h3 id="step-5-alto-1">Step 5: Alt+O</h3>
+<p>I want the reports in their own folder, not mixed in with the
+documents, so I go to Output directory.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Output directory edit</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-6-6">Step 6</h3>
+<p>Choose output opens a folder picker, but I simply type a new folder’s
+path, Reports, beside the course folder.</p>
+<p>Screen reader:</p>
+<ul>
+<li>C colon backslash Courses backslash Reports</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-altl">Step 7: Alt+L</h3>
+<p>I tick Log session, so a log of the whole run is written beside the
+reports, and View output, so their folder opens at the end.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Log session check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-8-enter-2">Step 8: Enter</h3>
+<p>Enter. The Reports folder does not exist yet, so extCheck asks before
+making it. Yes is the default.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Create the output directory?</li>
+<li>Yes button</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-enter-1">Step 9: Enter</h3>
+<p>Enter again, and the run begins. A small window counts the files as
+they are checked, so a long run is never silent.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Checking 3 of 12: Week 3 dot pptx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-10-6">Step 10</h3>
+<p>The results box gives the totals for the whole folder.</p>
+<p>Screen reader:</p>
+<ul>
+<li>12 files checked, 48 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-11-5">Step 11</h3>
+<p>Twelve files, forty-eight issues, in twelve reports, one per
+document, each named for its document.</p>
+<h3 id="step-12-4">Step 12</h3>
+<p>If two documents share a name, such as Notes dot docx and Notes dot
+md, the second report takes its kind into its name, Notes dash md dot
+csv, so neither replaces the other.</p>
+<h3 id="step-13-4">Step 13</h3>
+<p>When I run the same check again tomorrow, documents whose reports are
+already there are skipped, so only new ones are checked. Force
+replacements checks them all again.</p>
+<h3 id="step-14-altu">Step 14: Alt+U</h3>
+<p>Use configuration, U, saves these fields, so tomorrow the dialog
+opens with the same folders already filled in.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Use configuration check box, checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-15-2">Step 15</h3>
+<p>The log is the record of the run: every file, every finding, and
+anything that went wrong, such as a document Office could not open.</p>
+<h3 id="step-16-1">Step 16</h3>
+<p>If a document fails to open, the others are still checked, and the
+run says which failed and why.</p>
+<h3 id="step-17-3">Step 17</h3>
+<p>Checking a folder also checks the folders inside it? Not by itself.
+Name each subfolder, or a pattern, to include them, so a run never
+wanders where you did not mean it to.</p>
+<h3 id="step-18-4">Step 18</h3>
+<p>Office lock files, the ones whose names begin with a tilde, are
+skipped, since they are not documents.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Skipped tilde dollar Week 3 dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-19-5">Step 19</h3>
+<p>The progress window can be left alone; the run carries on, and its
+count says how far it has come at any moment.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Checking 9 of 12: Budget dot xlsx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-20-6">Step 20</h3>
+<p>At the end, the results box names any file that could not be checked,
+with the reason, such as a document protected by a password.</p>
+<p>Screen reader:</p>
+<ul>
+<li>11 files checked, 1 failed</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-21-4">Step 21</h3>
+<p>Opened together in Excel, the reports make a list of the work to do
+before term, document by document.</p>
+<h3 id="step-22-4">Step 22</h3>
+<p>A report for each document means a fix to one never hides a problem
+in another: each report stands on its own.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Week 3 dot csv</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-23-4">Step 23</h3>
+<p>The totals at the end make progress measurable: fewer issues each
+time the folder is checked.</p>
+<p>Screen reader:</p>
+<ul>
+<li>12 files checked, 19 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-24-1">Step 24</h3>
+<p>A whole term’s materials, checked in one run, with one folder of
+reports. The last task walk does the same from File Explorer and the
+command line.</p>
+<p><strong>Something to try:</strong> Check a folder twice, the second
+time without Force replacements, and hear the documents already reported
+skipped.</p>
+<h2 id="check-from-explorer-and-the-command-line">8 - Check from
+Explorer and the Command Line</h2>
+<p>Checking without the dialog: from File Explorer’s context menu, and
+from a command prompt or a batch file, with the same options as the
+dialog.</p>
+<p><strong>Before you start:</strong> A document in File Explorer, and a
+command prompt.</p>
+<h3 id="step-1-8">Step 1</h3>
+<p>One want: to check a document the moment I am looking at it, and to
+check a folder every week without opening anything.</p>
+<h3 id="step-2-1">Step 2</h3>
+<p>The quickest way is in File Explorer. I am on a document there.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Handout dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-3-shiftf10">Step 3: Shift+F10</h3>
+<p>Shift+F10 opens its context menu.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Context menu</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-x">Step 4: X</h3>
+<p>X is Report via extCheck.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck: 1 file checked, 2 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-5-4">Step 5</h3>
+<p>The report is written beside the document, so I find it in the same
+folder, with the same name ending in dot csv.</p>
+<h3 id="step-6-7">Step 6</h3>
+<p>The command line suits work done often. In a command prompt, extCheck
+followed by a file’s name checks that file.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck Handout dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-7-5">Step 7</h3>
+<p>Every check box in the dialog has a command-line option. Dash o
+followed by a folder sends the reports there; dash f replaces existing
+reports; dash l writes the session log.</p>
+<h3 id="step-8-4">Step 8</h3>
+<p>So one line checks a whole folder into a Reports folder, replacing
+last week’s reports.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dash f dash o Reports C colon backslash Courses backslash
+Fall</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-9-5">Step 9</h3>
+<p>Saved in a batch file, that line runs in a moment, or on a schedule
+with Windows Task Scheduler.</p>
+<h3 id="step-10-7">Step 10</h3>
+<p>Dash u reads the settings saved by the dialog’s Use configuration
+box, so a workflow tried out in the dialog can be run the same way from
+a batch file.</p>
+<h3 id="step-11-6">Step 11</h3>
+<p>When a run ends, extCheck returns an exit code a batch file can test:
+zero when every file was checked, and one when a file could not be
+checked or nothing was found to check.</p>
+<h3 id="step-12-5">Step 12</h3>
+<p>Dash rules writes the rule registry, the list of every rule extCheck
+knows, with its source, category and fix, as a spreadsheet.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dash rules</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13-5">Step 13</h3>
+<p>The registry is the place to look when a report names a rule I have
+not met before. A copy is also in the help folder of the
+installation.</p>
+<h3 id="step-14-4">Step 14</h3>
+<p>Dash h shows every option, and dash v the version.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck dash h</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-15-3">Step 15</h3>
+<p>Dash g opens the dialog from the command line, for anyone who starts
+there but prefers the fields.</p>
+<h3 id="step-16-2">Step 16</h3>
+<p>The File Explorer entry works on any file, but extCheck checks only
+the four kinds it knows; for anything else, it says so and writes no
+report.</p>
+<h3 id="step-17-4">Step 17</h3>
+<p>Patterns work on the command line as in the dialog: star dot docx
+checks every Word document in the current folder.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck star dot docx</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-18-5">Step 18</h3>
+<p>Quotation marks keep a path with spaces in one piece, such as a
+folder called Course Materials.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck quote C colon backslash Course Materials quote</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-19-6">Step 19</h3>
+<p>The session log is kept in your own application data, so a run from a
+schedule leaves a record even though nobody saw it.</p>
+<h3 id="step-20-7">Step 20</h3>
+<p>And because the dialog and the command line use the same options,
+anything learned in one works in the other.</p>
+<h3 id="step-21-5">Step 21</h3>
+<p>A batch file can also check the exit code, and say when a check needs
+attention.</p>
+<p>Screen reader:</p>
+<ul>
+<li>if errorlevel 1 echo Some files could not be checked</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-22-f1">Step 22: F1</h3>
+<p>For anyone who works mostly in a command prompt, the dialog’s Help,
+F1, lists every option too, side by side with its field.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck Help dialog</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-23-5">Step 23</h3>
+<p>From the menu, from a prompt, or from a schedule: the same checks,
+wherever the work is. The last walk gathers it all together.</p>
+<p><strong>Something to try:</strong> Write a one-line batch file that
+checks a folder into a Reports folder, and run it.</p>
+<h2 id="conclusion">9 - Conclusion</h2>
+<p>What the walks covered, a glossary in two voices, and every way to
+get help with extCheck.</p>
+<p><strong>Before you start:</strong> Nothing to set up for this walk;
+it only listens.</p>
+<h3 id="step-1-9">Step 1</h3>
+<p>That is extCheck. Here is what each walk gave you.</p>
+<h3 id="step-2-2">Step 2</h3>
+<p>Walk one: the dialog, and a letter for everything in it. Walk two:
+installing, and the three ways to start. Walks three to six: a Word
+document, a presentation, a workbook and a Markdown file, each checked
+and fixed.</p>
+<h3 id="step-3-2">Step 3</h3>
+<p>Walk seven: a whole folder, with the reports kept together. Walk
+eight: File Explorer and the command line.</p>
+<p>Screen reader:</p>
+<ul>
+<li>12 files checked, 48 issues</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-4-4">Step 4</h3>
+<p>Now a short glossary. I say the term; the other voice says what it
+means.</p>
+<h3 id="step-5-5">Step 5</h3>
+<p>Alternative text.</p>
+<p>Screen reader:</p>
+<ul>
+<li>The description of a picture or chart that a screen reader speaks in
+its place.</li>
+</ul>
+<h3 id="step-6-8">Step 6</h3>
+<p>Heading level.</p>
+<p>Screen reader:</p>
+<ul>
+<li>A heading’s place in a document’s outline: one for the title, two
+for its sections, three for theirs.</li>
+</ul>
+<h3 id="step-7-6">Step 7</h3>
+<p>Reading order.</p>
+<p>Screen reader:</p>
+<ul>
+<li>The order a screen reader reads the things on a slide: back to
+front, in the order they were added.</li>
+</ul>
+<h3 id="step-8-5">Step 8</h3>
+<p>Header row.</p>
+<p>Screen reader:</p>
+<ul>
+<li>The first row of a table, naming each column, so each cell can be
+said with its column’s name.</li>
+</ul>
+<h3 id="step-9-6">Step 9</h3>
+<p>Rule registry.</p>
+<p>Screen reader:</p>
+<ul>
+<li>The list of every rule extCheck checks, with its source, its
+category and its fix.</li>
+</ul>
+<h3 id="step-10-8">Step 10</h3>
+<p>MSAC and AXE.</p>
+<p>Screen reader:</p>
+<ul>
+<li>The two families of rules: the categories of Microsoft’s own
+Accessibility Checker, and rules adapted from the axe-core engine.</li>
+</ul>
+<h3 id="step-11-7">Step 11</h3>
+<p>Report.</p>
+<p>Screen reader:</p>
+<ul>
+<li>The spreadsheet file extCheck writes for each document, one problem
+to a row.</li>
+</ul>
+<h3 id="step-12-f1-1">Step 12: F1</h3>
+<p>Help is never more than a key away. In the dialog, F1 shows Help:
+every field with its tip, and every key.</p>
+<p>Screen reader:</p>
+<ul>
+<li>extCheck Help dialog</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-13-shiftf1">Step 13: Shift+F1</h3>
+<p>Shift+F1 says the tip for the field you are on. F7 lists the dialog’s
+controls and moves to the one you choose.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Source files: one file, a folder, a pattern, or several, separated
+by spaces</li>
+</ul>
+<p>Confirm the wording with a live run: buildTutorials -live.</p>
+<h3 id="step-14-5">Step 14</h3>
+<p>Guide, Alt+G, opens the full guide in your browser and then returns
+to the dialog as you left it. The guide, these walks as text, and the
+rule registry are all in the help folder of the installation.</p>
+<h3 id="step-15-4">Step 15</h3>
+<p>F11 checks for a newer version, and the extCheck page on GitHub has
+the latest release and a place to report a problem.</p>
+<h3 id="step-16-3">Step 16</h3>
+<p>Accessibility is a habit more than a task. A check before each
+document leaves your desk takes a minute, and saves every reader the
+trouble.</p>
+<h3 id="step-17-5">Step 17</h3>
+<p>Thank you for listening. Happy checking.</p>
+<p><strong>Something to try:</strong> Pick the document you share most
+often, check it, and fix the first three rows of its report.</p>
+<!-- walkthrough ends -->
+<h2 id="where-to-go-next">1. Where to Go Next</h2>
+<p>Press F1 for the guide, Alt+Shift+H for the hotkey list, and Alt+F10
+for every command in one window.</p>
+</body>
+</html>

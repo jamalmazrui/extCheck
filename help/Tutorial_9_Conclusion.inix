@@ -1,0 +1,105 @@
+﻿; Tutorial_9_Conclusion.inix -- conclusion
+
+[about]
+Title=9 - Conclusion
+Intro=What the walks covered, a glossary in two voices, and every way to get help with extCheck.
+Setup=Nothing to set up for this walk; it only listens.
+Homework=Pick the document you share most often, check it, and fix the first three rows of its report.
+
+[step]
+
+Say=That is extCheck. Here is what each walk gave you.
+Key=
+
+[step]
+
+Say=Walk one: the dialog, and a letter for everything in it. Walk two: installing, and the three ways to start. Walks three to six: a Word document, a presentation, a workbook and a Markdown file, each checked and fixed.
+Key=
+
+[step]
+
+Say=Walk seven: a whole folder, with the reports kept together. Walk eight: File Explorer and the command line.
+Key=
+Hear=12 files checked, 48 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Now a short glossary. I say the term; the other voice says what it means.
+Key=
+
+[step]
+
+Say=Alternative text.
+Key=
+Hear=The description of a picture or chart that a screen reader speaks in its place.
+
+[step]
+
+Say=Heading level.
+Key=
+Hear=A heading's place in a document's outline: one for the title, two for its sections, three for theirs.
+
+[step]
+
+Say=Reading order.
+Key=
+Hear=The order a screen reader reads the things on a slide: back to front, in the order they were added.
+
+[step]
+
+Say=Header row.
+Key=
+Hear=The first row of a table, naming each column, so each cell can be said with its column's name.
+
+[step]
+
+Say=Rule registry.
+Key=
+Hear=The list of every rule extCheck checks, with its source, its category and its fix.
+
+[step]
+
+Say=MSAC and AXE.
+Key=
+Hear=The two families of rules: the categories of Microsoft's own Accessibility Checker, and rules adapted from the axe-core engine.
+
+[step]
+
+Say=Report.
+Key=
+Hear=The spreadsheet file extCheck writes for each document, one problem to a row.
+
+[step]
+
+Say=Help is never more than a key away. In the dialog, F1 shows Help: every field with its tip, and every key.
+Key=F1
+Hear=extCheck Help dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift+F1 says the tip for the field you are on. F7 lists the dialog's controls and moves to the one you choose.
+Key=Shift+F1
+Hear=Source files: one file, a folder, a pattern, or several, separated by spaces
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Guide, Alt+G, opens the full guide in your browser and then returns to the dialog as you left it. The guide, these walks as text, and the rule registry are all in the help folder of the installation.
+Key=
+
+[step]
+
+Say=F11 checks for a newer version, and the extCheck page on GitHub has the latest release and a place to report a problem.
+Key=
+
+[step]
+
+Say=Accessibility is a habit more than a task. A check before each document leaves your desk takes a minute, and saves every reader the trouble.
+Key=
+
+[step]
+
+Say=Thank you for listening. Happy checking.
+Key=

@@ -1,0 +1,154 @@
+﻿; Tutorial_3_Check_a_Word_Document.inix -- check a word document
+
+[about]
+Title=3 - Check a Word Document
+Intro=Checking a Word handout before it is emailed, and reading its report: the most common use of extCheck.
+Setup=A Word document of your own, such as a handout or a letter, and Microsoft Word installed.
+Homework=Fix one problem the report names, check the document again with Force replacements on, and confirm that row is gone.
+
+[step]
+
+Say=One want: a Word handout that everyone can read, checked before I email it to a group.
+Key=
+
+[step]
+
+Say=I open the dialog. The focus is on Source files.
+Key=Alt+Control+X
+Hear=extCheck dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Rather than type the path, Browse source opens a file picker.
+Key=Alt+B
+Hear=Open dialog
+Hear=File name edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type the start of the handout's name and press Enter. The picker closes, and its full path is in Source files.
+Key=Enter
+Hear=Source files edit
+Hear=C colon backslash Users backslash Documents backslash Handout dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I leave Output directory blank, so the report lands in the current folder, and I tick View output, so that folder opens when the check is done.
+Key=Alt+V
+Hear=View output check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter starts the check. Word opens the document invisibly in the background, so nothing appears on screen.
+Key=Enter
+Hear=Checking Handout dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A few seconds later the results box says what was done.
+Key=
+Hear=1 file checked, 6 issues
+Hear=OK button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Six issues. I press Enter, and File Explorer opens on the folder, on the new report, Handout dot csv.
+Key=Enter
+Hear=Handout dot csv
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I open it in Excel. Each row is one problem, and the columns are rule, source, category, location, context, message, and remediation, which is the fix.
+Key=Enter
+Hear=Handout dot csv - Excel
+Hear=Rule ID, A1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow moves to the first problem. Control with Right Arrow reads along its row.
+Key=Down Arrow
+Hear=Missing Alt Text, A2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Missing alt text: a picture with no description, so a screen reader can say only that a picture is there. The location says which picture, and the remediation says how to add its description in Word.
+Key=
+
+[step]
+
+Say=The next row is a heading problem.
+Key=Down Arrow
+Hear=Heading Skipped Level, A3
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A heading skipped a level, from heading one straight to heading three. Readers who move by headings use those levels as an outline, so a gap misleads them about the structure.
+Key=
+
+[step]
+
+Say=Others in a typical Word report: a table with no header row, a link whose text says click here rather than where it goes, and blank paragraphs used for spacing, each heard as an empty line.
+Key=
+
+[step]
+
+Say=Each finding is a fix I can make in Word, in a minute or two: add the description, correct the heading level, mark the first table row as its header.
+Key=
+
+[step]
+
+Say=After fixing, I check again. The old report is there, so I tick Force replacements, which replaces it rather than skipping the document.
+Key=Alt+F
+Hear=Force replacements check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter, and the new report has fewer rows. When the count reaches zero, the handout is ready to send.
+Key=Enter
+Hear=1 file checked, 0 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A report can be long. In Excel, a filter on the Rule ID column shows one kind of problem at a time, which makes a long report manageable.
+Key=Alt+Down Arrow
+Hear=Filter, Rule ID
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Or sort by Location, to fix the document from top to bottom in one pass.
+Key=
+Hear=Sort A to Z, Location
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=The Message column always says why a problem matters, not just what it is, so a fix is never a matter of guessing.
+Key=
+Hear=Message, A picture has no description, so a screen reader can only say that a picture is there
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Some rules are certain, such as a picture with no description at all. Others are judgments, such as a description that may be too short to be useful; the message says which kind a finding is.
+Key=
+Hear=Alt Text Too Short, Picture 3
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=If Word is already open with other documents, extCheck uses its own hidden copy, and leaves yours alone.
+Key=
+[step]
+
+Say=One document, checked, fixed and checked again. The next walk does the same for a slide presentation, where reading order matters most.
+Key=

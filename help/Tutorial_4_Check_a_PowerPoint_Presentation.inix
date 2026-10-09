@@ -1,0 +1,142 @@
+﻿; Tutorial_4_Check_a_PowerPoint_Presentation.inix -- check a powerpoint presentation
+
+[about]
+Title=4 - Check a PowerPoint Presentation
+Intro=Checking slides before a talk, and the problems presentations have that documents do not: slide titles, reading order, and pictures without descriptions.
+Setup=A PowerPoint presentation of your own, and Microsoft PowerPoint installed.
+Homework=Open a presentation's Selection Pane in PowerPoint, and see the order a screen reader follows on one slide.
+
+[step]
+
+Say=One want: slides for a talk that the audience can follow afterwards with a screen reader, when I share the file.
+Key=
+
+[step]
+
+Say=I open the dialog, and type the presentation's path in Source files. Typing works as well as browsing.
+Key=Alt+Control+X
+Hear=extCheck dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I press Enter. PowerPoint opens the slides in the background, and extCheck reads each one.
+Key=Enter
+Hear=Checking Talk dot pptx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The results box gives the count.
+Key=
+Hear=1 file checked, 9 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Nine issues, in Talk dot csv. Presentations have three kinds of problem that documents do not.
+Key=
+
+[step]
+
+Say=The first is the slide title. A screen reader user moves through a presentation by its titles, the way a sighted reader glances at the top of each slide. A slide with no title is a slide with no name.
+Key=
+
+[step]
+
+Say=In the report, its location names the slide by number, so I know exactly where to look.
+Key=
+Hear=Slide Missing Title, Slide 4
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The second is reading order. A screen reader reads the things on a slide from back to front, in the order they were added, not top to bottom as they look. A title added last is read last.
+Key=
+
+[step]
+
+Say=extCheck reports a slide whose title is not first to be read. In PowerPoint, the Selection Pane lists a slide's objects in that order, and dragging the title to the bottom of that list makes it read first.
+Key=
+Hear=Title Not First In Reading Order, Slide 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The third is pictures and charts with no description. A chart that shows a trend says nothing unless its description says what the trend is.
+Key=
+Hear=Missing Alt Text, Slide 6, Chart 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Others in a typical presentation: slides that advance on a timer, which may move before a listener has finished, and text too small to read when the slides are shown.
+Key=
+
+[step]
+
+Say=Some findings are judgments rather than certainties, such as text that may be too small. The message says why each matters, and the fix is mine to decide.
+Key=
+
+[step]
+
+Say=I fix the titles in PowerPoint first, since they are the presentation's outline, then the reading order, then the descriptions.
+Key=
+
+[step]
+
+Say=Then I check again with Force replacements on, so the new report replaces the old.
+Key=Alt+F
+Hear=Force replacements check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter, and the count comes down. Presentations are the files most often shared without a check, and the ones that need it most.
+Key=Enter
+Hear=1 file checked, 1 issue
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A slide's reading order can be checked by ear, too: in PowerPoint, Tab moves through a slide's objects in exactly the order a screen reader reads them.
+Key=Tab
+Hear=Title 1, title placeholder
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=The first thing heard should be the title. Here it is, so this slide is in order.
+Key=
+[step]
+
+Say=Charts deserve the most care. A good description says what the chart shows, such as sales doubling over three years, not that it is a bar chart.
+Key=
+[step]
+
+Say=Pictures used only for decoration should be marked decorative in PowerPoint, so a screen reader skips them; extCheck does not report a picture marked that way.
+Key=
+[step]
+
+Say=Speaker notes are a good home for anything said aloud in the talk but not on a slide, so a reader of the shared file gets it too.
+Key=
+Hear=Notes, Slide 3
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Before checking, close the presentation in PowerPoint, so the copy extCheck reads is the one you last saved.
+Key=
+Hear=Talk dot pptx, saved
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=After fixing, a quick test by ear helps too: in PowerPoint, start the slide show, and listen to each slide's title as it arrives.
+Key=F5
+Hear=Slide 1, Quarterly Results
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Titles, reading order and descriptions: the three that matter most in slides. The next walk checks a workbook.
+Key=

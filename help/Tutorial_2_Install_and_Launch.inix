@@ -1,0 +1,152 @@
+﻿; Tutorial_2_Install_and_Launch.inix -- install and launch
+
+[about]
+Title=2 - Install and Launch
+Intro=Installing extCheck for everyone on the computer, the desktop key that opens it, and the File Explorer entry that checks one file.
+Setup=extCheck_setup.exe downloaded from the extCheck releases page on GitHub.
+Homework=After installing, right-click a document in File Explorer and find Report via extCheck.
+
+[step]
+
+Say=One want: extCheck on this computer, ready from the desktop and from File Explorer, in one sitting.
+Key=
+
+[step]
+
+Say=I open the downloaded setup program. It installs for everyone on the computer, so Windows asks for administrator rights. I say yes.
+Key=Enter
+Hear=Setup - extCheck dialog
+Hear=Welcome to the extCheck Setup Wizard
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The welcome page shows a short summary of the license. extCheck is free and open source, under the MIT license. Enter takes Next.
+Key=Enter
+Hear=Select Destination Location
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The first time, it asks for a folder. The default, in Program Files, is right. An update later goes to the same folder without asking.
+Key=Enter
+Hear=Ready to Install
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter again, and it copies the program and its documents.
+Key=Enter
+Hear=Installing
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The last page offers two check boxes. Launch extCheck now is checked; open the user guide is not.
+Key=
+Hear=Launch extCheck now check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I press Finish. A short box says what was installed and where the logs are.
+Key=Enter
+Hear=extCheck setup complete
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=When I close that box, extCheck starts, its dialog ready on Source files.
+Key=Enter
+Hear=extCheck dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Setup added three ways to start it. The first is a desktop shortcut whose key is Alt+Control+X, which opens the dialog from anywhere in Windows.
+Key=
+
+[step]
+
+Say=The second is the Start menu, where extCheck has its own group with the program, the guide and the uninstaller.
+Key=
+
+[step]
+
+Say=The third is in File Explorer. I close the dialog and go to a document there.
+Key=Escape
+Hear=Desktop
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift+F10 opens the context menu for the file I am on.
+Key=Shift+F10
+Hear=Context menu
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=X is Report via extCheck. It checks this one file at once and writes its report in the same folder, with the same name ending in dot csv.
+Key=X
+Hear=extCheck: 1 file checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Keeping extCheck current takes one key. In the dialog, F11 asks GitHub whether a newer version exists. If one does, Yes is the default, and Enter downloads and starts the new setup.
+Key=
+
+[step]
+
+Say=If this copy is already the newest, No is the default, and Enter simply returns to the dialog.
+Key=
+
+[step]
+
+Say=Installing for everyone has a reason: the program sits in Program Files, out of reach of changes made by mistake, and each person's settings and logs stay in their own folders.
+Key=
+Hear=C colon backslash Program Files backslash extCheck
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Those per-person folders are under your own application data: configs for the saved fields, and logs for a record of every session, kept whatever the dialog's Log session box says.
+Key=
+Hear=configs folder, logs folder
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=If setup ever stops partway, its own log says why, and running the setup again simply finishes the job.
+Key=
+[step]
+
+Say=To remove extCheck, use Installed apps in Windows Settings, or the uninstaller in its Start-menu group. Your reports are never touched, since they are wherever you saved them.
+Key=
+Hear=extCheck, Uninstall button
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=One more thing the installer adds: extCheck dot cmd at the top of the installation, which runs extCheck from any command prompt. Walk eight uses it.
+Key=
+Hear=extCheck dot cmd
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Back in the dialog, the title bar shows the version, so you can always tell which extCheck is installed.
+Key=Alt+Control+X
+Hear=extCheck 1.4 dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=And the Start-menu group holds the guide as well, so help is there even before the dialog is opened.
+Key=Windows
+Hear=Start
+Hear=extCheck folder
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Installed, launched three ways, and kept current with F11. The next walk checks a real document.
+Key=

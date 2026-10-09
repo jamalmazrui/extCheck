@@ -1,0 +1,164 @@
+﻿; Tutorial_1_User_Interface.inix -- user interface
+
+[about]
+Title=1 - User Interface
+Intro=The extCheck dialog: its fields, its underlined letters, and the keys that work anywhere in it, each shown as the screen reader speaks it.
+Setup=extCheck installed, as walk two shows; the dialog open with Alt+Control+X.
+Homework=Open the dialog, press F7, and choose a control from the list. Then press Shift+F1 there and hear its tip.
+
+[step]
+
+Say=One want: to move around the extCheck dialog quickly, without hunting. Everything in it can be reached by a letter.
+Key=
+
+[step]
+
+Say=I press the desktop key for extCheck. The dialog opens on its first field.
+Key=Alt+Control+X
+Hear=extCheck dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Source files is where the documents to check are named: one file, a folder, a pattern such as star dot docx, or several of these with spaces between. The underlined letter is S.
+Key=
+
+[step]
+
+Say=Tab moves to the next control, the button that opens a file picker.
+Key=Tab
+Hear=Browse source button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Every label has an underlined letter, and Alt with that letter jumps straight to it from anywhere in the dialog. Output directory is O.
+Key=Alt+O
+Hear=Output directory edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Output directory is where the reports go. Left blank, they go to the current folder. Choose output, C, opens a folder picker instead of typing.
+Key=
+
+[step]
+
+Say=Next come four check boxes. Force replacements, F, replaces a report that already exists; without it, a document whose report is there is skipped.
+Key=Alt+F
+Hear=Force replacements check box, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Space checks it, and Space again clears it.
+Key=Space
+Hear=checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I clear it again, since most runs do not need it.
+Key=Space
+Hear=not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=View output, V, opens the reports' folder in File Explorer when the run is done. Log session, L, writes a log of the run beside the reports. Use configuration, U, remembers these fields for next time.
+Key=
+
+[step]
+
+Say=Not sure what a field is for? Shift+F1 says the tip for the one you are on.
+Key=Shift+F1
+Hear=Force replacements: replace an existing report instead of skipping its document
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=F1 shows Help: every field with its tip, and every key.
+Key=F1
+Hear=extCheck Help dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape closes Help and returns to the same field.
+Key=Escape
+Hear=Force replacements check box, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=F7 lists every control in the dialog. Arrow to one, press Enter, and the focus moves there.
+Key=F7
+Hear=Controls list
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose Source files from the list.
+Key=Enter
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter starts the check. From any control, even a check box, Control+Enter does the same.
+Key=Tab
+Hear=OK button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Two more buttons sit at the end. Guide, G, opens the full guide in the browser and then returns here.
+Key=Alt+G
+Hear=Guide button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Default settings, D, clears every field and box, and forgets anything saved. It asks first, since it cannot be undone.
+Key=Alt+D
+Hear=Default settings button
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Escape, from anywhere in the dialog, closes it without checking anything, the same as the Cancel button.
+Key=Tab
+Hear=Cancel button
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=The dialog never speaks over the screen reader. It says a field's name once, as the reader would, and adds speech only for what the reader cannot know, such as a run's progress.
+Key=
+[step]
+
+Say=And the dialog remembers nothing unless asked. With Use configuration ticked, OK saves the fields; next time, they are already filled in.
+Key=Alt+U
+Hear=Use configuration check box, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Every key you have heard is listed in the Hotkeys document in the help folder, by key, by command, and by the field it belongs to, so you can review them without the dialog open.
+Key=
+[step]
+
+Say=Tab and Shift with Tab move forward and back through every control, in the order they appear, so nothing can be missed by moving one step at a time.
+Key=Shift+Tab
+Hear=Use configuration check box, not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=An underlined letter works whether or not the screen reader announces it, since it is plain Windows: the Alt key with the letter that the label shows.
+Key=Alt+S
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=That is the whole dialog: a field for what to check, a field for where reports go, four boxes, and a key for everything. The next walk installs extCheck.
+Key=

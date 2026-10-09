@@ -1,0 +1,139 @@
+﻿; Tutorial_8_Check_from_Explorer_and_the_Command_Line.inix -- check from explorer and the command line
+
+[about]
+Title=8 - Check from Explorer and the Command Line
+Intro=Checking without the dialog: from File Explorer's context menu, and from a command prompt or a batch file, with the same options as the dialog.
+Setup=A document in File Explorer, and a command prompt.
+Homework=Write a one-line batch file that checks a folder into a Reports folder, and run it.
+
+[step]
+
+Say=One want: to check a document the moment I am looking at it, and to check a folder every week without opening anything.
+Key=
+
+[step]
+
+Say=The quickest way is in File Explorer. I am on a document there.
+Key=
+Hear=Handout dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift+F10 opens its context menu.
+Key=Shift+F10
+Hear=Context menu
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=X is Report via extCheck.
+Key=X
+Hear=extCheck: 1 file checked, 2 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The report is written beside the document, so I find it in the same folder, with the same name ending in dot csv.
+Key=
+
+[step]
+
+Say=The command line suits work done often. In a command prompt, extCheck followed by a file's name checks that file.
+Key=
+Hear=extCheck Handout dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Every check box in the dialog has a command-line option. Dash o followed by a folder sends the reports there; dash f replaces existing reports; dash l writes the session log.
+Key=
+
+[step]
+
+Say=So one line checks a whole folder into a Reports folder, replacing last week's reports.
+Key=
+Hear=extCheck dash f dash o Reports C colon backslash Courses backslash Fall
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Saved in a batch file, that line runs in a moment, or on a schedule with Windows Task Scheduler.
+Key=
+
+[step]
+
+Say=Dash u reads the settings saved by the dialog's Use configuration box, so a workflow tried out in the dialog can be run the same way from a batch file.
+Key=
+
+[step]
+
+Say=When a run ends, extCheck returns an exit code a batch file can test: zero when every file was checked, and one when a file could not be checked or nothing was found to check.
+Key=
+
+[step]
+
+Say=Dash rules writes the rule registry, the list of every rule extCheck knows, with its source, category and fix, as a spreadsheet.
+Key=
+Hear=extCheck dash rules
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The registry is the place to look when a report names a rule I have not met before. A copy is also in the help folder of the installation.
+Key=
+
+[step]
+
+Say=Dash h shows every option, and dash v the version.
+Key=
+Hear=extCheck dash h
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Dash g opens the dialog from the command line, for anyone who starts there but prefers the fields.
+Key=
+
+[step]
+
+Say=The File Explorer entry works on any file, but extCheck checks only the four kinds it knows; for anything else, it says so and writes no report.
+Key=
+[step]
+
+Say=Patterns work on the command line as in the dialog: star dot docx checks every Word document in the current folder.
+Key=
+Hear=extCheck star dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Quotation marks keep a path with spaces in one piece, such as a folder called Course Materials.
+Key=
+Hear=extCheck quote C colon backslash Course Materials quote
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=The session log is kept in your own application data, so a run from a schedule leaves a record even though nobody saw it.
+Key=
+[step]
+
+Say=And because the dialog and the command line use the same options, anything learned in one works in the other.
+Key=
+[step]
+
+Say=A batch file can also check the exit code, and say when a check needs attention.
+Key=
+Hear=if errorlevel 1 echo Some files could not be checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=For anyone who works mostly in a command prompt, the dialog's Help, F1, lists every option too, side by side with its field.
+Key=F1
+Hear=extCheck Help dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=From the menu, from a prompt, or from a schedule: the same checks, wherever the work is. The last walk gathers it all together.
+Key=

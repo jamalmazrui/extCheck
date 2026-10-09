@@ -5,6 +5,24 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 8 October 2026 -- an audit by another AI, and spoken tutorials
+
+ChatGPT audited extCheck and reported 39 findings. Checked against the code, these held and are fixed:
+
+- **PowerPoint placeholders are recognized.** The code read IsPlaceholder, which PowerPoint's shapes do not have; the error was swallowed, so no placeholder -- slide titles included -- was ever recognized. A placeholder is now known by its type.
+- **Office truth values are read correctly.** Shape.HasChart, HasTextFrame, a transition's AdvanceOnTime and Word's HeadingFormat are numbers in Office, true being -1. Cast straight to true or false they threw, the error was swallowed, and those checks did nothing. They are now read as numbers.
+- **The reading-order check looks at the back.** It checked the front shape on each slide; screen readers read from the back, the first shape, which is now the one checked.
+- **Real numbered lists in Markdown are not called fake.** The pattern was Markdown's own ordered-list syntax, so every real numbered list was reported. Now only numbering Markdown does not make a list -- (1), 1 -, 1: -- is.
+- **One report, one source.** report.docx and report.md both wrote report.csv; a later file that would collide now takes its type into its report's name.
+- **A failed file is not a success.** The run returned success whenever anything was checked; a file that could not be checked now makes it fail.
+- **No cell becomes a formula.** Document text beginning = + - or @ became a live formula when a report was opened in Excel; such a cell now starts with an apostrophe. The two identical CSV writers became one.
+
+Brought up to the current Homer practices for an app:
+
+- **Spoken tutorials, in the pattern of ten.** Walk 0, an overview; 1, the dialog; 2, installing; 3 to 8, checking a Word handout, a slide presentation, a shared workbook, a Markdown ReadMe, a whole folder, and from File Explorer and the command line; 9, the conclusion, a glossary in two voices, and where to get help. The build speaks them; the installer ships them and their audio; the repository carries both.
+
+Left for later, as larger changes: a report of what each check could not examine; the wording of rules that claim more than they check; and a deadline for an Office document that stops responding.
+
 ## Version 2.1.1 (September 2026)
 
 - **Setup.** The Results box at the end of setup is titled "extCheck Setup Results", and the finish page uses the Homer wording: the verb first, no "recommended", and "Launch extCheck (desktop hotkey ...)".

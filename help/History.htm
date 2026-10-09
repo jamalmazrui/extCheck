@@ -171,6 +171,51 @@
 <p class="author">Jamal Mazrui</p>
 </header>
 <h1 id="extcheck-history">extCheck History</h1>
+<h2 id="october-2026-an-audit-by-another-ai-and-spoken-tutorials">8
+October 2026 – an audit by another AI, and spoken tutorials</h2>
+<p>ChatGPT audited extCheck and reported 39 findings. Checked against
+the code, these held and are fixed:</p>
+<ul>
+<li><strong>PowerPoint placeholders are recognized.</strong> The code
+read IsPlaceholder, which PowerPoint’s shapes do not have; the error was
+swallowed, so no placeholder – slide titles included – was ever
+recognized. A placeholder is now known by its type.</li>
+<li><strong>Office truth values are read correctly.</strong>
+Shape.HasChart, HasTextFrame, a transition’s AdvanceOnTime and Word’s
+HeadingFormat are numbers in Office, true being -1. Cast straight to
+true or false they threw, the error was swallowed, and those checks did
+nothing. They are now read as numbers.</li>
+<li><strong>The reading-order check looks at the back.</strong> It
+checked the front shape on each slide; screen readers read from the
+back, the first shape, which is now the one checked.</li>
+<li><strong>Real numbered lists in Markdown are not called
+fake.</strong> The pattern was Markdown’s own ordered-list syntax, so
+every real numbered list was reported. Now only numbering Markdown does
+not make a list – (1), 1 -, 1: – is.</li>
+<li><strong>One report, one source.</strong> report.docx and report.md
+both wrote report.csv; a later file that would collide now takes its
+type into its report’s name.</li>
+<li><strong>A failed file is not a success.</strong> The run returned
+success whenever anything was checked; a file that could not be checked
+now makes it fail.</li>
+<li><strong>No cell becomes a formula.</strong> Document text beginning
+= + - or @ became a live formula when a report was opened in Excel; such
+a cell now starts with an apostrophe. The two identical CSV writers
+became one.</li>
+</ul>
+<p>Brought up to the current Homer practices for an app:</p>
+<ul>
+<li><strong>Spoken tutorials, in the pattern of ten.</strong> Walk 0, an
+overview; 1, the dialog; 2, installing; 3 to 8, checking a Word handout,
+a slide presentation, a shared workbook, a Markdown ReadMe, a whole
+folder, and from File Explorer and the command line; 9, the conclusion,
+a glossary in two voices, and where to get help. The build speaks them;
+the installer ships them and their audio; the repository carries
+both.</li>
+</ul>
+<p>Left for later, as larger changes: a report of what each check could
+not examine; the wording of rules that claim more than they check; and a
+deadline for an Office document that stops responding.</p>
 <h2 id="version-2.1.1-september-2026">Version 2.1.1 (September
 2026)</h2>
 <ul>

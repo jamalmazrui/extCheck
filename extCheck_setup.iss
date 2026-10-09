@@ -137,6 +137,14 @@ Source: "help\*.md"; DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\*.htm"; DestDir: "{app}\help"; Flags: ignoreversion
 ; The rule registry, written by the build from the program's own rule table.
 Source: "help\*.csv"; DestDir: "{app}\help"; Flags: ignoreversion
+; The spoken tutorials, in the Homer pattern of ten, and their audio, made by the
+; build before this is compiled (8 October 2026). The walk scripts and the audio's
+; fingerprints ship too, since the build checks that every file in help ships.
+Source: "help\Tutorial_*.inix"; DestDir: "{app}\help"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "help\TutorialFeed.xml"; DestDir: "{app}\help"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "help\tutorials\*.mp3"; DestDir: "{app}\help\tutorials"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "help\tutorials\*.m3u"; DestDir: "{app}\help\tutorials"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "help\tutorials\*.sha256"; DestDir: "{app}\help\tutorials"; Flags: ignoreversion skipifsourcedoesntexist
 
 [InstallDelete]
 ; What the installers before the kit put at the top of the program folder.

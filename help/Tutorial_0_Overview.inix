@@ -1,0 +1,69 @@
+﻿; Tutorial_0_Overview.inix -- overview
+
+[about]
+Title=0 - Overview
+Intro=What extCheck is, the two ways to run it, and the ten walks that teach it.
+Setup=Nothing to set up for this walk; it only listens.
+Homework=Think of one document you share with other people. Walk three, four, five or six will check one like it.
+
+[step]
+
+Say=Welcome. This is the first of ten short walks through extCheck. I am the host, and the other voice you hear is the screen reader, speaking as it would on your own computer.
+Key=
+
+[step]
+
+Say=Two screen reader keys help in every walk. If you miss something the reader said, Insert plus Up Arrow says the current line again.
+Key=Insert+Up Arrow
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=And whenever you are unsure where you are, Insert plus Tab says what has the focus: its name, its kind, and its value.
+Key=Insert+Tab
+Hear=Source files edit, blank
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=extCheck checks documents for accessibility problems before you share them: Word documents, Excel workbooks, PowerPoint presentations, and Markdown files. For each one it writes a report, a spreadsheet file listing every problem it found, where it is, why it matters, and how to fix it.
+Key=
+
+[step]
+
+Say=Word, Excel and PowerPoint files are opened by Microsoft Office in the background, so Office must be installed to check them. Markdown files need nothing else at all.
+Key=
+
+[step]
+
+Say=There are two ways to run it. The dialog is a small window of fields and check boxes, opened from the desktop with one key. The command line runs the same checks from a command prompt or a batch file, which suits checking many files on a schedule.
+Key=
+
+[step]
+
+Say=A third way sits in between: in File Explorer, the context menu of any file holds Report via extCheck, which checks that one file and writes its report beside it.
+Key=
+
+[step]
+
+Say=The reports are plain CSV files. Open one in Excel, or in any editor, and each row is one problem, with seven columns: the rule, its source, the category, the location, the text concerned, the message, and the fix.
+Key=
+
+[step]
+
+Say=Each rule comes from one of two families. Some mirror the categories of the Accessibility Checker built into Microsoft Office. Others are adapted from axe-core, the open-source engine many web checkers use, and cover things the Office checker does not.
+Key=
+
+[step]
+
+Say=Here are the ten walks. Walk one: the user interface, the dialog and its keys. Walk two: install and launch. Walk three: check a Word document. Walk four: check a PowerPoint presentation. Walk five: check an Excel workbook.
+Key=
+
+[step]
+
+Say=Walk six: check a Markdown file. Walk seven: check a whole folder and keep the reports together. Walk eight: check from File Explorer and the command line. Walk nine: the conclusion, a glossary, and where to get help.
+Key=
+
+[step]
+
+Say=Each walk is a few minutes long, and each builds on the ones before it, so they are best heard in order the first time. Walk one comes next.
+Key=

@@ -1,0 +1,152 @@
+﻿; Tutorial_7_Check_a_Whole_Folder.inix -- check a whole folder
+
+[about]
+Title=7 - Check a Whole Folder
+Intro=Checking every document in a folder at once, keeping the reports together in their own folder, and keeping a log of the run.
+Setup=A folder holding several documents of different kinds, such as course materials.
+Homework=Check a folder twice, the second time without Force replacements, and hear the documents already reported skipped.
+
+[step]
+
+Say=One want: every handout, slide deck and spreadsheet for a course checked before term starts, with the reports kept together.
+Key=
+
+[step]
+
+Say=I open the dialog. In Source files, a folder's path is enough: extCheck checks every Word, Excel, PowerPoint and Markdown file in it.
+Key=Alt+Control+X
+Hear=extCheck dialog
+Hear=Source files edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type the folder's path.
+Key=
+Hear=C colon backslash Courses backslash Fall
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Several sources work too, separated by spaces, and a pattern such as star dot pptx checks only the presentations.
+Key=
+
+[step]
+
+Say=I want the reports in their own folder, not mixed in with the documents, so I go to Output directory.
+Key=Alt+O
+Hear=Output directory edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Choose output opens a folder picker, but I simply type a new folder's path, Reports, beside the course folder.
+Key=
+Hear=C colon backslash Courses backslash Reports
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I tick Log session, so a log of the whole run is written beside the reports, and View output, so their folder opens at the end.
+Key=Alt+L
+Hear=Log session check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter. The Reports folder does not exist yet, so extCheck asks before making it. Yes is the default.
+Key=Enter
+Hear=Create the output directory?
+Hear=Yes button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter again, and the run begins. A small window counts the files as they are checked, so a long run is never silent.
+Key=Enter
+Hear=Checking 3 of 12: Week 3 dot pptx
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The results box gives the totals for the whole folder.
+Key=
+Hear=12 files checked, 48 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Twelve files, forty-eight issues, in twelve reports, one per document, each named for its document.
+Key=
+
+[step]
+
+Say=If two documents share a name, such as Notes dot docx and Notes dot md, the second report takes its kind into its name, Notes dash md dot csv, so neither replaces the other.
+Key=
+
+[step]
+
+Say=When I run the same check again tomorrow, documents whose reports are already there are skipped, so only new ones are checked. Force replacements checks them all again.
+Key=
+
+[step]
+
+Say=Use configuration, U, saves these fields, so tomorrow the dialog opens with the same folders already filled in.
+Key=Alt+U
+Hear=Use configuration check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The log is the record of the run: every file, every finding, and anything that went wrong, such as a document Office could not open.
+Key=
+
+[step]
+
+Say=If a document fails to open, the others are still checked, and the run says which failed and why.
+Key=
+
+[step]
+
+Say=Checking a folder also checks the folders inside it? Not by itself. Name each subfolder, or a pattern, to include them, so a run never wanders where you did not mean it to.
+Key=
+[step]
+
+Say=Office lock files, the ones whose names begin with a tilde, are skipped, since they are not documents.
+Key=
+Hear=Skipped tilde dollar Week 3 dot docx
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=The progress window can be left alone; the run carries on, and its count says how far it has come at any moment.
+Key=
+Hear=Checking 9 of 12: Budget dot xlsx
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=At the end, the results box names any file that could not be checked, with the reason, such as a document protected by a password.
+Key=
+Hear=11 files checked, 1 failed
+Note=Confirm the wording with a live run: buildTutorials -live.
+[step]
+
+Say=Opened together in Excel, the reports make a list of the work to do before term, document by document.
+Key=
+[step]
+
+Say=A report for each document means a fix to one never hides a problem in another: each report stands on its own.
+Key=
+Hear=Week 3 dot csv
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The totals at the end make progress measurable: fewer issues each time the folder is checked.
+Key=
+Hear=12 files checked, 19 issues
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A whole term's materials, checked in one run, with one folder of reports. The last task walk does the same from File Explorer and the command line.
+Key=

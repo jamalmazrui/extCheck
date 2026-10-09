@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Homer Tools Walkthroughs</title>
+    <link>Tutorials.htm</link>
+    <description></description>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 09 Oct 2026 02:10:08 +0000</lastBuildDate>
+    <itunes:author></itunes:author>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:category text="Technology"/>
+    <item>
+      <title>0 - Overview</title>
+      <description>Nothing to set up for this walk; it only listens. Full transcript: Tutorials.htm#0-0-overview</description>
+      <link>Tutorials.htm#0-0-overview</link>
+      <guid isPermaLink="false">homer-tutorial_0_overview</guid>
+      <enclosure url="tutorials/0_Overview.mp3" length="1026568" type="audio/mpeg"/>
+      <itunes:duration>00:02:20</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>1 - User Interface</title>
+      <description>extCheck installed, as walk two shows; the dialog open with Alt+Control+X. Full transcript: Tutorials.htm#0a-1-user-interface</description>
+      <link>Tutorials.htm#0a-1-user-interface</link>
+      <guid isPermaLink="false">homer-tutorial_1_user_interface</guid>
+      <enclosure url="tutorials/1_User_Interface.mp3" length="1564674" type="audio/mpeg"/>
+      <itunes:duration>00:03:46</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>2 - Install and Launch</title>
+      <description>extCheck_setup.exe downloaded from the extCheck releases page on GitHub. Full transcript: Tutorials.htm#0b-2-install-and-launch</description>
+      <link>Tutorials.htm#0b-2-install-and-launch</link>
+      <guid isPermaLink="false">homer-tutorial_2_install_and_launch</guid>
+      <enclosure url="tutorials/2_Install_and_Launch.mp3" length="1472121" type="audio/mpeg"/>
+      <itunes:duration>00:03:27</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>3 - Check a Word Document</title>
+      <description>A Word document of your own, such as a handout or a letter, and Microsoft Word installed. Full transcript: Tutorials.htm#0c-3-check-a-word-document</description>
+      <link>Tutorials.htm#0c-3-check-a-word-document</link>
+      <guid isPermaLink="false">homer-tutorial_3_check_a_word_document</guid>
+      <enclosure url="tutorials/3_Check_a_Word_Document.mp3" length="1525905" type="audio/mpeg"/>
+      <itunes:duration>00:03:36</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>4 - Check a PowerPoint Presentation</title>
+      <description>A PowerPoint presentation of your own, and Microsoft PowerPoint installed. Full transcript: Tutorials.htm#0d-4-check-a-powerpoint-presentation</description>
+      <link>Tutorials.htm#0d-4-check-a-powerpoint-presentation</link>
+      <guid isPermaLink="false">homer-tutorial_4_check_a_powerpoint_presentation</guid>
+      <enclosure url="tutorials/4_Check_a_PowerPoint_Presentation.mp3" length="1456691" type="audio/mpeg"/>
+      <itunes:duration>00:03:22</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>5 - Check an Excel Workbook</title>
+      <description>An Excel workbook of your own, such as a budget or a schedule, and Microsoft Excel installed. Full transcript: Tutorials.htm#0e-5-check-an-excel-workbook</description>
+      <link>Tutorials.htm#0e-5-check-an-excel-workbook</link>
+      <guid isPermaLink="false">homer-tutorial_5_check_an_excel_workbook</guid>
+      <enclosure url="tutorials/5_Check_an_Excel_Workbook.mp3" length="1365693" type="audio/mpeg"/>
+      <itunes:duration>00:03:14</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>6 - Check a Markdown File</title>
+      <description>A Markdown file of your own, such as a ReadMe. Office is not needed. Full transcript: Tutorials.htm#0f-6-check-a-markdown-file</description>
+      <link>Tutorials.htm#0f-6-check-a-markdown-file</link>
+      <guid isPermaLink="false">homer-tutorial_6_check_a_markdown_file</guid>
+      <enclosure url="tutorials/6_Check_a_Markdown_File.mp3" length="1290367" type="audio/mpeg"/>
+      <itunes:duration>00:03:00</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>7 - Check a Whole Folder</title>
+      <description>A folder holding several documents of different kinds, such as course materials. Full transcript: Tutorials.htm#0g-7-check-a-whole-folder</description>
+      <link>Tutorials.htm#0g-7-check-a-whole-folder</link>
+      <guid isPermaLink="false">homer-tutorial_7_check_a_whole_folder</guid>
+      <enclosure url="tutorials/7_Check_a_Whole_Folder.mp3" length="1443203" type="audio/mpeg"/>
+      <itunes:duration>00:03:21</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>8 - Check from Explorer and the Command Line</title>
+      <description>A document in File Explorer, and a command prompt. Full transcript: Tutorials.htm#0h-8-check-from-explorer-and-the-command-line</description>
+      <link>Tutorials.htm#0h-8-check-from-explorer-and-the-command-line</link>
+      <guid isPermaLink="false">homer-tutorial_8_check_from_explorer_and_the_command_line</guid>
+      <enclosure url="tutorials/8_Check_from_Explorer_and_the_Command_Line.mp3" length="1252183" type="audio/mpeg"/>
+      <itunes:duration>00:02:53</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>9 - Conclusion</title>
+      <description>Nothing to set up for this walk; it only listens. Full transcript: Tutorials.htm#0i-9-conclusion</description>
+      <link>Tutorials.htm#0i-9-conclusion</link>
+      <guid isPermaLink="false">homer-tutorial_9_conclusion</guid>
+      <enclosure url="tutorials/9_Conclusion.mp3" length="883661" type="audio/mpeg"/>
+      <itunes:duration>00:02:07</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+  </channel>
+</rss>

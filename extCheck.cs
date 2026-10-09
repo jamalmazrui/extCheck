@@ -85,19 +85,28 @@ static class results {
         File.WriteAllText(sPath, sb.ToString(), Encoding.UTF8);
     }
 
-    static string esc(string s) {
-        s = s.Replace("\"", "\"\"");
-        if (s.Contains(",") || s.Contains("\"") || s.Contains("\r") || s.Contains("\n")) {
-            s = "\"" + s + "\"";
-        }
-        return s;
-    }
+    static string esc(string s) { return shared.csvCell(s); }
 }
 
 // ===========================================================================
 // Shared: vocabulary and utility functions used by multiple format modules
 // ===========================================================================
 static class shared {
+    // OFFICE TRUTH VALUES (8 October 2026, from an audit by another AI): Shape.HasChart
+    // and HasTextFrame are MsoTriState numbers, true being -1, and Word's HeadingFormat a
+    // Long; cast straight to bool through dynamic binding they threw, the empty catch
+    // swallowed it, and the check silently did nothing. Read as numbers, any nonzero is true.
+    public static bool officeTrue(object oValue) {
+        if (oValue == null) return false;
+        if (oValue is bool) return (bool)oValue;
+        try { return Convert.ToInt64(oValue) != 0; } catch { return false; }
+    }
+
+    // A PLACEHOLDER IS A SHAPE OF TYPE msoPlaceholder, 14 (8 October 2026, from an audit by
+    // another AI): Shape has no IsPlaceholder property, so reading it threw, the catch
+    // swallowed it, and no placeholder -- slide titles included -- was ever recognized.
+    public const int iMsoPlaceholder = 14;
+
     public static readonly string[] aVague = {
         "click here", "here", "link", "read more", "more", "this",
         "url", "learn more", "continue", "details", "info", "information", "go"
@@ -246,12 +255,20 @@ static class shared {
             if (i > 0) {
                 sb.Append(",");
             }
-            sb.Append(esc(aFields[i]));
+            sb.Append(csvCell(aFields[i]));
         }
         return sb.ToString();
     }
 
-    static string esc(string s) {
+    // ONE CSV CELL WRITER (8 October 2026, don't repeat yourself): results and shared
+    // each had an identical esc. This is the one; results.esc calls it.
+    // NO CELL BECOMES A FORMULA (8 October 2026, from an audit by another AI): text from
+    // a checked document went into the CSV as it was, so a cell beginning = + - or @
+    // became a live formula when the report was opened in Excel. Such a cell starts
+    // with an apostrophe, which Excel shows as plain text.
+    public static string csvCell(string s) {
+        if (s == null) s = "";
+        if (s.Length > 0 && "=+-@\t\r".IndexOf(s[0]) >= 0) s = "'" + s;
         s = s.Replace("\"", "\"\"");
         if (s.Contains(",") || s.Contains("\"") || s.Contains("\r") || s.Contains("\n")) {
             s = "\"" + s + "\"";
@@ -547,7 +564,7 @@ static class docxModule {
         foreach (dynamic oTable in oDoc.Tables) {
             iNum++;
             bool bHdr = false;
-            try { bHdr = (bool)oTable.Rows[1].HeadingFormat; } catch {}
+            try { bHdr = shared.officeTrue(oTable.Rows[1].HeadingFormat); } catch {}
             if (!bHdr) {
                 results.add("TableMissingHeaderRow", "MSAC", "Missing table header", "(Document)", "Table " + iNum,
                     "Table does not have a designated header row. Screen readers cannot identify column headers.",
@@ -1033,7 +1050,7 @@ static class pptxModule {
             foreach (dynamic oShape in oSlide.Shapes) {
                 bool bIsP  = false;
                 int iPType = 0;
-                try { bIsP  = (bool)oShape.IsPlaceholder; } catch {}
+                try { bIsP  = (int)oShape.Type == shared.iMsoPlaceholder; } catch {}
                 if (!bIsP) {
                     continue;
                 }
@@ -1064,7 +1081,7 @@ static class pptxModule {
                 int iPType    = 0;
                 try { sName   = oShape.Name.ToString(); } catch {}
                 try { iType   = (int)oShape.Type; } catch {}
-                try { bIsP    = (bool)oShape.IsPlaceholder; } catch {}
+                try { bIsP    = (int)oShape.Type == shared.iMsoPlaceholder; } catch {}
                 if (bIsP) {
                     try { iPType = (int)oShape.PlaceholderFormat.Type; } catch {}
                 }
@@ -1087,13 +1104,13 @@ static class pptxModule {
                 }
 
                 bool bHasChart = false;
-                try { bHasChart = (bool)oShape.HasChart; } catch {}
+                try { bHasChart = shared.officeTrue(oShape.HasChart); } catch {}
                 if (bHasChart) {
                     try { shared.chartTitleCheck(sLabel, sName, oShape.Chart); } catch {}
                 }
 
                 bool bHasText = false;
-                try { bHasText = (bool)oShape.HasTextFrame; } catch {}
+                try { bHasText = shared.officeTrue(oShape.HasTextFrame); } catch {}
                 if (!bHasText) {
                     continue;
                 }
@@ -1140,7 +1157,7 @@ static class pptxModule {
             dynamic oT  = oSlide.SlideShowTransition;
             bool bAuto  = false;
             float nTime = 0;
-            try { bAuto = (bool)oT.AdvanceOnTime; } catch {}
+            try { bAuto = shared.officeTrue(oT.AdvanceOnTime); } catch {}
             try { nTime = (float)oT.AdvanceTime; } catch {}
             if (bAuto && nTime > 0 && nTime < 3) {
                 results.add("FastAutoAdvance", "AXE", "Timing", sLabel, "Auto-advance: " + nTime + "s",
@@ -1193,7 +1210,7 @@ static class pptxModule {
                 int iType      = 0;
                 bool bHasChart = false;
                 try { iType    = (int)oShape.Type; } catch {}
-                try { bHasChart = (bool)oShape.HasChart; } catch {}
+                try { bHasChart = shared.officeTrue(oShape.HasChart); } catch {}
                 if (iType == iMsoShapeTypePicture || iType == iMsoShapeTypeLinkedPic || bHasChart) {
                     string sAlt = "";
                     try { sAlt = (oShape.AlternativeText ?? "").ToString().Trim(); } catch {}
@@ -1228,13 +1245,15 @@ static class pptxModule {
                     continue;
                 }
                 dynamic oBack = null;
-                try { oBack   = oSlide.Shapes[iCount]; } catch {}
+                // Shapes[1] is the back of the z-order, which screen readers read first;
+                // Shapes[Count] is the front (8 October 2026, from an audit by another AI).
+                try { oBack   = oSlide.Shapes[1]; } catch {}
                 if (oBack == null) {
                     continue;
                 }
                 bool bBackIsTitle = false;
                 try {
-                    bool bIsP = (bool)oBack.IsPlaceholder;
+                    bool bIsP = (int)oBack.Type == shared.iMsoPlaceholder;
                     if (bIsP) {
                         int t = (int)oBack.PlaceholderFormat.Type;
                         bBackIsTitle = (t == iPpPlaceholderTitle || t == iPpPlaceholderCenterTitle);
@@ -1678,7 +1697,11 @@ static class mdModule {
     }
 
     static void lists() {
-        var reFakeNum       = new Regex(@"^\s{0,3}(\d+)[.)]\s+\S");
+        // NUMBERING MARKDOWN DOES NOT MAKE A LIST (8 October 2026, from an audit by another
+        // AI): the pattern was Markdown's own ordered-list syntax, "1." or "1)", so every
+        // real numbered list was reported as fake. A fake one is "(1) text", "1 - text",
+        // "1: text" or a dash after the number, which Markdown leaves as plain paragraphs.
+        var reFakeNum       = new Regex(@"^\s{0,3}(\(\d+\)\s+\S|\d+\s*[-:\u2013\u2014]\s+\S)");
         var reFakeMidBullet = new Regex(@"\s[•·‣⁃]\s");
         bool bInFence = false;
 
@@ -1703,10 +1726,9 @@ static class mdModule {
                     "Use proper Markdown list items: start each item on its own line with - or * followed by a space.");
             }
 
-            if (!Regex.IsMatch(sLine, @"^\s{0,3}[-*+]\s") && reFakeNum.IsMatch(sLine)
-                    && i > 0 && reFakeNum.IsMatch(aLines[i-1])) {
+            if (reFakeNum.IsMatch(sLine) && i > 0 && reFakeNum.IsMatch(aLines[i-1])) {
                 add("FakeNumberedList", iLn, "MSAC", "List not used correctly", shared.trunc(sT),
-                    "Lines appear to be a manually numbered list outside proper Markdown ordered list syntax.",
+                    "Lines are numbered in a way Markdown does not make a list, such as (1) or 1 -, so they read as plain paragraphs.",
                     "Use Markdown ordered list syntax: start each item with '1.' followed by a space.");
             }
         }
@@ -3134,6 +3156,8 @@ Examples:
             // pass (2).
             var lsToCheck = new List<string>();
             var lsSkippedExisting = new List<string>();
+            var dCsvClaimed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var dCsvFor = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (string sFilePath in lsFiles) {
                 string sExt = Path.GetExtension(sFilePath).ToLower();
                 bool bSupported = false;
@@ -3144,8 +3168,20 @@ Examples:
                     logger.info("Skipped (unsupported format " + sExt + "): " + sFilePath);
                     continue;
                 }
+                // ONE REPORT, ONE SOURCE (8 October 2026, from an audit by another AI):
+                // report.docx and report.md both wrote report.csv, the second replacing
+                // the first. A later file that would collide takes its type into its
+                // report's name; each name is worked out once, here, and kept.
                 string sCsvPath = Path.Combine(sResolvedOutDir,
                     Path.GetFileNameWithoutExtension(sFilePath) + ".csv");
+                if (dCsvClaimed.ContainsKey(sCsvPath)) {
+                    string sAlternative = Path.Combine(sResolvedOutDir,
+                        Path.GetFileNameWithoutExtension(sFilePath) + "-" + sExt.TrimStart('.') + ".csv");
+                    logger.info(Path.GetFileName(sCsvPath) + " is already the report of " + dCsvClaimed[sCsvPath] + ", so " + sFilePath + " is reported in " + Path.GetFileName(sAlternative));
+                    sCsvPath = sAlternative;
+                }
+                dCsvClaimed[sCsvPath] = Path.GetFileName(sFilePath);
+                dCsvFor[sFilePath] = sCsvPath;
                 if (File.Exists(sCsvPath) && !bForce) {
                     lsSkippedExisting.Add(sFilePath);
                     logger.info("Skipped (CSV exists; use --force to overwrite): " + sFilePath);
@@ -3176,8 +3212,7 @@ Examples:
                     guiProgress.update(Path.GetFileName(sFilePath), iFileIndex, lsToCheck.Count);
 
                 string sExt = Path.GetExtension(sFilePath).ToLower();
-                string sCsvPath = Path.Combine(sResolvedOutDir,
-                    Path.GetFileNameWithoutExtension(sFilePath) + ".csv");
+                string sCsvPath = dCsvFor[sFilePath];
                 string sBase = Path.GetFileName(sFilePath);
 
                 logger.info("Checking " + sFilePath);
@@ -3299,6 +3334,9 @@ Examples:
             if (bViewOutput && (iChecked > 0 || bShowRules))
                 openOutputInExplorer(sResolvedOutDir);
 
+            // A FAILED FILE IS NOT A SUCCESS (8 October 2026, from an audit by another AI):
+            // the run returned 0 whenever anything was checked, whatever else failed.
+            if (iFailed > 0) return 1;
             return (iChecked > 0 || bShowRules) ? 0 : 1;
         }
         finally {

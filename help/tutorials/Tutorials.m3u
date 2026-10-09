@@ -1,0 +1,21 @@
+#EXTM3U
+#EXTINF:140,0 - Overview
+0_Overview.mp3
+#EXTINF:226,1 - User Interface
+1_User_Interface.mp3
+#EXTINF:207,2 - Install and Launch
+2_Install_and_Launch.mp3
+#EXTINF:216,3 - Check a Word Document
+3_Check_a_Word_Document.mp3
+#EXTINF:202,4 - Check a PowerPoint Presentation
+4_Check_a_PowerPoint_Presentation.mp3
+#EXTINF:194,5 - Check an Excel Workbook
+5_Check_an_Excel_Workbook.mp3
+#EXTINF:180,6 - Check a Markdown File
+6_Check_a_Markdown_File.mp3
+#EXTINF:201,7 - Check a Whole Folder
+7_Check_a_Whole_Folder.mp3
+#EXTINF:173,8 - Check from Explorer and the Command Line
+8_Check_from_Explorer_and_the_Command_Line.mp3
+#EXTINF:127,9 - Conclusion
+9_Conclusion.mp3
