@@ -13,16 +13,28 @@ Key=
 
 [step]
 
-Say=Two screen reader keys help in every walk. If you miss something the reader said, Insert plus Up Arrow says the current line again.
+Say=You know your screen reader's own keys already, and three of them are worth remembering whenever you feel lost or unsure. Insert plus Up Arrow says the line you are on again.
 Key=Insert+Up Arrow
 Hear=Source files edit
-Note=Confirm the wording with a live run: buildTutorials -live.
+
 [step]
 
-Say=And whenever you are unsure where you are, Insert plus Tab says what has the focus: its name, its kind, and its value.
+Say=Insert plus Tab says what has the focus: its name, its role, and its value or state.
 Key=Insert+Tab
 Hear=Source files edit, blank
-Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Insert plus T says the title of the window.
+Key=Insert+T
+Hear=extCheck
+
+[step]
+
+Say=If you set your screen reader to use Caps Lock in place of Insert, Caps Lock works the same way for all three.
+Key=
+Hear=
+
 [step]
 
 Say=extCheck checks documents for accessibility problems before you share them: Word documents, Excel workbooks, PowerPoint presentations, and Markdown files. For each one it writes a report, a spreadsheet file listing every problem it found, where it is, why it matters, and how to fix it.

@@ -101,6 +101,24 @@
 - [7 - Check a Whole Folder](#7-check-a-whole-folder)
 - [8 - Check from Explorer and the Command Line](#8-check-from-explorer-and-the-command-line)
 - [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Check a Word Document](#3-check-a-word-document)
+- [4 - Check a PowerPoint Presentation](#4-check-a-powerpoint-presentation)
+- [5 - Check an Excel Workbook](#5-check-an-excel-workbook)
+- [6 - Check a Markdown File](#6-check-a-markdown-file)
+- [7 - Check a Whole Folder](#7-check-a-whole-folder)
+- [8 - Check from Explorer and the Command Line](#8-check-from-explorer-and-the-command-line)
+- [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Check a Word Document](#3-check-a-word-document)
+- [4 - Check a PowerPoint Presentation](#4-check-a-powerpoint-presentation)
+- [5 - Check an Excel Workbook](#5-check-an-excel-workbook)
+- [6 - Check a Markdown File](#6-check-a-markdown-file)
+- [7 - Check a Whole Folder](#7-check-a-whole-folder)
+- [8 - Check from Explorer and the Command Line](#8-check-from-explorer-and-the-command-line)
+- [9 - Conclusion](#9-conclusion)
 - [0 - Overview](#0-overview)
 - [1 - User Interface](#1-user-interface)
 - [2 - Install and Launch](#2-install-and-launch)
@@ -127,57 +145,65 @@ Welcome. This is the first of ten short walks through extCheck. I am the host, a
 
 ### Step 2: Insert+Up Arrow
 
-Two screen reader keys help in every walk. If you miss something the reader said, Insert plus Up Arrow says the current line again.
+You know your screen reader's own keys already, and three of them are worth remembering whenever you feel lost or unsure. Insert plus Up Arrow says the line you are on again.
 
 Screen reader:
 
 - Source files edit
 
-Confirm the wording with a live run: buildTutorials -live.
-
 ### Step 3: Insert+Tab
 
-And whenever you are unsure where you are, Insert plus Tab says what has the focus: its name, its kind, and its value.
+Insert plus Tab says what has the focus: its name, its role, and its value or state.
 
 Screen reader:
 
 - Source files edit, blank
 
-Confirm the wording with a live run: buildTutorials -live.
+### Step 4: Insert+T
 
-### Step 4
+Insert plus T says the title of the window.
 
-extCheck checks documents for accessibility problems before you share them: Word documents, Excel workbooks, PowerPoint presentations, and Markdown files. For each one it writes a report, a spreadsheet file listing every problem it found, where it is, why it matters, and how to fix it.
+Screen reader:
+
+- extCheck
 
 ### Step 5
 
-Word, Excel and PowerPoint files are opened by Microsoft Office in the background, so Office must be installed to check them. Markdown files need nothing else at all.
+If you set your screen reader to use Caps Lock in place of Insert, Caps Lock works the same way for all three.
 
 ### Step 6
 
-There are two ways to run it. The dialog is a small window of fields and check boxes, opened from the desktop with one key. The command line runs the same checks from a command prompt or a batch file, which suits checking many files on a schedule.
+extCheck checks documents for accessibility problems before you share them: Word documents, Excel workbooks, PowerPoint presentations, and Markdown files. For each one it writes a report, a spreadsheet file listing every problem it found, where it is, why it matters, and how to fix it.
 
 ### Step 7
 
-A third way sits in between: in File Explorer, the context menu of any file holds Report via extCheck, which checks that one file and writes its report beside it.
+Word, Excel and PowerPoint files are opened by Microsoft Office in the background, so Office must be installed to check them. Markdown files need nothing else at all.
 
 ### Step 8
 
-The reports are plain CSV files. Open one in Excel, or in any editor, and each row is one problem, with seven columns: the rule, its source, the category, the location, the text concerned, the message, and the fix.
+There are two ways to run it. The dialog is a small window of fields and check boxes, opened from the desktop with one key. The command line runs the same checks from a command prompt or a batch file, which suits checking many files on a schedule.
 
 ### Step 9
 
-Each rule comes from one of two families. Some mirror the categories of the Accessibility Checker built into Microsoft Office. Others are adapted from axe-core, the open-source engine many web checkers use, and cover things the Office checker does not.
+A third way sits in between: in File Explorer, the context menu of any file holds Report via extCheck, which checks that one file and writes its report beside it.
 
 ### Step 10
 
-Here are the ten walks. Walk one: the user interface, the dialog and its keys. Walk two: install and launch. Walk three: check a Word document. Walk four: check a PowerPoint presentation. Walk five: check an Excel workbook.
+The reports are plain CSV files. Open one in Excel, or in any editor, and each row is one problem, with seven columns: the rule, its source, the category, the location, the text concerned, the message, and the fix.
 
 ### Step 11
 
-Walk six: check a Markdown file. Walk seven: check a whole folder and keep the reports together. Walk eight: check from File Explorer and the command line. Walk nine: the conclusion, a glossary, and where to get help.
+Each rule comes from one of two families. Some mirror the categories of the Accessibility Checker built into Microsoft Office. Others are adapted from axe-core, the open-source engine many web checkers use, and cover things the Office checker does not.
 
 ### Step 12
+
+Here are the ten walks. Walk one: the user interface, the dialog and its keys. Walk two: install and launch. Walk three: check a Word document. Walk four: check a PowerPoint presentation. Walk five: check an Excel workbook.
+
+### Step 13
+
+Walk six: check a Markdown file. Walk seven: check a whole folder and keep the reports together. Walk eight: check from File Explorer and the command line. Walk nine: the conclusion, a glossary, and where to get help.
+
+### Step 14
 
 Each walk is a few minutes long, and each builds on the ones before it, so they are best heard in order the first time. Walk one comes next.
 
