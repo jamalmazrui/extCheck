@@ -5,6 +5,11 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 14 October 2026 -- contents lists, and plainer guides
+
+- **Every help page has a contents list.** The build ran Pandoc without --toc, so a long guide had no list of its sections. Pages are now built with one, and a page that lacks one is built again once to gain it.
+- **The user guide reads at grade 8.6, down from 9.5,** with every fact kept, including the rule registry's sources and the note on 32-bit and 64-bit Office.
+
 ## 14 October 2026 -- the announcement in plainer words
 
 - **Announce.md now reads at grade 7.4, down from 13.2,** inside the ninth-grade target for documents shared publicly. Long sentences were split and dense phrases put plainly; every fact, key and link is kept, and first-person passages keep their author's own words. The section about the companion tools reads the same in each announcement that carries it, with the tools' hotkeys in alphabetical order.

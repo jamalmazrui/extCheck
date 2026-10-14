@@ -1,16 +1,22 @@
 ﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.12.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Jamal Mazrui" />
   <meta name="description" content="Accessibility Checker for Office and Markdown Files" />
   <title>extCheck</title>
   <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
     html {
       color: #1a1a1a;
+      color: light-dark(#1a1a1a, #fdfdfd);
       background-color: #fdfdfd;
+      background-color: light-dark(#fdfdfd, #1a1a1a);
+      color-scheme: light dark;
     }
     body {
       margin: 0 auto;
@@ -35,12 +41,16 @@
     }
     @media print {
       html {
-        background-color: white;
+        color-scheme: light only;
       }
-      body {
+      html, body, pre, code {
         background-color: transparent;
+      }
+      body, a, a:visited, blockquote {
         color: black;
-        font-size: 12pt;
+      }
+      pre, code {
+        padding: 0;
       }
       p, h2, h3 {
         orphans: 3;
@@ -53,13 +63,14 @@
     p {
       margin: 1em 0;
     }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
+    a, a:visited {
+      color: inherit;
     }
     img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
       max-width: 100%;
     }
     h1, h2, h3, h4, h5, h6 {
@@ -82,10 +93,14 @@
     blockquote {
       margin: 1em 0 1em 1.7em;
       padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
+      border-left: 2px solid;
+      border-color: #e6e6e6;
+      border-color: light-dark(#e6e6e6, #4c4c4c);
       color: #606060;
+      color: light-dark(#606060, #b6b6b6);
     }
     code {
+      white-space: pre-wrap;
       font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
@@ -105,8 +120,8 @@
      overflow: visible;
     }
     hr {
-      background-color: #1a1a1a;
       border: none;
+      border-top: 1px solid currentColor;
       height: 1px;
       margin: 1em 0;
     }
@@ -123,11 +138,11 @@
     }
     tbody {
       margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
+      border-top: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
     }
     th {
-      border-top: 1px solid #1a1a1a;
+      border-top: 1px solid currentColor;
       padding: 0.25em 0.5em 0.25em 0.5em;
     }
     td {
@@ -149,10 +164,13 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
-    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -163,10 +181,10 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -234,6 +252,33 @@
 <header id="title-block-header">
 <p class="author">Jamal Mazrui</p>
 </header>
+<nav id="TOC" role="doc-toc" aria-label="Contents">
+<ul>
+<li><a href="#extcheck-guide" id="toc-extcheck-guide">extCheck Guide</a>
+<ul>
+<li><a href="#what-you-need" id="toc-what-you-need">What you
+need</a></li>
+<li><a href="#installing" id="toc-installing">Installing</a></li>
+<li><a href="#running-extcheck" id="toc-running-extcheck">Running
+extCheck</a></li>
+<li><a href="#command-line-options"
+id="toc-command-line-options">Command-line options</a></li>
+<li><a href="#supported-file-formats"
+id="toc-supported-file-formats">Supported file formats</a></li>
+<li><a href="#output" id="toc-output">Output</a></li>
+<li><a href="#the-rule-registry" id="toc-the-rule-registry">The rule
+registry</a></li>
+<li><a href="#configuration-file"
+id="toc-configuration-file">Configuration file</a></li>
+<li><a href="#log-files" id="toc-log-files">Log files</a></li>
+<li><a href="#notes" id="toc-notes">Notes</a></li>
+<li><a href="#uninstalling" id="toc-uninstalling">Uninstalling</a></li>
+<li><a href="#for-developers" id="toc-for-developers">For
+developers</a></li>
+<li><a href="#license" id="toc-license">License</a></li>
+</ul></li>
+</ul>
+</nav>
 <main>
 <h1 id="extcheck-guide">extCheck Guide</h1>
 <p>This is the full guide. For a quick start, see ReadMe.</p>
@@ -257,22 +302,20 @@ batch files and pipelines). Both modes accept the same options.</p>
 <hr />
 <h2 id="what-you-need">What you need</h2>
 <ul>
-<li>Windows 10 or later (64-bit)</li>
-<li>Microsoft Word, Excel, or PowerPoint installed to check the
-corresponding <code>.docx</code>, <code>.xlsx</code>, or
-<code>.pptx</code> files</li>
-<li>No Office installation needed for <code>.md</code> files</li>
+<li>Windows 10 or later, 64-bit</li>
+<li>Microsoft Word, Excel or PowerPoint, to check <code>.docx</code>,
+<code>.xlsx</code> or <code>.pptx</code> files</li>
+<li>No Office at all for <code>.md</code> files</li>
 </ul>
-<p>You do <strong>not</strong> need to install .NET separately. The .NET
-Framework 4.8.1 used by <code>extCheck</code> ships in-box with Windows
-10 (since version 22H2) and Windows 11.</p>
-<p><strong>Bitness note.</strong> <code>extCheck</code> is built as a
-64-bit program, and Microsoft Office automation requires the controller
-process and the installed Office to share the same bitness. Modern
-Office (Microsoft 365, Office 2019+, Office 2024) is 64-bit by default,
-so this matches the common case. If you have 32-bit Office on your
-machine, <code>extCheck</code> will surface a clear error pointing at
-the bitness mismatch; you can either install 64-bit Office or rebuild
+<p>You do <strong>not</strong> need to install .NET yourself.
+<code>extCheck</code> uses .NET Framework 4.8.1, which comes with
+Windows 10 (since version 22H2) and Windows 11.</p>
+<p><strong>A note on 32-bit and 64-bit.</strong> <code>extCheck</code>
+is built as a 64-bit program. To work with Office, a program must match
+Office’s bitness. Modern Office (Microsoft 365, Office 2019 and later,
+Office 2024) is 64-bit by default, so this fits the usual case. If your
+Office is 32-bit, <code>extCheck</code> gives a clear error that names
+the mismatch. You can then install 64-bit Office, or rebuild
 <code>extCheck</code> with <code>/platform:x86</code> (see Development
 below).</p>
 <hr />
@@ -331,15 +374,14 @@ folder in File Explorer</li>
 letter that you can press with <strong>Alt</strong> to jump straight to
 that control:</p>
 <ul>
-<li><strong>Source files</strong> [S] — a single file path, a directory
-path, a wildcard pattern (e.g., <code>*.docx</code>), or several of
-either separated by spaces. A bare directory expands automatically to
-all supported files in it — equivalent to <code>&lt;dir&gt;\*.*</code> —
-so the trailing wildcard is not required. A single path containing
-spaces does not need quotes — extCheck recognizes the entire trimmed
-field as one path when it points to an existing file or directory.
-Quotes are only needed when supplying multiple specs and at least one
-contains a space.</li>
+<li><strong>Source files</strong> [S] — a file path, a folder path, a
+wildcard pattern (such as <code>*.docx</code>), or several of these
+separated by spaces. A folder on its own means every supported file in
+it, the same as <code>&lt;dir&gt;\*.*</code>, so you need not add the
+wildcard. One path with spaces in it needs no quotes: when the whole
+field names a file or folder that exists, extCheck takes it as one path.
+You need quotes only when you give several, and one of them has a
+space.</li>
 <li><strong>Browse source…</strong> [B] — pick a single source from a
 file picker</li>
 <li><strong>Output directory</strong> [O] — where the output is written.
@@ -353,8 +395,8 @@ directory.</li>
 <li><strong>View output</strong> [V] — open the output directory in File
 Explorer when the run is done</li>
 <li><strong>Log session</strong> [L] — also write a fresh
-<code>extCheck.log</code> in the output directory (or current directory
-if no output directory is set). A session log is always kept in
+<code>extCheck.log</code> in the output directory, or in the current
+directory if none is set. A session log is always kept in
 <code>%LOCALAPPDATA%\extCheck\logs</code>.</li>
 <li><strong>Use configuration</strong> [U] — load these field values
 from the saved configuration at startup, and save them back when you
@@ -368,22 +410,21 @@ all boxes, and delete the saved configuration if any</li>
 <li><strong>OK</strong> / <strong>Cancel</strong> — start the run, or
 cancel without running. Enter is OK; Escape is Cancel.</li>
 </ul>
-<p>More keys work anywhere in the dialog: <strong>F1</strong> shows
-Help, <strong>F11</strong> checks the web for a newer version of
-extCheck (see Updating), <strong>Control+Enter</strong> is OK from any
-control, <strong>Shift+F1</strong> says the tip for the field you are
+<p>More keys work anywhere in the dialog. <strong>F1</strong> shows
+Help. <strong>F11</strong> checks the web for a newer version of
+extCheck (see Updating). <strong>Control+Enter</strong> is OK from any
+control. <strong>Shift+F1</strong> says the tip for the field you are
 on, and <strong>F7</strong> lists the dialog’s controls so you can move
 to one. The dialog is built with the Homer Lbc classes, so its text
 fields also have the Lbc editing keys, which Help lists.</p>
 <p><strong>Default settings</strong> and <strong>Guide</strong> return
 you to the dialog; Default settings first clears the fields and deletes
 any saved configuration.</p>
-<p>The Browse source and Choose output pickers open at the directory
-derived from the corresponding text field’s current value when that
-value points to an existing path; otherwise they open at your Documents
-folder. With <strong>Use configuration</strong> checked, those text
-fields are pre-populated from your last session, so the pickers
-naturally pick up where you left off.</p>
+<p>The Browse source and Choose output pickers open at the folder named
+in their text field, when it exists. Otherwise they open at your
+Documents folder. With <strong>Use configuration</strong> checked, those
+fields start with what you used last time, so the pickers pick up where
+you left off.</p>
 <p>If you press OK with an output directory that does not yet exist,
 extCheck prompts to create it (default Yes). Choosing No keeps the
 dialog open with focus on the output field so you can correct it.</p>
@@ -485,24 +526,24 @@ matters</li>
 run, a total count is printed.</p>
 <h2 id="the-rule-registry">The rule registry</h2>
 <p>The installed <code>help</code> folder holds
-<code>extCheck.csv</code>, the rule registry, written by the program
-itself when it was built. Running <code>extCheck -rules</code> writes
-the same file wherever you like. It lists every rule extCheck knows
-about: rule ID, the Office Accessibility Checker category it maps to,
-the WCAG 2.1 success criterion number, severity, applicable file
-formats, description, and remediation guidance. Rules come from two
-complementary sources:</p>
-<p><strong>MSAC</strong> rules mirror the categories used by the
-built-in Microsoft Office Accessibility Checker: missing alternative
+<code>extCheck.csv</code>, the rule registry. The program itself writes
+it when it is built, and running <code>extCheck -rules</code> writes the
+same file wherever you like. It lists every rule extCheck knows: the
+rule ID, the category of the Office Accessibility Checker it matches,
+the number of the WCAG 2.1 success criterion, the severity, the file
+formats it applies to, a description and advice on fixing it. Rules come
+from two sources that complement each other:</p>
+<p><strong>MSAC</strong> rules follow the categories of the Microsoft
+Office Accessibility Checker built into Office: missing alternative
 text, missing table headers, heading issues, repeated blank characters,
-blank cells used for formatting, merged cells, complex tables, use of
-color alone, object titles, list usage, text contrast.</p>
-<p><strong>AXE</strong> rules are adapted from the axe-core open-source
-accessibility engine maintained by Deque Systems. These cover areas the
-Office checker does not address, including hyperlink distinguishability,
-duplicate heading text, non-descriptive link text, form field labels,
-slide reading order, animation timing, and code block language
-specifiers for Markdown.</p>
+blank cells used for formatting, merged cells, complex tables, color
+used alone, object titles, how lists are used, and text contrast.</p>
+<p><strong>AXE</strong> rules are adapted from axe-core, the open-source
+accessibility engine kept by Deque Systems. They cover areas the Office
+checker does not. These include whether links can be told apart,
+repeated heading text, link text that does not say where it goes, labels
+on form fields, slide reading order, animation timing, and the language
+named on a block of code in Markdown.</p>
 <hr />
 <h2 id="configuration-file">Configuration file</h2>
 <p>When <strong>Use configuration</strong> is checked in the dialog (or

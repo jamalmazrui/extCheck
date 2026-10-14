@@ -21,13 +21,13 @@ Like its companion tools `urlCheck` and `2htm` (see the Announce file for a desc
 
 ## What you need
 
-- Windows 10 or later (64-bit)
-- Microsoft Word, Excel, or PowerPoint installed to check the corresponding `.docx`, `.xlsx`, or `.pptx` files
-- No Office installation needed for `.md` files
+- Windows 10 or later, 64-bit
+- Microsoft Word, Excel or PowerPoint, to check `.docx`, `.xlsx` or `.pptx` files
+- No Office at all for `.md` files
 
-You do **not** need to install .NET separately. The .NET Framework 4.8.1 used by `extCheck` ships in-box with Windows 10 (since version 22H2) and Windows 11.
+You do **not** need to install .NET yourself. `extCheck` uses .NET Framework 4.8.1, which comes with Windows 10 (since version 22H2) and Windows 11.
 
-**Bitness note.** `extCheck` is built as a 64-bit program, and Microsoft Office automation requires the controller process and the installed Office to share the same bitness. Modern Office (Microsoft 365, Office 2019+, Office 2024) is 64-bit by default, so this matches the common case. If you have 32-bit Office on your machine, `extCheck` will surface a clear error pointing at the bitness mismatch; you can either install 64-bit Office or rebuild `extCheck` with `/platform:x86` (see Development below).
+**A note on 32-bit and 64-bit.** `extCheck` is built as a 64-bit program. To work with Office, a program must match Office's bitness. Modern Office (Microsoft 365, Office 2019 and later, Office 2024) is 64-bit by default, so this fits the usual case. If your Office is 32-bit, `extCheck` gives a clear error that names the mismatch. You can then install 64-bit Office, or rebuild `extCheck` with `/platform:x86` (see Development below).
 
 ---
 
@@ -62,24 +62,24 @@ Launch `extCheck` from any of these:
 
 The parameter dialog has these controls. Each label has an underlined letter that you can press with **Alt** to jump straight to that control:
 
-- **Source files** [S] — a single file path, a directory path, a wildcard pattern (e.g., `*.docx`), or several of either separated by spaces. A bare directory expands automatically to all supported files in it — equivalent to `<dir>\*.*` — so the trailing wildcard is not required. A single path containing spaces does not need quotes — extCheck recognizes the entire trimmed field as one path when it points to an existing file or directory. Quotes are only needed when supplying multiple specs and at least one contains a space.
+- **Source files** [S] — a file path, a folder path, a wildcard pattern (such as `*.docx`), or several of these separated by spaces. A folder on its own means every supported file in it, the same as `<dir>\*.*`, so you need not add the wildcard. One path with spaces in it needs no quotes: when the whole field names a file or folder that exists, extCheck takes it as one path. You need quotes only when you give several, and one of them has a space.
 - **Browse source...** [B] — pick a single source from a file picker
 - **Output directory** [O] — where the output is written. Blank means the current working directory.
 - **Choose output...** [C] — pick the output directory from a folder picker
 - **Force replacements** [F] — overwrite an existing `<basename>.csv` instead of skipping the input. Without this, extCheck skips an input whose CSV already exists in the output directory.
 - **View output** [V] — open the output directory in File Explorer when the run is done
-- **Log session** [L] — also write a fresh `extCheck.log` in the output directory (or current directory if no output directory is set). A session log is always kept in `%LOCALAPPDATA%\extCheck\logs`.
+- **Log session** [L] — also write a fresh `extCheck.log` in the output directory, or in the current directory if none is set. A session log is always kept in `%LOCALAPPDATA%\extCheck\logs`.
 - **Use configuration** [U] — load these field values from the saved configuration at startup, and save them back when you press OK
 - **Guide** [G] — open this guide in your browser, then return to the dialog with everything as it was.
 - **Help** [H] — list every field with its tip, the dialog's keys, and the version check. F1 also shows Help.
 - **Default settings** [D] — clear all fields, uncheck all boxes, and delete the saved configuration if any
 - **OK** / **Cancel** — start the run, or cancel without running. Enter is OK; Escape is Cancel.
 
-More keys work anywhere in the dialog: **F1** shows Help, **F11** checks the web for a newer version of extCheck (see Updating), **Control+Enter** is OK from any control, **Shift+F1** says the tip for the field you are on, and **F7** lists the dialog's controls so you can move to one. The dialog is built with the Homer Lbc classes, so its text fields also have the Lbc editing keys, which Help lists.
+More keys work anywhere in the dialog. **F1** shows Help. **F11** checks the web for a newer version of extCheck (see Updating). **Control+Enter** is OK from any control. **Shift+F1** says the tip for the field you are on, and **F7** lists the dialog's controls so you can move to one. The dialog is built with the Homer Lbc classes, so its text fields also have the Lbc editing keys, which Help lists.
 
 **Default settings** and **Guide** return you to the dialog; Default settings first clears the fields and deletes any saved configuration.
 
-The Browse source and Choose output pickers open at the directory derived from the corresponding text field's current value when that value points to an existing path; otherwise they open at your Documents folder. With **Use configuration** checked, those text fields are pre-populated from your last session, so the pickers naturally pick up where you left off.
+The Browse source and Choose output pickers open at the folder named in their text field, when it exists. Otherwise they open at your Documents folder. With **Use configuration** checked, those fields start with what you used last time, so the pickers pick up where you left off.
 
 If you press OK with an output directory that does not yet exist, extCheck prompts to create it (default Yes). Choosing No keeps the dialog open with focus on the output field so you can correct it.
 
@@ -158,11 +158,11 @@ Results are also printed to the console. At the end of a multi-file run, a total
 
 ## The rule registry
 
-The installed `help` folder holds `extCheck.csv`, the rule registry, written by the program itself when it was built. Running `extCheck -rules` writes the same file wherever you like. It lists every rule extCheck knows about: rule ID, the Office Accessibility Checker category it maps to, the WCAG 2.1 success criterion number, severity, applicable file formats, description, and remediation guidance. Rules come from two complementary sources:
+The installed `help` folder holds `extCheck.csv`, the rule registry. The program itself writes it when it is built, and running `extCheck -rules` writes the same file wherever you like. It lists every rule extCheck knows: the rule ID, the category of the Office Accessibility Checker it matches, the number of the WCAG 2.1 success criterion, the severity, the file formats it applies to, a description and advice on fixing it. Rules come from two sources that complement each other:
 
-**MSAC** rules mirror the categories used by the built-in Microsoft Office Accessibility Checker: missing alternative text, missing table headers, heading issues, repeated blank characters, blank cells used for formatting, merged cells, complex tables, use of color alone, object titles, list usage, text contrast.
+**MSAC** rules follow the categories of the Microsoft Office Accessibility Checker built into Office: missing alternative text, missing table headers, heading issues, repeated blank characters, blank cells used for formatting, merged cells, complex tables, color used alone, object titles, how lists are used, and text contrast.
 
-**AXE** rules are adapted from the axe-core open-source accessibility engine maintained by Deque Systems. These cover areas the Office checker does not address, including hyperlink distinguishability, duplicate heading text, non-descriptive link text, form field labels, slide reading order, animation timing, and code block language specifiers for Markdown.
+**AXE** rules are adapted from axe-core, the open-source accessibility engine kept by Deque Systems. They cover areas the Office checker does not. These include whether links can be told apart, repeated heading text, link text that does not say where it goes, labels on form fields, slide reading order, animation timing, and the language named on a block of code in Markdown.
 
 ---
 
