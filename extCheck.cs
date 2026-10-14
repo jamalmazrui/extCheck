@@ -302,9 +302,74 @@ static class comHelper {
                 "  Fix: install the matching Office bitness, or use the " +
                 sOther + " build of extCheck.");
         }
+        // OWNED OFFICE PROCESSES (14 October 2026, from an audit by another AI), as 2htm records
+        // them: the processes this call starts are remembered, and only they are ever ended. An
+        // Office the person already had open is reused by Windows and so is never recorded.
+        string sProcessName = officeProcessName(sProgId);
+        HashSet<int> setBefore = new HashSet<int>();
+        if (sProcessName != "") foreach (Process oBefore in Process.GetProcessesByName(sProcessName)) { setBefore.Add(oBefore.Id); oBefore.Dispose(); }
         dynamic oApp = Activator.CreateInstance(t);
+        if (sProcessName != "") {
+            foreach (Process oAfter in Process.GetProcessesByName(sProcessName)) {
+                if (!setBefore.Contains(oAfter.Id)) lock (setOwnedOffice) setOwnedOffice.Add(oAfter.Id);
+                oAfter.Dispose();
+            }
+        }
         silenceAlerts(sProgId, oApp);
         return oApp;
+    }
+
+    static HashSet<int> setOwnedOffice = new HashSet<int>();
+
+    public static string officeProcessName(string sProgId) {
+        string sLower = (sProgId ?? "").ToLowerInvariant();
+        if (sLower.StartsWith("word.")) return "WINWORD";
+        if (sLower.StartsWith("excel.")) return "EXCEL";
+        if (sLower.StartsWith("powerpoint.")) return "POWERPNT";
+        return "";
+    }
+
+    // AN OFFICE INSPECTION HAS A DEADLINE (14 October 2026, from an audit by another AI). A document
+    // Office could not finish held the whole batch, with no final coverage. Each document's
+    // inspection runs on its own single-threaded apartment, as Office requires, and is given this
+    // long; past it, only the Office processes extCheck started are ended, the document is reported
+    // as not inspected -- never as clean -- and the batch goes on.
+    public const int iOfficeMinutes = 10;
+
+    public static void runWithDeadline(Action action, string sProcessName) {
+        Exception exInner = null;
+        System.Threading.Thread thread = new System.Threading.Thread(() => {
+            try { action(); }
+            catch (Exception ex) { exInner = ex; }
+        });
+        thread.SetApartmentState(System.Threading.ApartmentState.STA);
+        thread.IsBackground = true;
+        thread.Start();
+        if (!thread.Join(iOfficeMinutes * 60 * 1000)) {
+            logger.warn(sProcessName + " was still working after " + iOfficeMinutes + " minutes; ending the copies extCheck started");
+            killOwnedOfficeProcesses(sProcessName);
+            thread.Join(30000);
+            throw new TimeoutException("Office was still working on this file after " + iOfficeMinutes
+                + " minutes, so it was not inspected. Office windows you had open were left alone.");
+        }
+        if (exInner != null) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(exInner).Throw();
+    }
+
+    public static void killOwnedOfficeProcesses(string sProcessName) {
+        try {
+            foreach (Process process in Process.GetProcessesByName(sProcessName)) {
+                try {
+                    bool bOwned;
+                    lock (setOwnedOffice) bOwned = setOwnedOffice.Contains(process.Id);
+                    if (bOwned) {
+                        process.Kill();
+                        process.WaitForExit(5000);
+                        logger.info("Ended " + sProcessName + " process " + process.Id + ", which extCheck had started");
+                    }
+                } catch { }
+                finally { process.Dispose(); }
+            }
+        } catch { }
     }
 
     /// <summary>
@@ -3230,26 +3295,41 @@ Examples:
                 string sCheckError = null;
 
                 if (sExt == ".docx") {
-                    bOpened = docxModule.open(sFilePath);
-                    if (bOpened) {
-                        try { docxModule.checkAll(sFilePath); }
-                        catch (Exception ex) { sCheckError = ex.Message; }
-                        docxModule.quit();
+                    try {
+                        comHelper.runWithDeadline(() => {
+                            bOpened = docxModule.open(sFilePath);
+                            if (bOpened) {
+                                try { docxModule.checkAll(sFilePath); }
+                                catch (Exception ex) { sCheckError = ex.Message; }
+                                docxModule.quit();
+                            }
+                        }, "WINWORD");
                     }
+                    catch (TimeoutException exTime) { bOpened = true; sCheckError = exTime.Message; }
                 } else if (sExt == ".xlsx") {
-                    bOpened = xlsxModule.open(sFilePath);
-                    if (bOpened) {
-                        try { xlsxModule.checkAll(sFilePath); }
-                        catch (Exception ex) { sCheckError = ex.Message; }
-                        xlsxModule.quit();
+                    try {
+                        comHelper.runWithDeadline(() => {
+                            bOpened = xlsxModule.open(sFilePath);
+                            if (bOpened) {
+                                try { xlsxModule.checkAll(sFilePath); }
+                                catch (Exception ex) { sCheckError = ex.Message; }
+                                xlsxModule.quit();
+                            }
+                        }, "EXCEL");
                     }
+                    catch (TimeoutException exTime) { bOpened = true; sCheckError = exTime.Message; }
                 } else if (sExt == ".pptx") {
-                    bOpened = pptxModule.open(sFilePath);
-                    if (bOpened) {
-                        try { pptxModule.checkAll(sFilePath); }
-                        catch (Exception ex) { sCheckError = ex.Message; }
-                        pptxModule.quit();
+                    try {
+                        comHelper.runWithDeadline(() => {
+                            bOpened = pptxModule.open(sFilePath);
+                            if (bOpened) {
+                                try { pptxModule.checkAll(sFilePath); }
+                                catch (Exception ex) { sCheckError = ex.Message; }
+                                pptxModule.quit();
+                            }
+                        }, "POWERPNT");
                     }
+                    catch (TimeoutException exTime) { bOpened = true; sCheckError = exTime.Message; }
                 } else if (sExt == ".md") {
                     bOpened = mdModule.open(sFilePath);
                     if (bOpened) {

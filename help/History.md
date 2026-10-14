@@ -5,6 +5,10 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 14 October 2026 -- an Office inspection with a deadline
+
+- **A document Office cannot finish no longer holds the batch.** Each Word, Excel or PowerPoint inspection now runs on its own thread and has 10 minutes; past that, only the Office processes extCheck itself started are ended -- it now records which those are, as 2htm does -- and the document is reported as not inspected, never as clean, while the batch goes on to the next file. Office windows you had open are left alone (from an audit by another AI).
+
 ## 14 October 2026 -- started as you
 
 - **Setup starts extCheck as you,** not with the installer's administrator rights, and creates its logs folder before leaving the launch marker, which a first install never wrote (from an audit by another AI).
