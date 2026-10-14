@@ -5,6 +5,11 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 14 October 2026 -- reports say who checked, and charts are checked as they are
+
+- **The report says extCheck made each check, and what it is modeled on.** The Source column said MSAC or AXE, which read as though Microsoft's Accessibility Checker or axe-core had run; every check is extCheck's own code. Source now always says extCheck, and a new Modeled On column names the checker a rule follows (from an audit by another AI).
+- **Pie and doughnut charts are no longer asked for axes.** They have none, so asking for their axis titles failed, and since the change earlier today each such chart would have been reported twice as a place that could not be checked. Charts without axes are now skipped for that check.
+- **An untitled chart axis is filed as what it is.** It was in the category "Missing table header"; it is now "Chart axis title". And the advice for an untitled chart says a title is only a start: the chart's figures or main point belong in text too (from an audit by another AI).
 ## 14 October 2026 -- a place it could not check is said, not guessed
 
 - **When Office cannot report a detail, the report says so.** A rule asks Office about a document -- whether a chart has a title, whether a table's first row is a header -- and when Office could not answer, the rule took a default. For a chart's title or a table's header row that default reported a problem that might not be there; for a chart's axes, its type, a shape's text and a slide's timing it skipped the check without a word. So a report with no findings did not mean every check had run. Each of those places now writes a CouldNotInspect row, in the category "Not checked", naming what could not be read, the rule that needed it and Office's own error; it is not counted as an accessibility problem, and it is in the rule registry. The test in Office belongs to the next release check: a chart whose title cannot be read now gives CouldNotInspect where it gave ChartMissingTitle (from an audit by another AI).

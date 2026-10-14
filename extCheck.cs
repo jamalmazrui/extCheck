@@ -37,7 +37,7 @@ using Homer;
 // Shared: issue record
 // ===========================================================================
 class issue {
-    public string sRuleId, sSource, sCategory, sLocation, sContext, sMessage, sRemediation;
+    public string sRuleId, sSource, sCategory, sLocation, sContext, sMessage, sRemediation, sModeledOn = "";
 
     public issue(string ruleId, string source, string category, string location,
                  string context, string message, string remediation) {
@@ -56,8 +56,11 @@ class issue {
 // ===========================================================================
 static class results {
     public static List<issue> lIssues = new List<issue>();
+    // WHO RAN THE CHECK, AND WHAT IT IS MODELED ON (14 October 2026, from an audit by another AI). Source said MSAC or
+    // AXE, which read as though Microsoft's Accessibility Checker or axe-core had run; every check is extCheck's own code,
+    // modeled on one of them. Source is now extCheck, and the new Modeled On column names the checker a rule follows.
     const string sCsvHeader =
-        "RuleID,Source,Category,Location,Context,Message,Remediation";
+        "RuleID,Source,Modeled On,Category,Location,Context,Message,Remediation";
 
     public static void clear() {
         lIssues.Clear();
@@ -66,7 +69,9 @@ static class results {
     public static void add(
             string ruleId, string source, string category, string location,
             string context, string message, string remediation) {
-        lIssues.Add(new issue(ruleId, source, category, location, context, message, remediation));
+        issue oIssue = new issue(ruleId, "extCheck", category, location, context, message, remediation);
+        oIssue.sModeledOn = source == "MSAC" ? "Microsoft Accessibility Checker" : source == "AXE" ? "axe-core" : "";
+        lIssues.Add(oIssue);
     }
 
     public static void writeCsv(string sPath) {
@@ -76,6 +81,7 @@ static class results {
             sb.AppendLine(
                 esc(o.sRuleId)      + "," +
                 esc(o.sSource)      + "," +
+                esc(o.sModeledOn)   + "," +
                 esc(o.sCategory)    + "," +
                 esc(o.sLocation)    + "," +
                 esc(o.sContext)     + "," +
@@ -125,6 +131,10 @@ static class shared {
     // swallowed it, and no placeholder -- slide titles included -- was ever recognized.
     public const int iMsoPlaceholder = 14;
 
+    // The XlChartType values of charts with no axes: xlPie 5, xlPieOfPie 68, xlPieExploded 69, xl3DPieExploded 70,
+    // xlBarOfPie 71, xlDoughnutExploded 80, xl3DPie -4102 and xlDoughnut -4120.
+    public static readonly int[] aChartTypesWithoutAxes = { 5, 68, 69, 70, 71, 80, -4102, -4120 };
+
     public static readonly string[] aVague = {
         "click here", "here", "link", "read more", "more", "this",
         "url", "learn more", "continue", "details", "info", "information", "go"
@@ -158,12 +168,18 @@ static class shared {
             results.add("ChartMissingTitle", "MSAC", "Object has no title or name",
                 sSheet, "Chart: " + sChartName,
                 "A chart has no title. Without a title, users cannot identify what the chart represents.",
-                "Go to Chart Design > Add Chart Element > Chart Title and enter a descriptive title.");
+                "Go to Chart Design > Add Chart Element > Chart Title and enter a descriptive title. A title is only a start: a chart also needs its data or its main point in text, such as a table of the figures beside it, or alternative text that states the trend.");
         }
+        // AXES ONLY WHERE A CHART HAS THEM (14 October 2026, from an audit by another AI): a pie or doughnut chart has no
+        // axes, so asking for their titles failed, and every such chart was reported as one that could not be inspected.
+        // Those chart types, aChartTypesWithoutAxes, are skipped.
+        int iChartType = 0;
+        try { iChartType = (int) oChart.ChartType; } catch { }
+        if (Array.IndexOf(aChartTypesWithoutAxes, iChartType) >= 0) return;
         try {
             bool b = shared.officeTrue(oChart.Axes(1).HasTitle);
             if (!b) {
-                results.add("ChartMissingAxisTitle", "AXE", "Missing table header",
+                results.add("ChartMissingAxisTitle", "AXE", "Chart axis title",
                     sSheet, "Chart: " + sChartName + " (category axis)",
                     "Chart category axis has no title. Users cannot determine what categories are being compared.",
                     "Go to Chart Design > Add Chart Element > Axis Titles and label the category axis.");
@@ -172,7 +188,7 @@ static class shared {
         try {
             bool b = shared.officeTrue(oChart.Axes(2).HasTitle);
             if (!b) {
-                results.add("ChartMissingAxisTitle", "AXE", "Missing table header",
+                results.add("ChartMissingAxisTitle", "AXE", "Chart axis title",
                     sSheet, "Chart: " + sChartName + " (value axis)",
                     "Chart value axis has no title. Users cannot determine what quantity is being measured.",
                     "Go to Chart Design > Add Chart Element > Axis Titles and label the value axis. Include units where applicable.");
@@ -193,7 +209,7 @@ static class shared {
             new[] { "BlankRowsUsedForLayout","Use of blank cells for formatting","1.3.2","Warning","XLSX","Multiple consecutive blank rows within data suggest blank rows are used for visual spacing.","Remove blank rows used for spacing. Use row height and cell padding via Format Cells instead." },
             new[] { "BlankTableHeader","Missing table header","1.3.1","Error","MD","A Pandoc pipe table has one or more blank column header cells.","Add a descriptive label to each column header cell." },
             new[] { "ChartMissingAltText","Missing alternative text","1.1.1","Error","XLSX, PPTX","A chart has no alt text. Without alt text a blind user receives no information about the chart's content or key finding.","Select the chart, right-click its border, choose Edit Alt Text, and describe the chart's key finding." },
-            new[] { "ChartMissingAxisTitle","Missing table header","1.3.1","Warning","XLSX, PPTX","A chart axis has no title label. Users cannot determine what quantity or categories are represented.","Select the chart and add axis titles via Chart Design > Add Chart Element > Axis Titles. Include units where applicable." },
+            new[] { "ChartMissingAxisTitle","Chart axis title","1.3.1","Warning","XLSX, PPTX","A chart axis has no title label. Users cannot determine what quantity or categories are represented.","Select the chart and add axis titles via Chart Design > Add Chart Element > Axis Titles. Include units where applicable." },
             new[] { "ChartMissingTitle","Object has no title or name","1.3.1","Error","XLSX, PPTX","A chart has no title. Without a title, users cannot identify what the chart represents.","Select the chart, go to Chart Design > Add Chart Element > Chart Title, and enter a descriptive title." },
             new[] { "CodeBlockMissingLanguage","Code","1.3.3","Warning","MD","A fenced code block has no language specifier. Screen reader users receive no cue about what kind of code they are reading.","Add a language identifier after the opening fence: ```python, ```bash, ```json, etc." },
             new[] { "ColorUsedAlone","Use of color alone","1.4.1","Warning","XLSX","Empty cells with background fill color may be conveying status through color alone.","Add a text label or symbol inside the colored cell that conveys the same meaning as the color." },

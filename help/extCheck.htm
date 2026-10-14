@@ -509,10 +509,12 @@ if any exist.</p>
 <ul>
 <li><strong>RuleID</strong> — unique identifier for the rule (e.g.,
 <code>MissingAltText</code>, <code>DuplicateHeadingText</code>)</li>
-<li><strong>Source</strong> — <code>MSAC</code> (Microsoft Office
-Accessibility Checker categories), <code>AXE</code> (axe-core WCAG
-equivalents), or <code>extCheck</code> for a place it could not
-check</li>
+<li><strong>Source</strong> — always <code>extCheck</code>: every check
+is extCheck’s own code</li>
+<li><strong>Modeled On</strong> — the checker a rule follows:
+<code>Microsoft Accessibility Checker</code> or <code>axe-core</code>,
+or empty for a rule of extCheck’s own. extCheck does not run either of
+them; it checks the same things its own way</li>
 <li><strong>Category</strong> — high-level grouping (e.g., “Image”,
 “Heading”, “Link”)</li>
 <li><strong>Location</strong> — sheet name, slide label, line number, or
@@ -532,6 +534,12 @@ is not an accessibility problem in itself; it marks a place to check by
 hand. So a report with no problems means every check ran, and a report
 with <code>CouldNotInspect</code> rows says exactly where one did
 not.</p>
+<p><strong>A chart’s title and axis titles are where its check starts,
+not where it ends.</strong> A chart with no axes, such as a pie or
+doughnut chart, is not checked for axis titles. And a titled chart still
+needs its figures, or its main point, in text: a table beside it, or
+alternative text that states the trend. That part is for a person to
+judge.</p>
 <p>Results are also printed to the console. At the end of a multi-file
 run, a total count is printed.</p>
 <h2 id="the-rule-registry">The rule registry</h2>
