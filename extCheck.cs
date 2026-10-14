@@ -1942,7 +1942,7 @@ class extCheck {
         Log.start(program.sProgramName);
         // F11 and the Help box ask GitHub through this whether a newer
         // extCheck exists.
-        Elevate.configure(program.c_sGitHubOwner, program.sProgramName, program.sProgramVersion);
+        Elevate.configure(program.sGitHubOwner, program.sProgramName, program.sProgramVersion);
         int iExit = 1;
         try {
             iExit = program.run(aArgs);
@@ -2087,7 +2087,7 @@ public static class logger
 // ===========================================================================
 public static class configManager
 {
-    const string c_sSettingsSection = "Settings";
+    const string sSettingsSection = "Settings";
 
     public static string getConfigDir()
     {
@@ -2103,7 +2103,7 @@ public static class configManager
     {
         string sAppData = Environment.GetFolderPath(
             Environment.SpecialFolder.LocalApplicationData);
-        return Path.Combine(Path.Combine(sAppData, program.sConfigDirName), program.c_sLegacyConfigFileName);
+        return Path.Combine(Path.Combine(sAppData, program.sConfigDirName), program.sLegacyConfigFileName);
     }
 
     public static bool configExists()
@@ -2184,16 +2184,16 @@ public static class configManager
                 var sb = new StringBuilder();
                 sb.AppendLine("; extCheck settings, written when Use configuration is checked at OK.");
                 sb.AppendLine("; Delete this file to reset, or press Default settings in the dialog.");
-                sb.AppendLine("[" + c_sSettingsSection + "]");
+                sb.AppendLine("[" + sSettingsSection + "]");
                 File.WriteAllText(sPath, sb.ToString(), new UTF8Encoding(true));
             }
             // InixCodec.writeValue changes one value in place, leaving every
             // comment and every other key where it was.
-            InixCodec.writeValue(sPath, c_sSettingsSection, "SourceFiles", sSource ?? "");
-            InixCodec.writeValue(sPath, c_sSettingsSection, "OutputDirectory", sOutputDir ?? "");
-            InixCodec.writeValue(sPath, c_sSettingsSection, "ForceReplacements", bForce ? "yes" : "no");
-            InixCodec.writeValue(sPath, c_sSettingsSection, "ViewOutput", bView ? "yes" : "no");
-            InixCodec.writeValue(sPath, c_sSettingsSection, "LogSession", bLog ? "yes" : "no");
+            InixCodec.writeValue(sPath, sSettingsSection, "SourceFiles", sSource ?? "");
+            InixCodec.writeValue(sPath, sSettingsSection, "OutputDirectory", sOutputDir ?? "");
+            InixCodec.writeValue(sPath, sSettingsSection, "ForceReplacements", bForce ? "yes" : "no");
+            InixCodec.writeValue(sPath, sSettingsSection, "ViewOutput", bView ? "yes" : "no");
+            InixCodec.writeValue(sPath, sSettingsSection, "LogSession", bLog ? "yes" : "no");
             logger.info("Saved configuration to " + sPath);
             if (File.Exists(getLegacyPath())) {
                 File.Delete(getLegacyPath());
@@ -2596,8 +2596,8 @@ static class program {
     public const string sConfigFileName = "extCheck.inix";
     // The GitHub owner whose extCheck releases F11 asks about, and the
     // settings file of the versions before 2.1.
-    public const string c_sGitHubOwner = "JamalMazrui";
-    public const string c_sLegacyConfigFileName = "extCheck.ini";
+    public const string sGitHubOwner = "JamalMazrui";
+    public const string sLegacyConfigFileName = "extCheck.ini";
     public const string sLogFileName = "extCheck.log";
     public static readonly string[] aSupportedExtensions = { ".docx", ".xlsx", ".pptx", ".md" };
 

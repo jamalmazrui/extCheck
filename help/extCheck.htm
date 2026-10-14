@@ -234,6 +234,7 @@
 <header id="title-block-header">
 <p class="author">Jamal Mazrui</p>
 </header>
+<main>
 <h1 id="extcheck-guide">extCheck Guide</h1>
 <p>This is the full guide. For a quick start, see ReadMe.</p>
 <p><strong>Author:</strong> Jamal Mazrui <strong>Copyright:</strong> ©
@@ -394,23 +395,23 @@ folder on your PATH, and run <code>extCheck</code> with the source as an
 argument. <code>extCheck.cmd</code> there runs the program in the
 <code>exec</code> folder.</p>
 <div class="sourceCode" id="cb1"><pre
-class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a># Check one file:</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>extCheck report.docx</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a># Several files at once:</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>extCheck *.docx *.md</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a># Files in different folders:</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>extCheck docs\*.docx data\*.xlsx slides\*.pptx</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a># Write reports to a specific directory:</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>extCheck *.md <span class="at">-o</span> reports</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a># Show the rule registry:</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>extCheck <span class="at">-rules</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a># Open the GUI:</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>extCheck <span class="at">-g</span></span></code></pre></div>
+class="sourceCode cmd"><code class="sourceCode dosbat"><span id="cb1-1"># Check one file:</span>
+<span id="cb1-2">extCheck report.docx</span>
+<span id="cb1-3"></span>
+<span id="cb1-4"># Several files at once:</span>
+<span id="cb1-5">extCheck *.docx *.md</span>
+<span id="cb1-6"></span>
+<span id="cb1-7"># Files in different folders:</span>
+<span id="cb1-8">extCheck docs\*.docx data\*.xlsx slides\*.pptx</span>
+<span id="cb1-9"></span>
+<span id="cb1-10"># Write reports to a specific directory:</span>
+<span id="cb1-11">extCheck *.md <span class="at">-o</span> reports</span>
+<span id="cb1-12"></span>
+<span id="cb1-13"># Show the rule registry:</span>
+<span id="cb1-14">extCheck <span class="at">-rules</span></span>
+<span id="cb1-15"></span>
+<span id="cb1-16"># Open the GUI:</span>
+<span id="cb1-17">extCheck <span class="at">-g</span></span></code></pre></div>
 <p>When invoked without arguments from a GUI shell (Explorer
 double-click, Start-menu shortcut, desktop hotkey),
 <code>extCheck</code> shows the dialog automatically. When invoked
@@ -567,5 +568,6 @@ this folder.</p>
 <h2 id="license">License</h2>
 <p>MIT License. See <code>License.htm</code> at the top of the program
 folder.</p>
+</main>
 </body>
 </html>
