@@ -5,6 +5,10 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 14 October 2026 -- the newest Pandoc for the help pages
+
+- **The help pages are made by the newest Pandoc, not the first on the PATH.** The build took the first pandoc on the PATH, which was Pandoc 2.19 in C:\bin, while Pandoc 3.12.1 was installed in Program Files. It now asks the kit's newest.ps1, as the kit's app template has done since kit 1.56.0, and the log names every copy found and its version.
+
 ## 14 October 2026 -- an Office inspection with a deadline
 
 - **A document Office cannot finish no longer holds the batch.** Each Word, Excel or PowerPoint inspection now runs on its own thread and has 10 minutes; past that, only the Office processes extCheck itself started are ended -- it now records which those are, as 2htm does -- and the document is reported as not inspected, never as clean, while the batch goes on to the next file. Office windows you had open are left alone (from an audit by another AI).
