@@ -5,6 +5,10 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 14 October 2026 -- started as you
+
+- **Setup starts extCheck as you,** not with the installer's administrator rights, and creates its logs folder before leaving the launch marker, which a first install never wrote (from an audit by another AI).
+
 ## 8 October 2026 -- an audit by another AI, and spoken tutorials
 
 ChatGPT audited extCheck and reported 39 findings. Checked against the code, these held and are fixed:
