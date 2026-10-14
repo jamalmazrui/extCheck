@@ -5,6 +5,9 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 14 October 2026 -- a place it could not check is said, not guessed
+
+- **When Office cannot report a detail, the report says so.** A rule asks Office about a document -- whether a chart has a title, whether a table's first row is a header -- and when Office could not answer, the rule took a default. For a chart's title or a table's header row that default reported a problem that might not be there; for a chart's axes, its type, a shape's text and a slide's timing it skipped the check without a word. So a report with no findings did not mean every check had run. Each of those places now writes a CouldNotInspect row, in the category "Not checked", naming what could not be read, the rule that needed it and Office's own error; it is not counted as an accessibility problem, and it is in the rule registry. The test in Office belongs to the next release check: a chart whose title cannot be read now gives CouldNotInspect where it gave ChartMissingTitle (from an audit by another AI).
 ## 14 October 2026 -- a report is whole or the last one stays
 
 - **Reports are written whole or not at all.** Each report was written straight over the last one, so an interruption left half a report where a whole one had been. Reports, and the rule registry, are now written beside the old file and swapped in, through the kit's Homer.Util.writeTextSafely, so the file is always one whole report or the other (from an audit by another AI).

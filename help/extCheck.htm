@@ -510,8 +510,9 @@ if any exist.</p>
 <li><strong>RuleID</strong> — unique identifier for the rule (e.g.,
 <code>MissingAltText</code>, <code>DuplicateHeadingText</code>)</li>
 <li><strong>Source</strong> — <code>MSAC</code> (Microsoft Office
-Accessibility Checker categories) or <code>AXE</code> (axe-core WCAG
-equivalents)</li>
+Accessibility Checker categories), <code>AXE</code> (axe-core WCAG
+equivalents), or <code>extCheck</code> for a place it could not
+check</li>
 <li><strong>Category</strong> — high-level grouping (e.g., “Image”,
 “Heading”, “Link”)</li>
 <li><strong>Location</strong> — sheet name, slide label, line number, or
@@ -522,6 +523,15 @@ content</li>
 matters</li>
 <li><strong>Remediation</strong> — how to fix it</li>
 </ul>
+<p><strong>A place extCheck could not check is a finding of its
+own.</strong> Sometimes Office cannot report a detail a rule needs, such
+as whether a chart has a title. extCheck then writes a
+<code>CouldNotInspect</code> row, in the category “Not checked”, that
+names the detail, the rule that needed it and the error Office gave. It
+is not an accessibility problem in itself; it marks a place to check by
+hand. So a report with no problems means every check ran, and a report
+with <code>CouldNotInspect</code> rows says exactly where one did
+not.</p>
 <p>Results are also printed to the console. At the end of a multi-file
 run, a total count is printed.</p>
 <h2 id="the-rule-registry">The rule registry</h2>

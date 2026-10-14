@@ -147,12 +147,14 @@ Every option in the GUI corresponds one-to-one with a command-line flag, so a wo
 For each file evaluated, a CSV named `<basename>.csv` is written to the output directory (`-o`, or the current working directory if no `-o`). The CSV columns are:
 
 - **RuleID** — unique identifier for the rule (e.g., `MissingAltText`, `DuplicateHeadingText`)
-- **Source** — `MSAC` (Microsoft Office Accessibility Checker categories) or `AXE` (axe-core WCAG equivalents)
+- **Source** — `MSAC` (Microsoft Office Accessibility Checker categories), `AXE` (axe-core WCAG equivalents), or `extCheck` for a place it could not check
 - **Category** — high-level grouping (e.g., "Image", "Heading", "Link")
 - **Location** — sheet name, slide label, line number, or `(Document)`
 - **Context** — short snippet of the offending content
 - **Message** — what the rule found and why it matters
 - **Remediation** — how to fix it
+
+**A place extCheck could not check is a finding of its own.** Sometimes Office cannot report a detail a rule needs, such as whether a chart has a title. extCheck then writes a `CouldNotInspect` row, in the category "Not checked", that names the detail, the rule that needed it and the error Office gave. It is not an accessibility problem in itself; it marks a place to check by hand. So a report with no problems means every check ran, and a report with `CouldNotInspect` rows says exactly where one did not.
 
 Results are also printed to the console. At the end of a multi-file run, a total count is printed.
 

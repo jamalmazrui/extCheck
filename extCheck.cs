@@ -99,10 +99,25 @@ static class shared {
     // and HasTextFrame are MsoTriState numbers, true being -1, and Word's HeadingFormat a
     // Long; cast straight to bool through dynamic binding they threw, the empty catch
     // swallowed it, and the check silently did nothing. Read as numbers, any nonzero is true.
+    // A VALUE THAT CANNOT BE READ IS NOT FALSE (14 October 2026, from an audit by another AI): one that could not be
+    // read as true or false was taken as false, and a check that rested on it reported a problem that might not be
+    // there. It now raises the error, and each caller records that it could not inspect.
     public static bool officeTrue(object oValue) {
         if (oValue == null) return false;
         if (oValue is bool) return (bool)oValue;
-        try { return Convert.ToInt64(oValue) != 0; } catch { return false; }
+        return Convert.ToInt64(oValue) != 0;
+    }
+
+    // COULD NOT INSPECT IS ITS OWN ANSWER (14 October 2026, from an audit by another AI). Where Office could not report
+    // a property a rule needs, the rule took a default: sometimes a problem that might not be there, sometimes no
+    // check at all, and the report could not tell either from a real result -- so no findings did not mean every check
+    // had run. Such a place is now a finding of its own, CouldNotInspect, which names what could not be read, the rule
+    // that needed it and Office's error, and is not counted as an accessibility problem.
+    public static void couldNotInspect(string sRuleId, string sLocation, string sContext, string sWhat, Exception oError) {
+        string sWhy = oError == null ? "" : " (" + oError.Message.Trim() + ")";
+        results.add("CouldNotInspect", "extCheck", "Not checked", sLocation, sContext,
+            "Office could not report " + sWhat + ", so " + sRuleId + " could not be checked here" + sWhy + ".",
+            "Check this by hand, or open the file in Office, save it, and run extCheck again.");
     }
 
     // A PLACEHOLDER IS A SHAPE OF TYPE msoPlaceholder, 14 (8 October 2026, from an audit by
@@ -136,8 +151,9 @@ static class shared {
 
     // Checks used identically across XLSX and PPTX
     public static void chartTitleCheck(string sSheet, string sChartName, dynamic oChart) {
-        bool bHasTitle = false;
-        try { bHasTitle = (bool)oChart.HasTitle; } catch {}
+        bool bHasTitle;
+        try { bHasTitle = shared.officeTrue(oChart.HasTitle); }
+        catch (Exception oError) { shared.couldNotInspect("ChartMissingTitle", sSheet, "Chart: " + sChartName, "whether the chart has a title", oError); bHasTitle = true; }
         if (!bHasTitle) {
             results.add("ChartMissingTitle", "MSAC", "Object has no title or name",
                 sSheet, "Chart: " + sChartName,
@@ -145,23 +161,23 @@ static class shared {
                 "Go to Chart Design > Add Chart Element > Chart Title and enter a descriptive title.");
         }
         try {
-            bool b = (bool)oChart.Axes(1).HasTitle;
+            bool b = shared.officeTrue(oChart.Axes(1).HasTitle);
             if (!b) {
                 results.add("ChartMissingAxisTitle", "AXE", "Missing table header",
                     sSheet, "Chart: " + sChartName + " (category axis)",
                     "Chart category axis has no title. Users cannot determine what categories are being compared.",
                     "Go to Chart Design > Add Chart Element > Axis Titles and label the category axis.");
             }
-        } catch {}
+        } catch (Exception oError) { shared.couldNotInspect("ChartMissingAxisTitle", sSheet, "Chart: " + sChartName + " (category axis)", "whether the category axis has a title", oError); }
         try {
-            bool b = (bool)oChart.Axes(2).HasTitle;
+            bool b = shared.officeTrue(oChart.Axes(2).HasTitle);
             if (!b) {
                 results.add("ChartMissingAxisTitle", "AXE", "Missing table header",
                     sSheet, "Chart: " + sChartName + " (value axis)",
                     "Chart value axis has no title. Users cannot determine what quantity is being measured.",
                     "Go to Chart Design > Add Chart Element > Axis Titles and label the value axis. Include units where applicable.");
             }
-        } catch {}
+        } catch (Exception oError) { shared.couldNotInspect("ChartMissingAxisTitle", sSheet, "Chart: " + sChartName + " (value axis)", "whether the value axis has a title", oError); }
     }
 
     // Writes extCheck.csv — the master rule registry
@@ -182,6 +198,7 @@ static class shared {
             new[] { "CodeBlockMissingLanguage","Code","1.3.3","Warning","MD","A fenced code block has no language specifier. Screen reader users receive no cue about what kind of code they are reading.","Add a language identifier after the opening fence: ```python, ```bash, ```json, etc." },
             new[] { "ColorUsedAlone","Use of color alone","1.4.1","Warning","XLSX","Empty cells with background fill color may be conveying status through color alone.","Add a text label or symbol inside the colored cell that conveys the same meaning as the color." },
             new[] { "ComplexTableHeaders","Complex table","1.3.1","Warning","DOCX","Table has header cells in both the first row and first column. Screen readers may not correctly associate data cells with both row and column headers.","Verify screen reader navigation. If possible, restructure into simpler tables. Test with NVDA or JAWS." },
+            new[] { "CouldNotInspect","Not checked","","Warning","DOCX, XLSX, PPTX","Office could not report a property a rule needs, so that rule's check was not made at this place. It is not an accessibility problem in itself; it marks a place a person must check.","Check this place by hand, or open the file in Office, save it, and run extCheck again." },
             new[] { "DefaultSheetName","Object has no title or name","2.4.6","Warning","XLSX","A worksheet tab has a default name (Sheet1, Sheet2, etc.). Screen readers announce the tab name when navigating.","Right-click the tab and choose Rename. Enter a concise, descriptive name." },
             new[] { "DefaultTableName","Object has no title or name","2.4.6","Warning","XLSX","An Excel Table has a default name (Table1, Table2, etc.).","Click inside the table, go to Table Design, and replace the default name with a descriptive identifier. No spaces allowed." },
             new[] { "DuplicateHeadingText","Heading issues","2.4.6","Warning","DOCX, PPTX, MD","Two headings at the same level share identical text, creating ambiguous navigation in screen reader heading lists.","Make each heading uniquely descriptive of its section." },
@@ -632,8 +649,9 @@ static class docxModule {
         int iNum = 0;
         foreach (dynamic oTable in oDoc.Tables) {
             iNum++;
-            bool bHdr = false;
-            try { bHdr = shared.officeTrue(oTable.Rows[1].HeadingFormat); } catch {}
+            bool bHdr;
+            try { bHdr = shared.officeTrue(oTable.Rows[1].HeadingFormat); }
+            catch (Exception oError) { shared.couldNotInspect("TableMissingHeaderRow", "(Document)", "Table " + iNum, "whether the table's first row repeats as a header", oError); bHdr = true; }
             if (!bHdr) {
                 results.add("TableMissingHeaderRow", "MSAC", "Missing table header", "(Document)", "Table " + iNum,
                     "Table does not have a designated header row. Screen readers cannot identify column headers.",
@@ -1173,13 +1191,16 @@ static class pptxModule {
                 }
 
                 bool bHasChart = false;
-                try { bHasChart = shared.officeTrue(oShape.HasChart); } catch {}
+                try { bHasChart = shared.officeTrue(oShape.HasChart); }
+                catch (Exception oError) { shared.couldNotInspect("ChartMissingTitle", sLabel, "Shape: " + sName, "whether the shape is a chart", oError); }
                 if (bHasChart) {
-                    try { shared.chartTitleCheck(sLabel, sName, oShape.Chart); } catch {}
+                    try { shared.chartTitleCheck(sLabel, sName, oShape.Chart); }
+                    catch (Exception oError) { shared.couldNotInspect("ChartMissingTitle", sLabel, "Chart: " + sName, "the chart itself", oError); }
                 }
 
                 bool bHasText = false;
-                try { bHasText = shared.officeTrue(oShape.HasTextFrame); } catch {}
+                try { bHasText = shared.officeTrue(oShape.HasTextFrame); }
+                catch (Exception oError) { shared.couldNotInspect("AllCapsText, FakeListBullet and SmallFontSize", sLabel, "Shape: " + sName, "whether the shape holds text", oError); }
                 if (!bHasText) {
                     continue;
                 }
@@ -1226,8 +1247,10 @@ static class pptxModule {
             dynamic oT  = oSlide.SlideShowTransition;
             bool bAuto  = false;
             float nTime = 0;
-            try { bAuto = shared.officeTrue(oT.AdvanceOnTime); } catch {}
-            try { nTime = (float)oT.AdvanceTime; } catch {}
+            try { bAuto = shared.officeTrue(oT.AdvanceOnTime); }
+            catch (Exception oError) { shared.couldNotInspect("FastAutoAdvance", sLabel, "Transition", "whether the slide advances by itself", oError); }
+            try { nTime = (float)oT.AdvanceTime; }
+            catch (Exception oError) { if (bAuto) shared.couldNotInspect("FastAutoAdvance", sLabel, "Transition", "how long the slide waits before advancing", oError); }
             if (bAuto && nTime > 0 && nTime < 3) {
                 results.add("FastAutoAdvance", "AXE", "Timing", sLabel, "Auto-advance: " + nTime + "s",
                     "Slide auto-advances in less than 3 seconds, leaving insufficient time for screen reader announcement (WCAG 2.2.1).",
@@ -1278,8 +1301,10 @@ static class pptxModule {
             foreach (dynamic oShape in oSlide.Shapes) {
                 int iType      = 0;
                 bool bHasChart = false;
-                try { iType    = (int)oShape.Type; } catch {}
-                try { bHasChart = shared.officeTrue(oShape.HasChart); } catch {}
+                try { iType    = (int)oShape.Type; }
+                catch (Exception oError) { shared.couldNotInspect("VisualContentWithoutNotes", sLabel, "Shape", "what kind of shape it is", oError); }
+                try { bHasChart = shared.officeTrue(oShape.HasChart); }
+                catch (Exception oError) { shared.couldNotInspect("VisualContentWithoutNotes", sLabel, "Shape", "whether the shape is a chart", oError); }
                 if (iType == iMsoShapeTypePicture || iType == iMsoShapeTypeLinkedPic || bHasChart) {
                     string sAlt = "";
                     try { sAlt = (oShape.AlternativeText ?? "").ToString().Trim(); } catch {}
