@@ -5,6 +5,10 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 14 October 2026 -- a stopped Office worker is proved stopped
+
+- **If Office's worker is still running after Office is ended, the run ends,** with exit code 2 and the reason in the log, so nothing it writes late can reach the next document's results (from a second audit by another AI).
+
 ## 14 October 2026 -- reports say who checked, and charts are checked as they are
 
 - **The report says extCheck made each check, and what it is modeled on.** The Source column said MSAC or AXE, which read as though Microsoft's Accessibility Checker or axe-core had run; every check is extCheck's own code. Source now always says extCheck, and a new Modeled On column names the checker a rule follows (from an audit by another AI).
