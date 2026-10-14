@@ -32,7 +32,7 @@ Try the fresh build with `extCheck -g` (the `extCheck.cmd` at the top runs `exec
 
 The build finds the Roslyn C# compiler with `vswhere`, or installs the free Visual Studio Build Tools with winget. The Framework's own `csc.exe`, which extCheck used to be built with, stops at C# 5 and cannot compile the kit.
 
-extCheck compiles eight of the kit's classes straight from `C:\HomerDev\CSharp`: Elevate, Inix, Lbc, Log, Paths, Say, Util and Web. Its dialog, `guiDialog.show`, is an LbcDialog, built the way urlFido's is: bands for a field and its button, checkboxes below a separator, and `runWithButtons` with OK, Guide, Default settings and Cancel, looping back to the dialog after Guide, Default settings, or an output folder the user declined to create. Lbc needs Elevate, Inix, Log, Say and Util.
+extCheck compiles eight of the kit's classes straight from `C:\HomerDev\exec\CSharp`: Elevate, Inix, Lbc, Log, Paths, Say, Util and Web. Its dialog, `guiDialog.show`, is an LbcDialog, built the way urlFido's is: bands for a field and its button, checkboxes below a separator, and `runWithButtons` with OK, Guide, Default settings and Cancel, looping back to the dialog after Guide, Default settings, or an output folder the user declined to create. Lbc needs Elevate, Inix, Log, Say and Util.
 
 - `Log` keeps the session log in `%LOCALAPPDATA%\extCheck\logs`. extCheck's own `logger` writes every line to it as well as to the optional `extCheck.log`, and `Main` records anything `program.run` did not catch. Log needs Paths and Say.
 - `Paths.configs()` is where `extCheck.inix` lives, and `Paths.installedFolder` is how Help finds `help\extCheck.htm` from `exec`.

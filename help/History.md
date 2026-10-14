@@ -5,6 +5,11 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 14 October 2026 -- a report is whole or the last one stays
+
+- **Reports are written whole or not at all.** Each report was written straight over the last one, so an interruption left half a report where a whole one had been. Reports, and the rule registry, are now written beside the old file and swapped in, through the kit's Homer.Util.writeTextSafely, so the file is always one whole report or the other (from an audit by another AI).
+- **The developer guide names the kit's classes where they are,** in C:\HomerDev\exec\CSharp; it still named C:\HomerDev\CSharp, a folder the kit no longer has (from an audit by another AI).
+
 ## 14 October 2026 -- contents lists, and plainer guides
 
 - **Every help page has a contents list.** The build ran Pandoc without --toc, so a long guide had no list of its sections. Pages are now built with one, and a page that lacks one is built again once to gain it.

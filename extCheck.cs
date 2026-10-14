@@ -82,7 +82,10 @@ static class results {
                 esc(o.sMessage)     + "," +
                 esc(o.sRemediation));
         }
-        File.WriteAllText(sPath, sb.ToString(), Encoding.UTF8);
+        // A REPORT IS WHOLE OR THE OLD ONE STAYS (14 October 2026, from an audit by another AI). It was written
+        // straight over the last report, so an interruption left half a report where a whole one had been. It is now
+        // written beside it and swapped in, so the file is always one whole report or the other.
+        Homer.Util.writeTextSafely(sPath, sb.ToString(), Encoding.UTF8, "");
     }
 
     static string esc(string s) { return shared.csvCell(s); }
@@ -244,7 +247,8 @@ static class shared {
         foreach (string[] row in rows) {
             sb.AppendLine(csvRow(row));
         }
-        File.WriteAllText(sPath, sb.ToString(), Encoding.UTF8);
+        // Whole or not at all, as each report is.
+        Homer.Util.writeTextSafely(sPath, sb.ToString(), Encoding.UTF8, "");
         Console.WriteLine("Rules CSV written: " + sPath);
         Console.WriteLine("Rules: " + (rows.Count - 1));
     }
