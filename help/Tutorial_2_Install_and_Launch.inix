@@ -121,7 +121,7 @@ Say=If setup ever stops partway, its own log says why, and running the setup aga
 Key=
 [step]
 
-Say=To remove extCheck, use Installed apps in Windows Settings, or the uninstaller in its Start-menu group. Your reports are never touched, since they are wherever you saved them.
+Say=To remove extCheck, use Installed apps in Windows Settings, or the uninstaller in its Start-menu group. The uninstaller removes what it installed; your reports stay wherever you saved them.
 Key=
 Hear=extCheck, Uninstall button
 Note=Confirm the wording with a live run: buildTutorials -live.

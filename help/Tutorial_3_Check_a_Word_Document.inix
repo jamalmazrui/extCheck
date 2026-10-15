@@ -74,7 +74,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Down Arrow moves to the first problem. Control with Right Arrow reads along its row.
+Say=Down Arrow moves to the first problem. Right Arrow reads along its row, one cell at a time.
 Key=Down Arrow
 Hear=Missing Alt Text, A2
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -115,7 +115,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Enter, and the new report has fewer rows. When the count reaches zero, the handout is ready to send.
+Say=Enter, and the new report has fewer rows. Zero means the rules found nothing more. Before I send the handout, I still read it through once for reading order, sensible descriptions of pictures and clear link text, which no rule can judge.
 Key=Enter
 Hear=1 file checked, 0 issues
 Note=Confirm the wording with a live run: buildTutorials -live.

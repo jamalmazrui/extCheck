@@ -24,7 +24,7 @@ What extCheck is, the two ways to run it, and the ten walks that teach it.
 
 ### Step 1
 
-Welcome. This is the first of ten short walks through extCheck. I am the host, and the other voice you hear is the screen reader, speaking as it would on your own computer.
+Welcome. This is the first of ten short walks through extCheck. I am the host, and the other voice you hear is the screen reader. It is a simulation of what a screen reader says, so your own reader's words may differ a little.
 
 ### Step 2: Insert+Up Arrow
 
@@ -52,7 +52,7 @@ Screen reader:
 
 ### Step 5
 
-If you set your screen reader to use Caps Lock in place of Insert, Caps Lock works the same way for all three.
+On a laptop keyboard, Caps Lock usually stands in for Insert, though in some laptop layouts the line command moves to a letter, such as Caps Lock plus L. And if speech goes by before you catch it, your reader can replay it: Insert plus X in some readers, a speech history in others.
 
 ### Step 6
 
@@ -463,7 +463,7 @@ If setup ever stops partway, its own log says why, and running the setup again s
 
 ### Step 19
 
-To remove extCheck, use Installed apps in Windows Settings, or the uninstaller in its Start-menu group. Your reports are never touched, since they are wherever you saved them.
+To remove extCheck, use Installed apps in Windows Settings, or the uninstaller in its Start-menu group. The uninstaller removes what it installed; your reports stay wherever you saved them.
 
 Screen reader:
 
@@ -605,7 +605,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 10: Down Arrow
 
-Down Arrow moves to the first problem. Control with Right Arrow reads along its row.
+Down Arrow moves to the first problem. Right Arrow reads along its row, one cell at a time.
 
 Screen reader:
 
@@ -651,7 +651,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 17: Enter
 
-Enter, and the new report has fewer rows. When the count reaches zero, the handout is ready to send.
+Enter, and the new report has fewer rows. Zero means the rules found nothing more. Before I send the handout, I still read it through once for reading order, sensible descriptions of pictures and clear link text, which no rule can judge.
 
 Screen reader:
 

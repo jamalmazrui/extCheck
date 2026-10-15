@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description></description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 14 Oct 2026 17:41:03 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 15 Oct 2026 20:02:09 +0000</lastBuildDate>
     <itunes:author></itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -14,8 +14,8 @@
       <description>Nothing to set up for this walk; it only listens. Full transcript: Tutorials.htm#0-0-overview</description>
       <link>Tutorials.htm#0-0-overview</link>
       <guid isPermaLink="false">homer-tutorial_0_overview</guid>
-      <enclosure url="tutorials/0_Overview.mp3" length="1111340" type="audio/mpeg"/>
-      <itunes:duration>00:02:32</itunes:duration>
+      <enclosure url="tutorials/0_Overview.mp3" length="1197435" type="audio/mpeg"/>
+      <itunes:duration>00:02:43</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -32,7 +32,7 @@
       <description>extCheck_setup.exe downloaded from the extCheck releases page on GitHub. Full transcript: Tutorials.htm#0b-2-install-and-launch</description>
       <link>Tutorials.htm#0b-2-install-and-launch</link>
       <guid isPermaLink="false">homer-tutorial_2_install_and_launch</guid>
-      <enclosure url="tutorials/2_Install_and_Launch.mp3" length="1472121" type="audio/mpeg"/>
+      <enclosure url="tutorials/2_Install_and_Launch.mp3" length="1476585" type="audio/mpeg"/>
       <itunes:duration>00:03:27</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -41,8 +41,8 @@
       <description>A Word document of your own, such as a handout or a letter, and Microsoft Word installed. Full transcript: Tutorials.htm#0c-3-check-a-word-document</description>
       <link>Tutorials.htm#0c-3-check-a-word-document</link>
       <guid isPermaLink="false">homer-tutorial_3_check_a_word_document</guid>
-      <enclosure url="tutorials/3_Check_a_Word_Document.mp3" length="1525905" type="audio/mpeg"/>
-      <itunes:duration>00:03:36</itunes:duration>
+      <enclosure url="tutorials/3_Check_a_Word_Document.mp3" length="1574768" type="audio/mpeg"/>
+      <itunes:duration>00:03:42</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
