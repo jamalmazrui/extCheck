@@ -5,6 +5,13 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 24 October 2026
+
+- **The build uses the newest Homer kit it finds,** logging each one: your HomerDev variable, C:\HomerDev and the folders above. The variable named an older installed kit, which stopped BatCon's build.
+- **Its Markdown rules now live in the Homer kit,** as MarkdownCheck in Quality.cs, so every Homer app judges Markdown by the same rules extCheck reports. The rules are unchanged (HomerDev 1.92.0).
+- **The build honours the HomerDev environment variable,** and accepts a kit only where HomerDev.cs is too.
+- **Word, Excel and PowerPoint are marked as opened for checking, not converting,** so the kit's check no longer counts them as private conversion code.
+
 ## 23 October 2026 -- the Homer launch dialog
 
 - **The dialog is the one every Homer launch app shows,** built by the Homer kit's LaunchDialog (kit 1.89.0). It is in rows called bands, read left to right: Source paths and Browse local source; Output directory and Choose output directory; Force replacements, Use configuration and View output directory; Default settings and Help; then OK and Cancel alone at the bottom right, as Microsoft's dialog guidance places them.
