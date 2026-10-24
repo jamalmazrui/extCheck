@@ -13,7 +13,8 @@ author: "Jamal Mazrui"
 - **Logging is automatic.** The Log session checkbox and -l are gone; every run writes %LOCALAPPDATA%\extCheck\logs\extCheck-yyyyMMdd-HHmmss.log. The Guide button is gone too.
 - **Every run ends with the Results box,** whose one OK button has the focus, so Enter, Space or Escape closes it; the output directory then opens if View output directory is checked, and extCheck closes.
 - **Switches match the dialog:** a long switch is a control's label and a short one its Alt letter, written with /, - or --, in any case. New: -d, --default-settings; switches now work with /, in any case; -v is now View output directory, so the version is --version alone. The older names still work.
-- **The progress window is the kit's,** LaunchProgress: "extCheck, <status>" in its title, a Status box with the focus, Cancel (Escape) to stop after the current file, and speech only while extCheck is the window in front.
+- **The progress window is the kit's,** LaunchProgress: "extCheck, <status>" in its title, a Status box with the focus, the percentage done and time left ("2 of 5 done, 40%, about 3 min left"), Cancel (Escape) to stop after the current file, and speech only while extCheck is the window in front.
+- **Force replacements works as in every launch app:** unchecked, a source whose result is already there is skipped and kept, and the Results box says how many and how to replace them; checked, the work is done again and the old result kept until the new one is complete. Its tip is now the kit's standard one.
 - **The build needs HomerDev 1.89.0 or later.**
 
 ## 14 October 2026 -- a stopped Office worker is proved stopped
