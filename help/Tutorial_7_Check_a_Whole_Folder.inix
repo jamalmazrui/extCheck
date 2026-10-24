@@ -13,10 +13,10 @@ Key=
 
 [step]
 
-Say=I open the dialog. In Source files, a folder's path is enough: extCheck checks every Word, Excel, PowerPoint and Markdown file in it.
+Say=I open the dialog. In Source paths, a folder's path is enough: extCheck checks every Word, Excel, PowerPoint and Markdown file in it.
 Key=Alt+Control+X
 Hear=extCheck dialog
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -40,16 +40,16 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Choose output opens a folder picker, but I simply type a new folder's path, Reports, beside the course folder.
+Say=Choose output directory opens a folder picker, but I simply type a new folder's path, Reports, beside the course folder.
 Key=
 Hear=C colon backslash Courses backslash Reports
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I tick Log session, so a log of the whole run is written beside the reports, and View output, so their folder opens at the end.
-Key=Alt+L
-Hear=Log session check box, checked
+Say=I tick View output directory, so the reports' folder opens once I close the Results box. The log of the run is kept anyway, as it always is.
+Key=Alt+V
+Hear=View output directory check box, checked
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

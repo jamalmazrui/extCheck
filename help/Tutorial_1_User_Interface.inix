@@ -16,19 +16,19 @@ Key=
 Say=I press the desktop key for extCheck. The dialog opens on its first field.
 Key=Alt+Control+X
 Hear=extCheck dialog
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Source files is where the documents to check are named: one file, a folder, a pattern such as star dot docx, or several of these with spaces between. The underlined letter is S.
+Say=Source paths is where the documents to check are named: one file, a folder, a pattern such as star dot docx, or several of these with spaces between. The underlined letter is S.
 Key=
 
 [step]
 
 Say=Tab moves to the next control, the button that opens a file picker.
 Key=Tab
-Hear=Browse source button
+Hear=Browse local source button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -40,7 +40,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Output directory is where the reports go. Left blank, they go to the current folder. Choose output, C, opens a folder picker instead of typing.
+Say=Output directory is where the reports go. Left blank, they go to the current folder. Choose output directory, C, opens a folder picker instead of typing.
 Key=
 
 [step]
@@ -66,7 +66,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=View output, V, opens the reports' folder in File Explorer when the run is done. Log session, L, writes a log of the run beside the reports. Use configuration, U, remembers these fields for next time.
+Say=View output directory, V, opens the reports' folder in File Explorer when the run is done. Use configuration, U, remembers these fields for next time.
 Key=
 
 [step]
@@ -99,28 +99,28 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I choose Source files from the list.
+Say=I choose Source paths from the list.
 Key=Enter
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Enter starts the check. From any control, even a check box, Control+Enter does the same.
+Say=Control+Enter starts the check from any control, even a check box.
 Key=Tab
 Hear=OK button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Two more buttons sit at the end. Guide, G, opens the full guide in the browser and then returns here.
-Key=Alt+G
-Hear=Guide button
+Say=Two buttons sit in their own band, above OK and Cancel. Help, H, lists every field, says where the logs are kept, and checks for a newer version.
+Key=Alt+H
+Hear=Help button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Default settings, D, clears every field and box, and forgets anything saved. It asks first, since it cannot be undone.
+Say=Default settings, D, clears every field and box, and forgets anything saved, then shows the dialog again.
 Key=Alt+D
 Hear=Default settings button
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -155,7 +155,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=An underlined letter works whether or not the screen reader announces it, since it is plain Windows: the Alt key with the letter that the label shows.
 Key=Alt+S
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

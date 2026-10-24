@@ -64,7 +64,7 @@ set "progFiles=%ProgramFiles%"
 
 rem ---- SETTINGS: the part an app edits -------------------------------
 rem The oldest kit with everything this build uses.
-set "kitNeeded=1.43.29"
+set "kitNeeded=1.89.0"
 rem The number to start from when version.txt is missing. A newer release
 rem tag, if the repository has one, wins; so does nothing lower than this.
 rem extCheck's last hand-numbered release was 2.0; the first built from

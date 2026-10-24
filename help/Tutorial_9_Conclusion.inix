@@ -81,12 +81,12 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Shift+F1 says the tip for the field you are on. F7 lists the dialog's controls and moves to the one you choose.
 Key=Shift+F1
-Hear=Source files: one file, a folder, a pattern, or several, separated by spaces
+Hear=Source paths: one file, a folder, a pattern, or several, separated by spaces
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Guide, Alt+G, opens the full guide in your browser and then returns to the dialog as you left it. The guide, these walks as text, and the rule registry are all in the help folder of the installation.
+Say=Help, Alt plus H, does what F1 does, and also says where the automatic logs are kept. The guide, these walks as text, and the rule registry are all in the help folder of the installation.
 Key=
 
 [step]

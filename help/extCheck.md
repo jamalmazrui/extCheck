@@ -60,26 +60,24 @@ Launch `extCheck` from any of these:
 - The Start-menu shortcut
 - Double-clicking `extCheck.exe` in the `exec` folder in File Explorer
 
-The parameter dialog has these controls. Each label has an underlined letter that you can press with **Alt** to jump straight to that control:
+The dialog is the one every Homer launch app shows, in rows called bands that read left to right. Tab moves through its controls in this order. Each label has an underlined letter that you can press with **Alt** to jump straight to that control:
 
-- **Source files** [S] — a file path, a folder path, a wildcard pattern (such as `*.docx`), or several of these separated by spaces. A folder on its own means every supported file in it, the same as `<dir>\*.*`, so you need not add the wildcard. One path with spaces in it needs no quotes: when the whole field names a file or folder that exists, extCheck takes it as one path. You need quotes only when you give several, and one of them has a space.
-- **Browse source...** [B] — pick a single source from a file picker
+- **Source paths** [S] — a file path, a folder path, a wildcard pattern (such as `*.docx`), or several of these separated by spaces. A folder on its own means every supported file in it, the same as `<dir>\*.*`, so you need not add the wildcard. One path with spaces in it needs no quotes: when the whole field names a file or folder that exists, extCheck takes it as one path. You need quotes only when you give several, and one of them has a space.
+- **Browse local source** [B] — pick a single source from a file picker
 - **Output directory** [O] — where the output is written. Blank means the current working directory.
-- **Choose output...** [C] — pick the output directory from a folder picker
+- **Choose output directory** [C] — pick the output directory from a folder picker
 - **Force replacements** [F] — overwrite an existing `<basename>.csv` instead of skipping the input. Without this, extCheck skips an input whose CSV already exists in the output directory.
-- **View output** [V] — open the output directory in File Explorer when the run is done
-- **Log session** [L] — also write a fresh `extCheck.log` in the output directory, or in the current directory if none is set. A session log is always kept in `%LOCALAPPDATA%\extCheck\logs`.
 - **Use configuration** [U] — load these field values from the saved configuration at startup, and save them back when you press OK
-- **Guide** [G] — open this guide in your browser, then return to the dialog with everything as it was.
-- **Help** [H] — list every field with its tip, the dialog's keys, and the version check. F1 also shows Help.
+- **View output directory** [V] — open the output directory in File Explorer when the run is done, after you close the Results box
 - **Default settings** [D] — clear all fields, uncheck all boxes, and delete the saved configuration if any
-- **OK** / **Cancel** — start the run, or cancel without running. Enter is OK; Escape is Cancel.
+- **Help** [H] — list every field with its tip, the dialog's keys, where the logs are kept, and the version check. F1 also shows Help.
+- **OK** / **Cancel** — alone at the bottom right: start the run, or close without running. Control+Enter is OK and Escape is Cancel, from any control.
 
-More keys work anywhere in the dialog. **F1** shows Help. **F11** checks the web for a newer version of extCheck (see Updating). **Control+Enter** is OK from any control. **Shift+F1** says the tip for the field you are on, and **F7** lists the dialog's controls so you can move to one. The dialog is built with the Homer Lbc classes, so its text fields also have the Lbc editing keys, which Help lists.
+More keys work anywhere in the dialog. **F1** shows Help. **F11** checks the web, from any control, for a newer version of extCheck (see Updating). **Control+Enter** is OK from any control. **Shift+F1** says the tip for the field you are on, and **F7** lists the dialog's controls so you can move to one. The dialog is built with the Homer Lbc classes, so its text fields also have the Lbc editing keys, which Help lists.
 
-**Default settings** and **Guide** return you to the dialog; Default settings first clears the fields and deletes any saved configuration.
+**Default settings** returns you to the dialog with the fields cleared and any saved configuration deleted. Every run ends with the extCheck Results box. Its only button is OK, so Enter, Space or Escape closes it; then the output directory opens if View output directory is checked, and extCheck closes. A long report shows its first 15 lines and names a file with the rest.
 
-The Browse source and Choose output pickers open at the folder named in their text field, when it exists. Otherwise they open at your Documents folder. With **Use configuration** checked, those fields start with what you used last time, so the pickers pick up where you left off.
+The Browse local source and Choose output directory pickers open at the folder named in their text field, when it exists. Otherwise they open at your Documents folder. With **Use configuration** checked, those fields start with what you used last time, so the pickers pick up where you left off.
 
 If you press OK with an output directory that does not yet exist, extCheck prompts to create it (default Yes). Choosing No keeps the dialog open with focus on the output field so you can correct it.
 
@@ -117,17 +115,17 @@ When invoked without arguments from a GUI shell (Explorer double-click, Start-me
 
 ## Command-line options
 
-- `-f`, `--force` — overwrite an existing `<basename>.csv` instead of skipping the input.
+- `-d`, `--default-settings` — forget the saved settings and exit.
+- `-f`, `--force-replacements` — overwrite an existing `<basename>.csv` instead of skipping the input.
 - `-g`, `--gui-mode` — show the parameter dialog.
 - `-h`, `--help` — show usage and exit.
-- `-l`, `--log` — also write `extCheck.log` (UTF-8 with BOM) in the output directory, replaced each session. A session log is always kept in `%LOCALAPPDATA%\extCheck\logs`.
-- `-o <folder>`, `--output-dir <folder>` — write the reports to `<folder>` (made if missing); the default is the current directory.
+- `-o <folder>`, `--output-directory <folder>` — write the reports to `<folder>` (made if missing); the default is the current directory.
 - `-rules` — write the rule registry as `extCheck.csv` to the output directory and exit.
 - `-u`, `--use-configuration` — read saved settings from `%LOCALAPPDATA%\extCheck\configs\extCheck.inix`.
-- `-v`, `--version` — show the version and exit.
-- `--view-output` — after the run, open the output directory in File Explorer.
+- `--version` — show the version and exit.
+- `-v`, `--view-output-directory` — after the run, open the output directory in File Explorer.
 
-Every option in the GUI corresponds one-to-one with a command-line flag, so a workflow prototyped in the dialog can be translated to a batch file without surprises.
+Every option in the dialog has a command-line switch named after its label, whose letter is the control's Alt letter, and switches may be written with /, - or --, in any case, so a workflow prototyped in the dialog can be translated to a batch file without surprises.
 
 ---
 
@@ -195,9 +193,7 @@ extCheck always keeps a log of each session, whatever the options:
 
 Each run gets its own file, named for the moment it started, so sorting the folder by name also sorts it by time. The 30 newest are kept. The log starts with the version, where the program ran from, the Windows version, the working folder, the command line and every setting, then records each file checked and any error with its full details. If something goes wrong, zip the `logs` folder and send it.
 
-**Log session** (or `-l`) additionally writes a fresh `extCheck.log` in the output directory (or the current directory if none is set), so a log can travel with the reports. Any prior `extCheck.log` there is replaced.
-
-Both logs are UTF-8 with a byte-order mark, so Notepad opens them correctly.
+Logging is automatic: there is no checkbox or switch for it, and Help names the folder. The log is UTF-8 with a byte-order mark, so Notepad opens it correctly.
 
 ---
 

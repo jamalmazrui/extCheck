@@ -32,7 +32,7 @@ You know your screen reader's own keys already, and three of them are worth reme
 
 Screen reader:
 
-- Source files edit
+- Source paths edit
 
 ### Step 3: Insert+Tab
 
@@ -40,7 +40,7 @@ Insert plus Tab says what has the focus: its name, its role, and its value or st
 
 Screen reader:
 
-- Source files edit, blank
+- Source paths edit, blank
 
 ### Step 4: Insert+T
 
@@ -109,13 +109,13 @@ I press the desktop key for extCheck. The dialog opens on its first field.
 Screen reader:
 
 - extCheck dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 3
 
-Source files is where the documents to check are named: one file, a folder, a pattern such as star dot docx, or several of these with spaces between. The underlined letter is S.
+Source paths is where the documents to check are named: one file, a folder, a pattern such as star dot docx, or several of these with spaces between. The underlined letter is S.
 
 ### Step 4: Tab
 
@@ -123,7 +123,7 @@ Tab moves to the next control, the button that opens a file picker.
 
 Screen reader:
 
-- Browse source button
+- Browse local source button
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -139,7 +139,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 6
 
-Output directory is where the reports go. Left blank, they go to the current folder. Choose output, C, opens a folder picker instead of typing.
+Output directory is where the reports go. Left blank, they go to the current folder. Choose output directory, C, opens a folder picker instead of typing.
 
 ### Step 7: Alt+F
 
@@ -173,7 +173,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 10
 
-View output, V, opens the reports' folder in File Explorer when the run is done. Log session, L, writes a log of the run beside the reports. Use configuration, U, remembers these fields for next time.
+View output directory, V, opens the reports' folder in File Explorer when the run is done. Use configuration, U, remembers these fields for next time.
 
 ### Step 11: Shift+F1
 
@@ -217,17 +217,17 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 15: Enter
 
-I choose Source files from the list.
+I choose Source paths from the list.
 
 Screen reader:
 
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 16: Tab
 
-Enter starts the check. From any control, even a check box, Control+Enter does the same.
+Control+Enter starts the check from any control, even a check box.
 
 Screen reader:
 
@@ -235,19 +235,19 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 17: Alt+G
+### Step 17: Alt+H
 
-Two more buttons sit at the end. Guide, G, opens the full guide in the browser and then returns here.
+Two buttons sit in their own band, above OK and Cancel. Help, H, lists every field, says where the logs are kept, and checks for a newer version.
 
 Screen reader:
 
-- Guide button
+- Help button
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 18: Alt+D
 
-Default settings, D, clears every field and box, and forgets anything saved. It asks first, since it cannot be undone.
+Default settings, D, clears every field and box, and forgets anything saved, then shows the dialog again.
 
 Screen reader:
 
@@ -299,7 +299,7 @@ An underlined letter works whether or not the screen reader announces it, since 
 
 Screen reader:
 
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -382,12 +382,12 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 8: Enter
 
-When I close that box, extCheck starts, its dialog ready on Source files.
+When I close that box, extCheck starts, its dialog ready on Source paths.
 
 Screen reader:
 
 - extCheck dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -449,7 +449,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 17
 
-Those per-person folders are under your own application data: configs for the saved fields, and logs for a record of every session, kept whatever the dialog's Log session box says.
+Those per-person folders are under your own application data: configs for the saved fields, and logs for a record of every session, kept automatically.
 
 Screen reader:
 
@@ -520,18 +520,18 @@ One want: a Word handout that everyone can read, checked before I email it to a 
 
 ### Step 2: Alt+Control+X
 
-I open the dialog. The focus is on Source files.
+I open the dialog. The focus is on Source paths.
 
 Screen reader:
 
 - extCheck dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 3: Alt+B
 
-Rather than type the path, Browse source opens a file picker.
+Rather than type the path, Browse local source opens a file picker.
 
 Screen reader:
 
@@ -542,22 +542,22 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 4: Enter
 
-I type the start of the handout's name and press Enter. The picker closes, and its full path is in Source files.
+I type the start of the handout's name and press Enter. The picker closes, and its full path is in Source paths.
 
 Screen reader:
 
-- Source files edit
+- Source paths edit
 - C colon backslash Users backslash Documents backslash Handout dot docx
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 5: Alt+V
 
-I leave Output directory blank, so the report lands in the current folder, and I tick View output, so that folder opens when the check is done.
+I leave Output directory blank, so the report lands in the current folder, and I tick View output directory, so that folder opens when the check is done.
 
 Screen reader:
 
-- View output check box, checked
+- View output directory check box, checked
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -721,12 +721,12 @@ One want: slides for a talk that the audience can follow afterwards with a scree
 
 ### Step 2: Alt+Control+X
 
-I open the dialog, and type the presentation's path in Source files. Typing works as well as browsing.
+I open the dialog, and type the presentation's path in Source paths. Typing works as well as browsing.
 
 Screen reader:
 
 - extCheck dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -894,12 +894,12 @@ One want: a budget spreadsheet the whole team can work in, including the colleag
 
 ### Step 2: Alt+Control+X
 
-I open the dialog and put the workbook's path in Source files.
+I open the dialog and put the workbook's path in Source paths.
 
 Screen reader:
 
 - extCheck dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1097,12 +1097,12 @@ Markdown is plain text with simple marks: a number sign for a heading, a dash fo
 
 ### Step 3: Alt+Control+X
 
-I open the dialog and put the file's path in Source files.
+I open the dialog and put the file's path in Source paths.
 
 Screen reader:
 
 - extCheck dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1270,12 +1270,12 @@ One want: every handout, slide deck and spreadsheet for a course checked before 
 
 ### Step 2: Alt+Control+X
 
-I open the dialog. In Source files, a folder's path is enough: extCheck checks every Word, Excel, PowerPoint and Markdown file in it.
+I open the dialog. In Source paths, a folder's path is enough: extCheck checks every Word, Excel, PowerPoint and Markdown file in it.
 
 Screen reader:
 
 - extCheck dialog
-- Source files edit
+- Source paths edit
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1305,7 +1305,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 6
 
-Choose output opens a folder picker, but I simply type a new folder's path, Reports, beside the course folder.
+Choose output directory opens a folder picker, but I simply type a new folder's path, Reports, beside the course folder.
 
 Screen reader:
 
@@ -1313,13 +1313,13 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 7: Alt+L
+### Step 7: Alt+V
 
-I tick Log session, so a log of the whole run is written beside the reports, and View output, so their folder opens at the end.
+I tick View output directory, so the reports' folder opens once I close the Results box. The log of the run is kept anyway, as it always is.
 
 Screen reader:
 
-- Log session check box, checked
+- View output directory check box, checked
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1714,13 +1714,13 @@ Shift+F1 says the tip for the field you are on. F7 lists the dialog's controls a
 
 Screen reader:
 
-- Source files: one file, a folder, a pattern, or several, separated by spaces
+- Source paths: one file, a folder, a pattern, or several, separated by spaces
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 14
 
-Guide, Alt+G, opens the full guide in your browser and then returns to the dialog as you left it. The guide, these walks as text, and the rule registry are all in the help folder of the installation.
+Help, Alt plus H, does what F1 does, and also says where the automatic logs are kept. The guide, these walks as text, and the rule registry are all in the help folder of the installation.
 
 ### Step 15
 

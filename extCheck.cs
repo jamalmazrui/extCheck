@@ -2291,12 +2291,10 @@ public static class configManager
             program.bForce = getBool(dVals, "ForceReplacements");
         if (!program.bViewOutputFromCli)
             program.bViewOutput = getBool(dVals, "ViewOutput");
-        if (!program.bLogFromCli)
-            program.bLog = getBool(dVals, "LogSession");
     }
 
     public static void save(string sSource, string sOutputDir,
-        bool bForce, bool bView, bool bLog)
+        bool bForce, bool bView)
     {
         string sDir = getConfigDir();
         string sPath = getConfigPath();
@@ -2315,7 +2313,6 @@ public static class configManager
             InixCodec.writeValue(sPath, sSettingsSection, "OutputDirectory", sOutputDir ?? "");
             InixCodec.writeValue(sPath, sSettingsSection, "ForceReplacements", bForce ? "yes" : "no");
             InixCodec.writeValue(sPath, sSettingsSection, "ViewOutput", bView ? "yes" : "no");
-            InixCodec.writeValue(sPath, sSettingsSection, "LogSession", bLog ? "yes" : "no");
             logger.info("Saved configuration to " + sPath);
             if (File.Exists(getLegacyPath())) {
                 File.Delete(getLegacyPath());
@@ -2393,118 +2390,61 @@ public static class configManager
 // ===========================================================================
 public static class guiDialog
 {
-    // THE DIALOG IS BUILT FROM Homer's Lbc (since 2.1.0), like every Homer
-    // dialog: one control per row in tab order, each field's label just before
-    // it so the label names it, a band where a field and the button that fills
-    // it share a row. Lbc supplies, with no code here, Control+Enter for OK from
-    // any control, Shift+F1 for a field's tip, F7 for a list of the dialog's
-    // controls, the editing keys of every text field, and the Help button (F1),
-    // which lists each field with its tip and ends with the version check.
-    // F11 is claimed below. The Guide button opens the full guide and returns
-    // to the dialog with everything as it was, as Default settings does.
+    // THE DIALOG IS THE KIT'S LAUNCH DIALOG (23 October 2026, help\LaunchDialog.md in
+    // HomerDev), the one every Homer launch app shows: Source paths and Browse local
+    // source; Output directory and Choose output directory; Force replacements, Use
+    // configuration and View output directory; Default settings and Help; then OK and
+    // Cancel alone. Control+Enter is OK and Escape is Cancel from any control, F1 is Help
+    // and F11 checks the web for a newer extCheck. There is no Guide button and no Log
+    // session checkbox: Help says where the automatic logs are.
     public static bool show(ref string sSource, ref string sOutputDir,
-        ref bool bForce, ref bool bView, ref bool bLog, ref bool bUseCfg)
+        ref bool bForce, ref bool bView, ref bool bUseCfg)
     {
         while (true) {
             string sButton;
-            using (var dlg = new LbcDialog(program.sProgramName, null)) {
-                dlg.addBand();
-                TextBox tbSource = dlg.addInputBox("&Source files:",
+            using (var oLaunch = new LaunchDialog(program.sProgramName)) {
+                oLaunch.sourcePick = "files";
+                oLaunch.sourceFilter =
+                    "Supported files (*.docx;*.xlsx;*.pptx;*.md)|*.docx;*.xlsx;*.pptx;*.md|" +
+                    "Word documents (*.docx)|*.docx|" +
+                    "Excel workbooks (*.xlsx)|*.xlsx|" +
+                    "PowerPoint presentations (*.pptx)|*.pptx|" +
+                    "Markdown files (*.md)|*.md|" +
+                    "All files (*.*)|*.*";
+                TextBox tbSource = oLaunch.addSourceBand(
                     string.IsNullOrWhiteSpace(sSource) ? defaultSourceForGui() : sSource,
                     "One or more files, folders or wildcard patterns such as *.docx, " +
-                    "separated by spaces. A folder means every supported file in it.");
-                Button btnBrowse = dlg.addButton("&Browse source...",
-                    "Choose one file to check.");
-                dlg.addBand();
-                TextBox tbOut = dlg.addInputBox("&Output directory:", sOutputDir ?? "",
-                    "Where each report is written, named after its file. Blank means the current folder.");
-                Button btnChoose = dlg.addButton("&Choose output...",
+                    "separated by spaces. A folder means every supported file in it.",
+                    "Choose one or more files to check. It opens where Source paths points, else in Documents.");
+                TextBox tbOut = oLaunch.addOutputBand(sOutputDir ?? "",
+                    "Where each report is written, named after its file. Blank means the current folder.",
                     "Choose the folder the reports go to.");
-                dlg.endBand();
-
-                btnBrowse.Click += (o, e) => {
-                    using (var dialog = new OpenFileDialog()) {
-                        dialog.Title = "Choose a file to check";
-                        dialog.Filter =
-                            "Supported files (*.docx;*.xlsx;*.pptx;*.md)|*.docx;*.xlsx;*.pptx;*.md|" +
-                            "Word documents (*.docx)|*.docx|" +
-                            "Excel workbooks (*.xlsx)|*.xlsx|" +
-                            "PowerPoint presentations (*.pptx)|*.pptx|" +
-                            "Markdown files (*.md)|*.md|" +
-                            "All files (*.*)|*.*";
-                        dialog.FilterIndex = 1;
-                        dialog.CheckFileExists = true;
-                        dialog.RestoreDirectory = true;
-                        try { dialog.InitialDirectory = getInitialBrowseDir(tbSource.Text); } catch { }
-                        if (dialog.ShowDialog(dlg.form) == DialogResult.OK) {
-                            string sPicked = dialog.FileName;
-                            if (sPicked.Contains(" ")) sPicked = "\"" + sPicked + "\"";
-                            tbSource.Text = sPicked;
-                            if (string.IsNullOrEmpty(tbOut.Text))
-                                tbOut.Text = Path.GetDirectoryName(dialog.FileName);
-                            tbSource.Focus();
-                        }
-                    }
+                // A blank output directory follows the first file chosen, as before.
+                oLaunch.sourceChosen = delegate() {
+                    if (!string.IsNullOrEmpty(tbOut.Text)) return;
+                    string sFolder = LaunchDialog.startFolder(tbSource.Text, Environment.SpecialFolder.MyDocuments);
+                    tbOut.Text = sFolder;
                 };
-                btnChoose.Click += (o, e) => {
-                    using (var dialog = new FolderBrowserDialog()) {
-                        dialog.Description = "Choose the output directory";
-                        dialog.ShowNewFolderButton = true;
-                        try { dialog.SelectedPath = getInitialBrowseDir(tbOut.Text); } catch { }
-                        if (dialog.ShowDialog(dlg.form) == DialogResult.OK) {
-                            tbOut.Text = dialog.SelectedPath;
-                            tbOut.Focus();
-                        }
-                    }
-                };
+                oLaunch.addOperationBands(bForce, "Overwrite an existing report instead of skipping the file.",
+                    bUseCfg, "Load these settings next time, and save them when you press OK, in configs\\" + program.sConfigFileName + ".",
+                    bView, "Open the output directory in File Explorer when the run is done.");
 
-                dlg.addSeparator();
-                CheckBox cbForce = dlg.addCheckBox("&Force replacements", bForce,
-                    "Overwrite an existing report instead of skipping the file.");
-                CheckBox cbView = dlg.addCheckBox("&View output", bView,
-                    "Open the output folder in File Explorer when the run is done.");
-                CheckBox cbLog = dlg.addCheckBox("&Log session", bLog,
-                    "Also write " + program.sLogFileName + " in the output folder. A session log is always kept in %LOCALAPPDATA%\\extCheck\\logs.");
-                CheckBox cbUseCfg = dlg.addCheckBox("&Use configuration", bUseCfg,
-                    "Load these settings next time, and save them when you press OK, in configs\\" + program.sConfigFileName + ".");
-
-                // F11: is there a newer extCheck on the web? (Elevate sounds
-                // like eleven.) Claimed before any control sees the key.
-                dlg.commandKey = k => {
-                    if (k != Keys.F11) return false;
-                    logger.info("F11: checking the web for a newer version");
-                    if (Elevate.offer(dlg.form)) {
-                        logger.info("F11: the setup program was started; closing the dialog");
-                        dlg.form.DialogResult = DialogResult.Cancel;
-                        dlg.form.Close();
-                    }
-                    return true;
-                };
-
-                sButton = dlg.runWithButtons(new string[] {
-                    "OK", "Guide", "Default settings", "Cancel" });
+                sButton = oLaunch.run();
 
                 // Harvest every field before the dialog is disposed, so a
                 // return to the dialog keeps whatever else was typed.
                 sSource = (tbSource.Text ?? "").Trim();
                 sOutputDir = (tbOut.Text ?? "").Trim();
-                bForce = cbForce.Checked;
-                bView = cbView.Checked;
-                bLog = cbLog.Checked;
-                bUseCfg = cbUseCfg.Checked;
+                bForce = oLaunch.forceBox.Checked;
+                bView = oLaunch.viewOutputBox.Checked;
+                bUseCfg = oLaunch.useConfigBox.Checked;
             }
 
-            if (string.IsNullOrEmpty(sButton) ||
-                    string.Equals(sButton, "Cancel", StringComparison.OrdinalIgnoreCase))
-                return false;
-            if (string.Equals(sButton, "Guide", StringComparison.OrdinalIgnoreCase)) {
-                launchReadMe();
-                continue;
-            }
-            if (string.Equals(sButton, "Default settings", StringComparison.OrdinalIgnoreCase)) {
+            if (sButton == "Cancel") return false;
+            if (sButton == "Default settings") {
                 sSource = defaultSourceForGui();
                 sOutputDir = "";
-                bForce = false; bView = false; bLog = false; bUseCfg = false;
+                bForce = false; bView = false; bUseCfg = false;
                 configManager.eraseAll();
                 logger.info("Default settings restored");
                 continue;
@@ -2547,87 +2487,6 @@ public static class guiDialog
         }
     }
 
-    /// <summary>
-    /// Choose the initial directory for a file or folder picker.
-    /// Returns the directory derived from the user's current text-field
-    /// content (in-session choice or value loaded from saved config) when
-    /// it points to an existing path; falls back to the user's Documents
-    /// folder otherwise. This follows Microsoft's guidance that pickers
-    /// start where the user has shown intent, with Documents as a
-    /// sensible no-context default.
-    /// </summary>
-    /// <param name="sFieldText">The current text of the source-input or
-    /// output-directory field. May be empty, may contain wildcards or
-    /// quoted paths, may contain space-separated tokens (only the first
-    /// is inspected).</param>
-    /// <returns>An existing directory path. Always non-empty.</returns>
-    private static string getInitialBrowseDir(string sFieldText)
-    {
-        string sCandidate = "";
-        string sFirstToken = "";
-        string sParent = "";
-
-        sFieldText = (sFieldText ?? "").Trim();
-        if (string.IsNullOrEmpty(sFieldText)) return defaultSourceForGui();
-        // Inspect first space-separated token only.
-        int iSpace = sFieldText.IndexOf(' ');
-        sFirstToken = (iSpace < 0) ? sFieldText : sFieldText.Substring(0, iSpace);
-        sFirstToken = sFirstToken.Trim('"');
-        if (string.IsNullOrEmpty(sFirstToken)) return defaultSourceForGui();
-        sCandidate = sFirstToken;
-        try {
-            // Wildcards: strip the basename and inspect the parent directory.
-            if (sCandidate.IndexOfAny(new[] { '*', '?' }) >= 0) {
-                sCandidate = Path.GetDirectoryName(sCandidate) ?? "";
-            }
-            if (!string.IsNullOrEmpty(sCandidate) && Directory.Exists(sCandidate))
-                return Path.GetFullPath(sCandidate);
-            if (!string.IsNullOrEmpty(sCandidate) && File.Exists(sCandidate))
-                return Path.GetDirectoryName(Path.GetFullPath(sCandidate));
-            sParent = string.IsNullOrEmpty(sCandidate) ? "" : (Path.GetDirectoryName(sCandidate) ?? "");
-            if (!string.IsNullOrEmpty(sParent) && Directory.Exists(sParent))
-                return Path.GetFullPath(sParent);
-        } catch { }
-        return defaultSourceForGui();
-    }
-
-    // Opens the full guide. The Homer layout puts it in help\extCheck.htm,
-    // beside exec\ where the program runs, in the installed tree and in the
-    // project alike; Paths.installedFolder finds that folder. ReadMe.htm at
-    // the top is the fallback, then the Markdown forms.
-    private static void launchReadMe()
-    {
-        string sFolder = Paths.installedFolder;
-        string[] aCandidates = {
-            Path.Combine(Path.Combine(sFolder, "help"), "extCheck.htm"),
-            Path.Combine(sFolder, "ReadMe.htm"),
-            Path.Combine(Path.Combine(sFolder, "help"), "extCheck.md"),
-            Path.Combine(sFolder, "ReadMe.md") };
-        string sTarget = null;
-        foreach (string sCandidate in aCandidates)
-            if (sTarget == null && File.Exists(sCandidate)) sTarget = sCandidate;
-        if (sTarget == null) {
-            logger.warn("No guide found under " + sFolder);
-            MessageBox.Show(
-                "The guide was not found in the extCheck folder:\r\n\r\n" +
-                sFolder + "\r\n\r\n" +
-                "Reinstalling extCheck puts it back.",
-                "extCheck — Guide not found",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-            return;
-        }
-        try {
-            var processStartInfo = new ProcessStartInfo(sTarget) { UseShellExecute = true };
-            Process.Start(processStartInfo);
-        } catch (Exception ex) {
-            MessageBox.Show(
-                "Could not open the guide:\r\n\r\n" + ex.Message,
-                "extCheck — Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-        }
-    }
 }
 
 // ===========================================================================
@@ -2642,65 +2501,28 @@ public static class guiDialog
 // after the file finishes. This avoids the confusion of seeing "100%"
 // while the (only) file is still being processed.
 // ===========================================================================
+// guiProgress: the kit's LaunchProgress (23 October 2026, help\LaunchDialog.md in
+// HomerDev), the one progress window of every Homer launch app: "extCheck, <status>"
+// in its title, a status box that holds the focus, Cancel (Escape), speech only while
+// extCheck is the window in front, and the message pump.
 public static class guiProgress
 {
-    private static Form frm;
-    private static Label lblStatus;
-
+    private static LaunchProgress oProgress;
+    public static bool cancelled { get { return oProgress != null && oProgress.cancelled; } }
     public static void open(int iTotal)
     {
-        frm = new Form();
-        frm.Text = "extCheck — Checking";
-        frm.FormBorderStyle = FormBorderStyle.FixedDialog;
-        frm.StartPosition = FormStartPosition.CenterScreen;
-        frm.MaximizeBox = false;
-        frm.MinimizeBox = false;
-        frm.ControlBox = false;
-        frm.ShowInTaskbar = true;
-        frm.ClientSize = new System.Drawing.Size(480, 92);
-        frm.Font = System.Drawing.SystemFonts.MessageBoxFont;
-
-        var lblIntro = new Label();
-        lblIntro.Text = "Checking files. Please wait...";
-        lblIntro.AutoSize = false;
-        lblIntro.Location = new System.Drawing.Point(14, 14);
-        lblIntro.Size = new System.Drawing.Size(452, 22);
-        lblIntro.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-        frm.Controls.Add(lblIntro);
-
-        lblStatus = new Label();
-        lblStatus.Text = "Starting...";
-        lblStatus.AutoSize = false;
-        lblStatus.Location = new System.Drawing.Point(14, 42);
-        lblStatus.Size = new System.Drawing.Size(452, 22);
-        lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-        lblStatus.AccessibleName = "Check status";
-        lblStatus.AccessibleRole = AccessibleRole.StatusBar;
-        frm.Controls.Add(lblStatus);
-
-        frm.Show();
-        Application.DoEvents();
+        oProgress = new LaunchProgress(program.sProgramName,
+            "Checking " + iTotal + (iTotal == 1 ? " file" : " files"), delegate(string sLine) { logger.info(sLine); });
     }
-
     public static void update(string sBase, int iIndex, int iTotal)
     {
-        if (frm == null || lblStatus == null) return;
-        // iIndex is 1-based; we show "iIndex - 1" as the completed count
-        // so the percentage and count reflect work DONE, not work in
-        // progress.
-        int iCompleted = iIndex - 1;
-        int iPercent = iTotal > 0 ? (iCompleted * 100 / iTotal) : 0;
-        lblStatus.Text = sBase + " \u2014 " + iCompleted + " of " + iTotal +
-            ", " + iPercent + "%";
-        Application.DoEvents();
+        if (oProgress != null) oProgress.step(sBase, iIndex - 1, iTotal);
     }
-
     public static void close()
     {
-        if (frm == null) return;
-        try { frm.Close(); frm.Dispose(); } catch { }
-        frm = null;
-        lblStatus = null;
+        if (oProgress == null) return;
+        oProgress.Dispose();
+        oProgress = null;
     }
 }
 
@@ -2740,7 +2562,7 @@ static class program {
     // A single failure record: basename and a short reason. Used
     // in the structured results summary to render
     // "basename: reason" on one line. The full exception (if any)
-    // is in the log when -l is on.
+    // is in the session log, which is automatic.
     public class failure {
         public string sBase;
         public string sReason;
@@ -2751,7 +2573,6 @@ static class program {
     public static bool bGuiMode = false;
     public static bool bShowRules = false;
     public static bool bForce = false;
-    public static bool bLog = false;
     public static bool bUseConfig = false;
     public static bool bViewOutput = false;
     public static bool bHideConsoleMode = false;
@@ -2760,7 +2581,6 @@ static class program {
     // the saved config file must NOT overwrite the command-line-supplied
     // value during the pre-GUI load.
     public static bool bForceFromCli = false;
-    public static bool bLogFromCli = false;
     public static bool bViewOutputFromCli = false;
     public static bool bOutputDirFromCli = false;
     public static bool bSourceFromCli = false;
@@ -2983,19 +2803,21 @@ static class program {
     }
 
     // ---- Show a final MessageBox in GUI mode summarizing the run. ----
-    private static void showFinalMessage(string sBody, string sTitle = "extCheck — Results")
+    // The folder View output directory opens once the Results box is closed.
+    private static string sViewAfterResults = "";
+
+    // showFinalMessage: an error, as the Results box every Homer launch ends
+    // with (the kit's LaunchDialog.showResults).
+    private static void showFinalMessage(string sBody, string sTitle = "")
     {
-        try {
-            MessageBox.Show(string.IsNullOrEmpty(sBody) ? "Done." : sBody,
-                sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
-        } catch { }
+        try { LaunchDialog.showResults(sProgramName, sBody, true); } catch { }
     }
 
     // ---- Print CLI help. ----
     private const string sUsage = @"
 Usage:
-  extCheck.exe [-h] [-g] [-rules] [-o <dir>] [--view-output]
-               [-l] [-u] [-f] <filespec> [<filespec> ...]
+  extcheck [-h] [-g] [/rules] [-o <dir>] [-f] [-u] [-v] <filespec> [<filespec> ...]
+  extcheck -d
 
 Arguments:
   <filespec>   Path to one or more files to evaluate.
@@ -3007,32 +2829,35 @@ Supported file formats:
   .pptx   Microsoft PowerPoint presentation
   .md     Pandoc Markdown file
 
-Options:
+Switches, written /switch, -switch or --switch, in any case. Each long switch
+is a label in the dialog, and each letter is that control's Alt letter:
   -h, --help            Show this help screen and exit.
-  -g, --gui-mode        Show the parameter dialog. GUI mode is also entered
-                        automatically when extCheck is launched without
-                        arguments from a GUI shell (File Explorer, Start
-                        menu, desktop hotkey).
-  -rules                Write extCheck.csv (the complete rule registry) to
+  --version             Show the version and exit.
+  -g, --gui-mode        Show the dialog. It also opens when extCheck is
+                        started with nothing from File Explorer, the Start
+                        menu or a desktop hotkey.
+  /rules                Write extCheck.csv (the complete rule registry) to
                         the output directory or current directory and exit.
-  -o, --output-dir <d>  Directory in which the per-file CSV reports are
+  -o, --output-directory <d>
+                        Directory in which the per-file CSV reports are
                         written. Defaults to the current working directory.
                         Created if it does not exist.
-  --view-output         After all files are checked, open the output
-                        directory in File Explorer.
-  -f, --force           Overwrite an existing <basename>.csv. Without this
-                        flag, an input file is skipped if its CSV already
-                        exists in the output directory.
-  -l, --log             Also write detailed diagnostics to extCheck.log
-                        (UTF-8 with BOM) in the output directory if one is
-                        set, else the current working directory. Any prior
-                        extCheck.log is overwritten. A session log is always
-                        kept in %LOCALAPPDATA%\extCheck\logs.
+  -f, --force-replacements
+                        Overwrite an existing <basename>.csv. Without this,
+                        an input file is skipped if its CSV already exists
+                        in the output directory.
   -u, --use-configuration
                         Load saved settings from
                         %LOCALAPPDATA%\extCheck\configs\extCheck.inix at
-                        startup, and (in GUI mode) write them back on OK.
-                        Without this flag no settings are saved.
+                        startup, and in the dialog write them back on OK.
+  -v, --view-output-directory
+                        After all files are checked, open the output
+                        directory in File Explorer.
+  -d, --default-settings
+                        Forget the saved settings and exit.
+
+Logging is automatic: every run writes
+%LOCALAPPDATA%\extCheck\logs\extCheck-yyyyMMdd-HHmmss.log.
 
 Output:
   For each file evaluated, a CSV named <basename>.csv is written to the
@@ -3046,7 +2871,7 @@ Output:
   A brief progress line is printed for each file (basename, plus
   ""skipped"" or ""ERROR"" if applicable). The detailed issue list is in
   the CSV; full paths and stack traces (when relevant) are in the
-  log when -l is given.
+  session log.
 
 Notes:
   Word, Excel, and PowerPoint must be installed to check .docx, .xlsx,
@@ -3057,9 +2882,9 @@ Notes:
 Examples:
   extCheck.exe report.docx
   extCheck.exe *.md -o reports
-  extCheck.exe docs\*.docx data\*.xlsx slides\*.pptx --view-output
-  extCheck.exe -rules -o C:\references
-  extCheck.exe -g
+  extcheck docs\*.docx data\*.xlsx slides\*.pptx -v
+  extcheck /rules -o C:\references
+  extcheck -g
 ";
 
     // ---- Main run() ----
@@ -3073,33 +2898,46 @@ Examples:
 
         // Phase 2: parse CLI args. Recognized flags are consumed;
         // unrecognized tokens are file specs.
+        // THE LAUNCH SWITCHES (23 October 2026, help\LaunchDialog.md in the kit): /switch,
+        // -switch or --switch, in any case, through the kit's Util.switchName; a long switch
+        // is the dialog's label and a short one its Alt letter, and the older names still
+        // work. /log went with the Log session checkbox, since logging is automatic, and -v
+        // is View output directory, so the version is /version alone. A name that is not a
+        // switch, or is an existing file or folder, is a file spec.
+        string[] aKnown = { "d", "default-settings", "defaults", "f", "force", "force-replacements", "g", "gui-mode", "h", "help",
+            "o", "output", "output-dir", "output-directory", "rules", "u", "use-configuration", "v", "version", "view", "view-output",
+            "view-output-directory" };
         for (int i = 0; i < aArgs.Length; i++) {
             string sArg = aArgs[i];
-            if (sArg == "-h" || sArg == "/h" || sArg == "--help") {
+            string sSwitch = Util.switchName(sArg);
+            if (sSwitch != "" && (Array.IndexOf(aKnown, sSwitch) < 0 || File.Exists(sArg) || Directory.Exists(sArg))) sSwitch = "";
+            if (sSwitch == "h" || sSwitch == "help" || sArg == "/?") {
                 Console.WriteLine(sProgramName + " " + sProgramVersion);
                 Console.WriteLine();
                 Console.Write(sUsage);
                 return 0;
             }
-            if (sArg == "-v" || sArg == "--version") {
+            if (sSwitch == "version") {
                 Console.WriteLine(sProgramName + " " + sProgramVersion);
                 return 0;
             }
-            if (sArg == "-g" || sArg == "--gui-mode") { bGuiMode = true; continue; }
-            if (sArg == "-rules" || sArg == "/rules") { bShowRules = true; continue; }
-            if (sArg == "-f" || sArg == "--force") {
+            if (sSwitch == "default-settings" || sSwitch == "defaults" || sSwitch == "d") {
+                configManager.eraseAll();
+                Console.WriteLine("Default settings restored.");
+                return 0;
+            }
+            if (sSwitch == "g" || sSwitch == "gui-mode") { bGuiMode = true; continue; }
+            if (sSwitch == "rules") { bShowRules = true; continue; }
+            if (sSwitch == "f" || sSwitch == "force" || sSwitch == "force-replacements") {
                 bForce = true; bForceFromCli = true; continue;
             }
-            if (sArg == "-l" || sArg == "--log") {
-                bLog = true; bLogFromCli = true; continue;
-            }
-            if (sArg == "-u" || sArg == "--use-configuration") {
+            if (sSwitch == "u" || sSwitch == "use-configuration") {
                 bUseConfig = true; continue;
             }
-            if (sArg == "--view-output") {
+            if (sSwitch == "v" || sSwitch == "view" || sSwitch == "view-output" || sSwitch == "view-output-directory") {
                 bViewOutput = true; bViewOutputFromCli = true; continue;
             }
-            if (sArg == "-o" || sArg == "--output-dir") {
+            if (sSwitch == "o" || sSwitch == "output" || sSwitch == "output-dir" || sSwitch == "output-directory") {
                 if (i + 1 >= aArgs.Length) {
                     Console.Error.WriteLine(sArg +
                         " requires a directory argument.");
@@ -3142,20 +2980,18 @@ Examples:
             string sOut = sOutputDir;
             bool bForceLocal = bForce;
             bool bView = bViewOutput;
-            bool bLogLocal = bLog;
             bool bUseCfgLocal = bUseConfig;
             if (!guiDialog.show(ref sSource, ref sOut, ref bForceLocal,
-                ref bView, ref bLogLocal, ref bUseCfgLocal)) {
+                ref bView, ref bUseCfgLocal)) {
                 return 0;
             }
             bForce = bForceLocal;
             bViewOutput = bView;
-            bLog = bLogLocal;
             bUseConfig = bUseCfgLocal;
             sOutputDir = sOut;
             lsFileArgs = splitSourceField(sSource);
             if (bUseConfig)
-                configManager.save(sSource, sOutputDir, bForce, bViewOutput, bLog);
+                configManager.save(sSource, sOutputDir, bForce, bViewOutput);
         }
 
         // Phase 6: resolve output directory and open the log if
@@ -3176,7 +3012,6 @@ Examples:
                 return 1;
             }
         }
-        if (bLog) logger.open(sResolvedOutDir);
 
         // Write the run header to the log: program version, friendly
         // start time, and the resolved parameter list (showing both
@@ -3191,7 +3026,6 @@ Examples:
         lsParams.Add(new KeyValuePair<string, string>("Force replacements", bForce.ToString().ToLowerInvariant()));
         lsParams.Add(new KeyValuePair<string, string>("View output",        bViewOutput.ToString().ToLowerInvariant()));
         lsParams.Add(new KeyValuePair<string, string>("Use configuration",  bUseConfig.ToString().ToLowerInvariant()));
-        lsParams.Add(new KeyValuePair<string, string>("Log session",        bLog.ToString().ToLowerInvariant()));
         lsParams.Add(new KeyValuePair<string, string>("Show rules",         bShowRules.ToString().ToLowerInvariant()));
         lsParams.Add(new KeyValuePair<string, string>("GUI mode",           bGuiMode.ToString().ToLowerInvariant()));
         lsParams.Add(new KeyValuePair<string, string>("Working directory",  Directory.GetCurrentDirectory()));
@@ -3329,6 +3163,8 @@ Examples:
 
             try {
             foreach (string sFilePath in lsToCheck) {
+                // Cancel in the progress window stops before the next file.
+                if (guiProgress.cancelled) { Console.WriteLine("Cancelled: " + (lsToCheck.Count - iFileIndex) + " not checked."); break; }
                 iFileIndex++;
                 if (bGuiOrHidden)
                     guiProgress.update(Path.GetFileName(sFilePath), iFileIndex, lsToCheck.Count);
@@ -3468,8 +3304,12 @@ Examples:
                 Console.WriteLine("No supported files to check.");
             }
 
-            if (bViewOutput && (iChecked > 0 || bShowRules))
-                openOutputInExplorer(sResolvedOutDir);
+            // In the dialog's run the folder opens after the Results box is
+            // closed, so File Explorer does not take the focus from it.
+            if (bViewOutput && (iChecked > 0 || bShowRules)) {
+                if (bGuiMode) sViewAfterResults = sResolvedOutDir;
+                else openOutputInExplorer(sResolvedOutDir);
+            }
 
             // A FAILED FILE IS NOT A SUCCESS (8 October 2026, from an audit by another AI):
             // the run returned 0 whenever anything was checked, whatever else failed.
@@ -3481,7 +3321,10 @@ Examples:
             if (bGuiMode && stringWriterOut != null) {
                 Console.SetOut(writerOriginalOut);
                 Console.SetError(writerOriginalErr);
-                showFinalMessage(stringWriterOut.ToString());
+                // THE RESULTS BOX ENDS THE RUN, then the output directory
+                // opens if asked, and extCheck closes (23 October 2026).
+                LaunchDialog.showResults(sProgramName, stringWriterOut.ToString(), false);
+                if (sViewAfterResults != "") openOutputInExplorer(sViewAfterResults);
             } else if (bHideConsoleMode && stringWriterErr != null) {
                 Console.SetError(writerOriginalErr);
                 string sErr = stringWriterErr.ToString();

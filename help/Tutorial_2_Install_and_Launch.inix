@@ -56,10 +56,10 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=When I close that box, extCheck starts, its dialog ready on Source files.
+Say=When I close that box, extCheck starts, its dialog ready on Source paths.
 Key=Enter
 Hear=extCheck dialog
-Hear=Source files edit
+Hear=Source paths edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -111,7 +111,7 @@ Hear=C colon backslash Program Files backslash extCheck
 Note=Confirm the wording with a live run: buildTutorials -live.
 [step]
 
-Say=Those per-person folders are under your own application data: configs for the saved fields, and logs for a record of every session, kept whatever the dialog's Log session box says.
+Say=Those per-person folders are under your own application data: configs for the saved fields, and logs for a record of every session, kept automatically.
 Key=
 Hear=configs folder, logs folder
 Note=Confirm the wording with a live run: buildTutorials -live.

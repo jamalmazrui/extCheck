@@ -19,7 +19,7 @@ You need Windows 10 or 11, 64-bit, and the Office program for each kind of file 
 
 ## Check a file
 
-1. Press **Alt+Control+X** from anywhere in Windows. The extCheck dialog opens with focus in **Source files**.
+1. Press **Alt+Control+X** from anywhere in Windows. The extCheck dialog opens with focus in **Source paths**.
 2. Type a file name, a folder, or a pattern such as `*.docx`.
 3. Press Enter.
 

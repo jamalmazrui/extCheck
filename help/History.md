@@ -5,6 +5,17 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 23 October 2026 -- the Homer launch dialog
+
+- **The dialog is the one every Homer launch app shows,** built by the Homer kit's LaunchDialog (kit 1.89.0). It is in rows called bands, read left to right: Source paths and Browse local source; Output directory and Choose output directory; Force replacements, Use configuration and View output directory; Default settings and Help; then OK and Cancel alone at the bottom right, as Microsoft's dialog guidance places them.
+- **Insert+Tab names the Source paths box again, and the Output directory box is found again.** The kit put a band's label after the band, so the box had no name and Browse seemed to come first.
+- **Control+Enter is OK and Escape is Cancel from any control, and F11 checks for a newer version from anywhere.** Help says so, and says where the logs are kept.
+- **Logging is automatic.** The Log session checkbox and -l are gone; every run writes %LOCALAPPDATA%\extCheck\logs\extCheck-yyyyMMdd-HHmmss.log. The Guide button is gone too.
+- **Every run ends with the Results box,** whose one OK button has the focus, so Enter, Space or Escape closes it; the output directory then opens if View output directory is checked, and extCheck closes.
+- **Switches match the dialog:** a long switch is a control's label and a short one its Alt letter, written with /, - or --, in any case. New: -d, --default-settings; switches now work with /, in any case; -v is now View output directory, so the version is --version alone. The older names still work.
+- **The progress window is the kit's,** LaunchProgress: "extCheck, <status>" in its title, a Status box with the focus, Cancel (Escape) to stop after the current file, and speech only while extCheck is the window in front.
+- **The build needs HomerDev 1.89.0 or later.**
+
 ## 14 October 2026 -- a stopped Office worker is proved stopped
 
 - **If Office's worker is still running after Office is ended, the run ends,** with exit code 2 and the reason in the log, so nothing it writes late can reach the next document's results (from a second audit by another AI).
