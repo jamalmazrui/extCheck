@@ -975,12 +975,29 @@ def removeStrayKitFiles(bRepo):
     lsDirs = set()
     for sRel in sorted(lsKitFiles):
         if any(sRel == s or (s.endswith("/") and sRel.startswith(s)) for s in lsNeverStray): continue
+        # WHAT A BUILD PUTS IN EXEC IS NOT A STRAY (1.92.5). An app's build copies the kit's route table,
+        # exec\conversions.inix, and fetches PdfPig's libraries into exec, each byte for byte the kit's, so this pass
+        # deleted them from every app that converts: BatCon's acceptance run on 24 October then read the installed
+        # kit's 1.77.6 table from Program Files, found no Edge way for a PDF, and fell back to Word. A file directly in
+        # exec is never a stray; a kit unarchived by mistake still leaves exec\CSharp and the like, which are.
+        if sRel.startswith("exec/") and sRel.count("/") == 1: continue
         sMine = os.path.join(sRoot, sRel.replace("/", os.sep))
         if not os.path.isfile(sMine): continue
         try:
             if hashOf(sMine) != hashOf(os.path.join(sKit, sRel.replace("/", os.sep))): continue
         except OSError:
             continue
+        # THE PROJECT'S OWN FILE COMES BACK (1.93.1). A kit unarchived into an app's folder overwrites the app's files
+        # of the same name with the kit's: on 24 October DbDo's ReadMe.md became the kit's, this pass then deleted it as
+        # a stray, and DbDo's installer could not be built. When the project's git history holds its own version of the
+        # file, and that version is not the kit's, the project's version is written back instead.
+        if bRepo:
+            oHead = subprocess.run(["git", "show", "HEAD:" + sRel], capture_output=True, cwd=sRoot)
+            if oHead.returncode == 0 and oHead.stdout and hashlib.sha256(oHead.stdout).hexdigest() != hashOf(os.path.join(sKit, sRel.replace("/", os.sep))):
+                open(sMine, "wb").write(oHead.stdout)
+                logLine("project file restored from git, overwritten by the kit's: " + sRel)
+                sayLine("Restored " + sRel + " from the project's own history; a kit unarchived here had overwritten it with the kit's.")
+                continue
         os.remove(sMine)
         iRemoved += 1
         lsDirs.add(os.path.dirname(sMine))
