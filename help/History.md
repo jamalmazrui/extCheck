@@ -5,6 +5,11 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 30 October 2026 -- fixes from an audit by another AI
+
+- **Every report gets a name of its own.** When two documents shared a name, the second's report took a name that a third document could also want; a taken name now gets a number.
+- **A report that cannot be written fails only its own document.** A locked or unwritable report ended the run, leaving the documents after it unchecked. It is now listed as that document's failure, and the run goes on.
+
 ## 24 October 2026
 
 - **The build uses the newest Homer kit it finds,** logging each one: your HomerDev variable, C:\HomerDev and the folders above. The variable named an older installed kit, which stopped BatCon's build.

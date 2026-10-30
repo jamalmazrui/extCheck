@@ -2521,8 +2521,13 @@ Examples:
                 string sCsvPath = Path.Combine(sResolvedOutDir,
                     Path.GetFileNameWithoutExtension(sFilePath) + ".csv");
                 if (dCsvClaimed.ContainsKey(sCsvPath)) {
-                    string sAlternative = Path.Combine(sResolvedOutDir,
-                        Path.GetFileNameWithoutExtension(sFilePath) + "-" + sExt.TrimStart('.') + ".csv");
+                    // EVERY ALTERNATIVE IS RESERVED TOO (30 October 2026, from an audit by another AI):
+                    // report-md.csv, the second report.* file's name, was also report-md.docx's own
+                    // name, so one could still replace the other. A taken alternative now gets a number.
+                    string sStem = Path.GetFileNameWithoutExtension(sFilePath) + "-" + sExt.TrimStart('.');
+                    string sAlternative = Path.Combine(sResolvedOutDir, sStem + ".csv");
+                    for (int iTry = 2; dCsvClaimed.ContainsKey(sAlternative); iTry++)
+                        sAlternative = Path.Combine(sResolvedOutDir, sStem + "-" + iTry + ".csv");
                     logger.info(Path.GetFileName(sCsvPath) + " is already the report of " + dCsvClaimed[sCsvPath] + ", so " + sFilePath + " is reported in " + Path.GetFileName(sAlternative));
                     sCsvPath = sAlternative;
                 }
@@ -2637,7 +2642,19 @@ Examples:
                     continue;
                 }
 
-                results.writeCsv(sCsvPath);
+                // A REPORT THAT CANNOT BE WRITTEN IS THIS FILE'S FAILURE (30 October 2026, from an
+                // audit by another AI). A locked or unwritable CSV threw out of the loop, ending
+                // the run with the files after it unchecked. Now it is reported for this file, and
+                // the run goes on to the next.
+                try {
+                    results.writeCsv(sCsvPath);
+                } catch (Exception oWriteError) {
+                    string sReason = "report not written: " + firstLine(oWriteError.Message);
+                    logger.error("Could not write " + sCsvPath + " for " + sFilePath + ": " + oWriteError.Message);
+                    lsFailed.Add(new failure(sBase, sReason));
+                    if (!bGuiOrHidden) Console.WriteLine(": " + sReason);
+                    continue;
+                }
                 logger.info("Wrote " + sCsvPath + " (" + results.lIssues.Count + " issue(s))");
                 lsChecked.Add(sBase);
                 if (!bGuiOrHidden) Console.WriteLine();
