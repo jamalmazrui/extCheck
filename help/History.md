@@ -5,6 +5,14 @@ author: "Jamal Mazrui"
 
 # extCheck History
 
+## 18 November 2026 -- One set of dialog keys, names and words across Homer
+
+- **Shift+F1 and Control+Slash work in every message, as in every Homer dialog.** extCheck's messages were Windows message boxes, which answer neither: the question that offers to make an output directory, its error, and the problems found in the sources. Each is now an Lbc dialog, through the kit's LbcMessage, so What This Does and Where Am I work there too, Yes is Alt+Y and No is Alt+N, and Control+Enter and Escape answer as everywhere.
+- **The Hotkeys page uses the suite's names and layout,** as DbDo, EdSharp and FileDir do: By Command Name, By Key, In Tab Order, Text Box Keys and Why These Keys. F11 is Elevate Version, Shift+F1 is What This Does, and Control+Slash, Where Am I, is listed for the first time.
+- **A checkbox is marked, not ticked or checked,** in the installer, the guides, the tutorials and every message, as across Homer.
+- **The standard controls and switches say the kit's words.** Browse local source, Choose output directory, Use configuration and View output directory take the kit's sentence, as in every launch app, and -f, -u, -v, -d and -h have the same sentence in every app's help; help says "stop", never "exit". These were aligned on 12 November, but the change never reached the repository.
+- **This needs HomerDev 1.259.0,** since kit 1.258.0's Say.cs lost a quotation mark and no C# app could build with it.
+
 ## 30 October 2026 -- fixes from an audit by another AI
 
 - **Every report gets a name of its own.** When two documents shared a name, the second's report took a name that a third document could also want; a taken name now gets a number.

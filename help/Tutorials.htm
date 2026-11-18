@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.12.1" />
+  <meta name="generator" content="pandoc 3.14" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Tutorials</title>
   <style>
@@ -35,27 +35,6 @@
       }
       h1 {
         font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        color-scheme: light only;
-      }
-      html, body, pre, code {
-        background-color: transparent;
-      }
-      body, a, a:visited, blockquote {
-        color: black;
-      }
-      pre, code {
-        padding: 0;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
       }
     }
     p {
@@ -163,6 +142,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
+    em, em em em, em em em em em {
+      font-style: italic;
+    }
+    em em, em em em em {
+      font-style: normal;
+    }
     div.columns{display: flex; gap: 1.5em;}
     div.column{flex: auto;}
     @media screen {
@@ -179,7 +164,27 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-  </style>
+    @media print {
+      html {
+        color-scheme: light only;
+      }
+      html, body, pre, code {
+        background-color: transparent;
+      }
+      body, a, a:visited, blockquote {
+        color: black;
+      }
+      pre, code {
+        padding: 0;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }  </style>
 </head>
 <body>
 <main>
@@ -432,7 +437,7 @@ name once, as the reader would, and adds speech only for what the reader
 cannot know, such as a run’s progress.</p>
 <h3 id="step-21-altu">Step 21: Alt+U</h3>
 <p>And the dialog remembers nothing unless asked. With Use configuration
-ticked, OK saves the fields; next time, they are already filled in.</p>
+marked, OK saves the fields; next time, they are already filled in.</p>
 <p>Screen reader:</p>
 <ul>
 <li>Use configuration check box, not checked</li>
@@ -508,7 +513,7 @@ is right. An update later goes to the same folder without asking.</p>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-6-2">Step 6</h3>
-<p>The last page offers two check boxes. Launch extCheck now is checked;
+<p>The last page offers two check boxes. Launch extCheck now is marked;
 open the user guide is not.</p>
 <p>Screen reader:</p>
 <ul>
@@ -667,7 +672,7 @@ docx</li>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-5-altv">Step 5: Alt+V</h3>
 <p>I leave Output directory blank, so the report lands in the current
-folder, and I tick View output directory, so that folder opens when the
+folder, and I mark View output directory, so that folder opens when the
 check is done.</p>
 <p>Screen reader:</p>
 <ul>
@@ -740,7 +745,7 @@ paragraphs used for spacing, each heard as an empty line.</p>
 description, correct the heading level, mark the first table row as its
 header.</p>
 <h3 id="step-16-altf">Step 16: Alt+F</h3>
-<p>After fixing, I check again. The old report is there, so I tick Force
+<p>After fixing, I check again. The old report is there, so I mark Force
 replacements, which replaces it rather than skipping the document.</p>
 <p>Screen reader:</p>
 <ul>
@@ -1293,7 +1298,7 @@ new folder’s path, Reports, beside the course folder.</p>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-7-altv">Step 7: Alt+V</h3>
-<p>I tick View output directory, so the reports’ folder opens once I
+<p>I mark View output directory, so the reports’ folder opens once I
 close the Results box. The log of the run is kept anyway, as it always
 is.</p>
 <p>Screen reader:</p>

@@ -37,7 +37,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I leave Output directory blank, so the report lands in the current folder, and I tick View output directory, so that folder opens when the check is done.
+Say=I leave Output directory blank, so the report lands in the current folder, and I mark View output directory, so that folder opens when the check is done.
 Key=Alt+V
 Hear=View output directory check box, checked
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -108,7 +108,7 @@ Key=
 
 [step]
 
-Say=After fixing, I check again. The old report is there, so I tick Force replacements, which replaces it rather than skipping the document.
+Say=After fixing, I check again. The old report is there, so I mark Force replacements, which replaces it rather than skipping the document.
 Key=Alt+F
 Hear=Force replacements check box, checked
 Note=Confirm the wording with a live run: buildTutorials -live.

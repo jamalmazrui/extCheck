@@ -13,9 +13,9 @@
 ;
 ; extCheck installs no components of its own: it drives the Microsoft Office
 ; already on the machine, and everything else is inside extCheck.exe. The
-; finish page therefore offers only Launch (ticked) and Open the user guide
-; (unticked), which is what the installer before the kit offered, with the
-; guide box now unticked as the kit's finish-page rule asks.
+; finish page therefore offers only Launch (marked) and Open the user guide
+; (unmarked), which is what the installer before the kit offered, with the
+; guide box now unmarked as the kit's finish-page rule asks.
 ;
 ; It keeps the File Explorer verb the earlier installers registered, "Report
 ; via extCheck", now pointing at exec\extCheck.exe.
@@ -180,8 +180,8 @@ Root: HKLM; Subkey: "SOFTWARE\Classes\*\shell\extCheck\command"; \
 
 [Run]
 ; FINISH-PAGE ORDER, the HomerDev rule: Install, Update, Reinstall groups
-; (none here: extCheck installs no components), then Launch ticked, then Open
-; the user guide unticked.
+; (none here: extCheck installs no components), then Launch marked, then Open
+; the user guide unmarked.
 ;
 ; Launch only leaves a marker. The program starts from CurStepChanged(ssDone),
 ; after the Results box has been read and closed. TWO pairs of quotes: this
@@ -209,7 +209,7 @@ Type: filesandordirs; Name: "{localappdata}\{#AppName}\logs"
 //      it drives the Office already on the machine, and the
 //      installer before the kit offered none -- so the table is empty; a
 //      component added later is one homerAdd and three [Run] entries;
-//    - the ticked boxes recorded when Finish is pressed (homerNoteTicked), so
+//    - the marked boxes recorded when Finish is pressed (homerNoteTicked), so
 //      the Results box reports only what was asked for this session;
 //    - the Results box first, the launch after it.
 //
@@ -218,7 +218,7 @@ Type: filesandordirs; Name: "{localappdata}\{#AppName}\logs"
 //      Install, Update or Reinstall truthfully;
 //    - keeps the setup log with the program's own logs;
 //    - shows one Results box of what was done, then starts extCheck if the
-//      Launch box was ticked -- in that order, so the box is not hidden behind
+//      Launch box was marked -- in that order, so the box is not hidden behind
 //      the program's window.
 //  Comments inside [Code] use // or (* *), never ;.
 #include HomerDev + "\Templates\HomerComponents.iss"

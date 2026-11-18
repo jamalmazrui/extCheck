@@ -1657,7 +1657,7 @@ public static class configManager
             Console.Error.WriteLine(sMsg);
             if (program.bGuiMode) {
                 try {
-                    MessageBox.Show(sMsg,
+                    LbcMessage.show(sMsg,
                         "extCheck — Configuration not loaded",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
@@ -1692,7 +1692,7 @@ public static class configManager
             if (!Directory.Exists(sDir)) Directory.CreateDirectory(sDir);
             if (!File.Exists(sPath)) {
                 var sb = new StringBuilder();
-                sb.AppendLine("; extCheck settings, written when Use configuration is checked at OK.");
+                sb.AppendLine("; extCheck settings, written when Use configuration is marked at OK.");
                 sb.AppendLine("; Delete this file to reset, or press Default settings in the dialog.");
                 sb.AppendLine("[" + sSettingsSection + "]");
                 File.WriteAllText(sPath, sb.ToString(), new UTF8Encoding(true));
@@ -1715,7 +1715,7 @@ public static class configManager
             logger.info("Could not save configuration: " + ex.Message);
             if (program.bGuiMode) {
                 try {
-                    MessageBox.Show(sMsg,
+                    LbcMessage.show(sMsg,
                         "extCheck — Configuration not saved",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
@@ -1805,19 +1805,21 @@ public static class guiDialog
                     string.IsNullOrWhiteSpace(sSource) ? defaultSourceForGui() : sSource,
                     "One or more files, folders or wildcard patterns such as *.docx, " +
                     "separated by spaces. A folder means every supported file in it.",
-                    "Choose one or more files to check. It opens where Source paths points, else in Documents.");
+                    "");
                 TextBox tbOut = oLaunch.addOutputBand(sOutputDir ?? "",
                     "Where each report is written, named after its file. Blank means the current folder.",
-                    "Choose the folder the reports go to.");
+                    "");
                 // A blank output directory follows the first file chosen, as before.
                 oLaunch.sourceChosen = delegate() {
                     if (!string.IsNullOrEmpty(tbOut.Text)) return;
                     string sFolder = LaunchDialog.startFolder(tbSource.Text, Environment.SpecialFolder.MyDocuments);
                     tbOut.Text = sFolder;
                 };
+                // THE KIT'S SENTENCES (18 November 2026): Browse local source, Choose output directory, Use configuration and View output
+                // directory say the same in every launch app, so each takes the kit's tip, passed as "".
                 oLaunch.addOperationBands(bForce, "",
-                    bUseCfg, "Load these settings next time, and save them when you press OK, in configs\\" + program.sConfigFileName + ".",
-                    bView, "Open the output directory in File Explorer when the run is done.");
+                    bUseCfg, "",
+                    bView, "");
 
                 sButton = oLaunch.run();
 
@@ -1845,27 +1847,11 @@ public static class guiDialog
         }
     }
 
-    // Offer to create a non-existent output directory, default Yes. Returns
-    // false to send the user back to the dialog.
+    // Offer to create a non-existent output directory, default Yes -- the kit's question, the same in every launch app
+    // (kit 1.258.0, 18 November 2026). Returns false to send the user back to the dialog.
     private static bool confirmOutputDir(string sOutputDir)
     {
-        string sOutCandidate = (sOutputDir ?? "").Trim();
-        if (sOutCandidate.Length >= 2 && sOutCandidate[0] == '"' && sOutCandidate[sOutCandidate.Length - 1] == '"')
-            sOutCandidate = sOutCandidate.Substring(1, sOutCandidate.Length - 2).Trim();
-        if (string.IsNullOrEmpty(sOutCandidate)) return true;
-        try { if (Directory.Exists(sOutCandidate)) return true; } catch { return true; }
-        DialogResult dr = MessageBox.Show("Create " + sOutCandidate + "?",
-            program.sProgramName, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-            MessageBoxDefaultButton.Button1);
-        if (dr != DialogResult.Yes) return false;
-        try {
-            Directory.CreateDirectory(sOutCandidate);
-            return true;
-        } catch (Exception ex) {
-            MessageBox.Show("Could not create directory:\r\n" + sOutCandidate + "\r\n\r\n" + ex.Message,
-                program.sProgramName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return false;
-        }
+        return LaunchDialog.confirmOutput(program.sProgramName, sOutputDir);
     }
 
     private static string defaultSourceForGui()
@@ -2221,8 +2207,8 @@ Supported file formats:
 
 Switches, written /switch, -switch or --switch, in any case. Each long switch
 is a label in the dialog, and each letter is that control's Alt letter:
-  -h, --help            Show this help screen and exit.
-  --version             Show the version and exit.
+  -h, --help            Show these switches and stop.
+  --version             Show the version and stop.
   -g, --gui-mode        Show the dialog. It also opens when extCheck is
                         started with nothing from File Explorer, the Start
                         menu or a desktop hotkey.
@@ -2233,18 +2219,15 @@ is a label in the dialog, and each letter is that control's Alt letter:
                         written. Defaults to the current working directory.
                         Created if it does not exist.
   -f, --force-replacements
-                        Overwrite an existing <basename>.csv. Without this,
-                        an input file is skipped if its CSV already exists
-                        in the output directory.
+                        Do the work again for a source whose result is already there, replacing the old result; without it, that source is skipped and its result kept.
   -u, --use-configuration
-                        Load saved settings from
-                        %LOCALAPPDATA%\extCheck\configs\extCheck.inix at
-                        startup, and in the dialog write them back on OK.
+                        Load the saved settings at startup, and in the dialog save them when you press OK.
+                        The settings are in
+                        %LOCALAPPDATA%\extCheck\configs\extCheck.inix.
   -v, --view-output-directory
-                        After all files are checked, open the output
-                        directory in File Explorer.
+                        Open the output directory in File Explorer when the run is done.
   -d, --default-settings
-                        Forget the saved settings and exit.
+                        Forget the saved settings and stop.
 
 Logging is automatic: every run writes
 %LOCALAPPDATA%\extCheck\logs\extCheck-yyyyMMdd-HHmmss.log.

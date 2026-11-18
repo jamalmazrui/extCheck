@@ -40,7 +40,7 @@ Download `extCheck_setup.exe` from the [extCheck releases page](https://github.c
 - Adds a Start-menu group and a desktop shortcut whose hotkey is **Alt+Control+X**. Pressing **Alt+Control+X** from anywhere in Windows opens the `extCheck` dialog.
 - Adds a **Report via extCheck** entry to the File Explorer right-click menu for all file types. Right-clicking any file (or pressing **Shift+F10**) and choosing this entry checks that file and writes the CSV report next to it. extCheck's supported formats are `.docx`, `.xlsx`, `.pptx`, and `.md`; on any other file it says so and stops. The access letter is **x**, matching the desktop hotkey, so from a file in File Explorer the keys are **Shift+F10**, then **x**.
 
-The last page offers two checkboxes. **Launch extCheck now** is checked; **Open the user guide** is not. When you press Finish, a short results box says what was installed and where the logs are. extCheck starts after you close that box, so the box is never hidden behind it.
+The last page offers two checkboxes. **Launch extCheck now** is marked; **Open the user guide** is not. When you press Finish, a short results box says what was installed and where the logs are. extCheck starts after you close that box, so the box is never hidden behind it.
 
 The program itself is in the `exec` folder of the installation, and this guide, the other documents and the rule registry are in the `help` folder. `ReadMe.htm`, `License.htm` and `extCheck.cmd`, which runs the program from a command prompt there, are at the top.
 
@@ -73,9 +73,9 @@ The dialog is the one every Homer launch app shows, in rows called bands that re
 - **Help** [H] — list every field with its tip, the dialog's keys, where the logs are kept, and the version check. F1 also shows Help.
 - **OK** / **Cancel** — alone at the bottom right: start the run, or close without running. Control+Enter is OK and Escape is Cancel, from any control.
 
-More keys work anywhere in the dialog. **F1** shows Help. **F11** checks the web, from any control, for a newer version of extCheck (see Updating). **Control+Enter** is OK from any control. **Shift+F1** says the tip for the field you are on, and **F7** lists the dialog's controls so you can move to one. The dialog is built with the Homer Lbc classes, so its text fields also have the Lbc editing keys, which Help lists.
+More keys work anywhere in the dialog. **F1** shows Help. **F11** checks the web, from any control, for a newer version of extCheck (see Updating). **Control+Enter** is OK from any control. **Shift+F1**, What This Does, says what the control with focus does, and **Control+Slash**, Where Am I, says where you are, what has focus and its keys; both work in every dialog and message, and pressed twice, each shows what it said in a window. **F7** lists the dialog's controls so you can move to one. The dialog is built with the Homer Lbc classes, so its text fields also have the Lbc editing keys, which Help lists.
 
-**Default settings** returns you to the dialog with the fields cleared and any saved configuration deleted. Every run ends with the extCheck Results box. Its only button is OK, so Enter, Space or Escape closes it; then the output directory opens if View output directory is checked, and extCheck closes. A long report shows its first 15 lines and names a file with the rest.
+**Default settings** returns you to the dialog with the fields cleared and any saved configuration deleted. Every run ends with the extCheck Results box. Its only button is OK, so Enter, Space or Escape closes it; then the output directory opens if View output directory is marked, and extCheck closes. A long report shows its first 15 lines and names a file with the rest.
 
 The Browse local source and Choose output directory pickers open at the folder named in their text field, when it exists. Otherwise they open at your Documents folder. With **Use configuration** checked, those fields start with what you used last time, so the pickers pick up where you left off.
 
@@ -115,15 +115,15 @@ When invoked without arguments from a GUI shell (Explorer double-click, Start-me
 
 ## Command-line options
 
-- `-d`, `--default-settings` — forget the saved settings and exit.
-- `-f`, `--force-replacements` — do the work again for a source whose result is already there, replacing it; without it, that source is skipped and its result kept.
+- `-d`, `--default-settings` — Forget the saved settings and stop.
+- `-f`, `--force-replacements` — Do the work again for a source whose result is already there, replacing the old result; without it, that source is skipped and its result kept.
 - `-g`, `--gui-mode` — show the parameter dialog.
-- `-h`, `--help` — show usage and exit.
+- `-h`, `--help` — Show these switches and stop.
 - `-o <folder>`, `--output-directory <folder>` — write the reports to `<folder>` (made if missing); the default is the current directory.
 - `-rules` — write the rule registry as `extCheck.csv` to the output directory and exit.
-- `-u`, `--use-configuration` — read saved settings from `%LOCALAPPDATA%\extCheck\configs\extCheck.inix`.
+- `-u`, `--use-configuration` — Load the saved settings at startup, and in the dialog save them when you press OK. The settings are in `%LOCALAPPDATA%\extCheck\configs\extCheck.inix`.
 - `--version` — show the version and exit.
-- `-v`, `--view-output-directory` — after the run, open the output directory in File Explorer.
+- `-v`, `--view-output-directory` — Open the output directory in File Explorer when the run is done.
 
 Every option in the dialog has a command-line switch named after its label, whose letter is the control's Alt letter, and switches may be written with /, - or --, in any case, so a workflow prototyped in the dialog can be translated to a batch file without surprises.
 
@@ -171,7 +171,7 @@ The installed `help` folder holds `extCheck.csv`, the rule registry. The program
 
 ## Configuration file
 
-When **Use configuration** is checked in the dialog (or `-u` is on the command line), `extCheck` reads and writes its settings in:
+When **Use configuration** is marked in the dialog (or `-u` is on the command line), `extCheck` reads and writes its settings in:
 
 ```
 %LOCALAPPDATA%\extCheck\configs\extCheck.inix

@@ -47,7 +47,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I tick View output directory, so the reports' folder opens once I close the Results box. The log of the run is kept anyway, as it always is.
+Say=I mark View output directory, so the reports' folder opens once I close the Results box. The log of the run is kept anyway, as it always is.
 Key=Alt+V
 Hear=View output directory check box, checked
 Note=Confirm the wording with a live run: buildTutorials -live.

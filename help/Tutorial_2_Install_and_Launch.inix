@@ -42,7 +42,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=The last page offers two check boxes. Launch extCheck now is checked; open the user guide is not.
+Say=The last page offers two check boxes. Launch extCheck now is marked; open the user guide is not.
 Key=
 Hear=Launch extCheck now check box, checked
 Note=Confirm the wording with a live run: buildTutorials -live.

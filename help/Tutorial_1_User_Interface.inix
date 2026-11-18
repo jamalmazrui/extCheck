@@ -136,7 +136,7 @@ Say=The dialog never speaks over the screen reader. It says a field's name once,
 Key=
 [step]
 
-Say=And the dialog remembers nothing unless asked. With Use configuration ticked, OK saves the fields; next time, they are already filled in.
+Say=And the dialog remembers nothing unless asked. With Use configuration marked, OK saves the fields; next time, they are already filled in.
 Key=Alt+U
 Hear=Use configuration check box, not checked
 Note=Confirm the wording with a live run: buildTutorials -live.

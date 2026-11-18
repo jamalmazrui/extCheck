@@ -271,7 +271,7 @@ The dialog never speaks over the screen reader. It says a field's name once, as 
 
 ### Step 21: Alt+U
 
-And the dialog remembers nothing unless asked. With Use configuration ticked, OK saves the fields; next time, they are already filled in.
+And the dialog remembers nothing unless asked. With Use configuration marked, OK saves the fields; next time, they are already filled in.
 
 Screen reader:
 
@@ -362,7 +362,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 6
 
-The last page offers two check boxes. Launch extCheck now is checked; open the user guide is not.
+The last page offers two check boxes. Launch extCheck now is marked; open the user guide is not.
 
 Screen reader:
 
@@ -553,7 +553,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 5: Alt+V
 
-I leave Output directory blank, so the report lands in the current folder, and I tick View output directory, so that folder opens when the check is done.
+I leave Output directory blank, so the report lands in the current folder, and I mark View output directory, so that folder opens when the check is done.
 
 Screen reader:
 
@@ -641,7 +641,7 @@ Each finding is a fix I can make in Word, in a minute or two: add the descriptio
 
 ### Step 16: Alt+F
 
-After fixing, I check again. The old report is there, so I tick Force replacements, which replaces it rather than skipping the document.
+After fixing, I check again. The old report is there, so I mark Force replacements, which replaces it rather than skipping the document.
 
 Screen reader:
 
@@ -1315,7 +1315,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 7: Alt+V
 
-I tick View output directory, so the reports' folder opens once I close the Results box. The log of the run is kept anyway, as it always is.
+I mark View output directory, so the reports' folder opens once I close the Results box. The log of the run is kept anyway, as it always is.
 
 Screen reader:
 
